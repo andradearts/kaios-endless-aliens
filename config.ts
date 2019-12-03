@@ -14,7 +14,7 @@
 // This is needed so I can use the KaiAds SDK
 declare var getKaiAd: any;
 const kTESTMODE = 1; /* set to 0 for real ads */
-const gameName = "Template";
+const gGameName = "Template";
 const gGameVersion = "1.0.0";
 const gamePrefsFile = "gameTemplate_000";
 const gameBGColor = 0x333333;
@@ -58,11 +58,12 @@ let gGameTimeStart;
 // ******************************************************************************
 // ******************************************************************************
 // NOTE ******* If using Matomo the init is in the index.html file */
+// DON"T USE MATOMO FOR ONLINE GAMES. USE GOOGLE.
 // Using Google Analytics //////////////////////////////////////////////////////
 // TEST:UA-150350318-3
 // PROD:UA-150350318-1
 // ******************************************************************************
-// AAKaiAnalytics.initAnalytics('UA-150350318-3', gGameName);
+AAKaiAnalytics.initAnalytics('UA-150350318-3', gGameName);
 
 
 window.onload = () => {
@@ -72,7 +73,7 @@ window.onload = () => {
         renderType: Phaser.WEBGL,
         scene: scenes,
         banner: false,
-        title: gameName,
+        title: gGameName,
         backgroundColor: gameBGColor,
         url: 'https://taaragames.com/',
         version: gGameVersion,
