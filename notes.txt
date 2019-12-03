@@ -1,0 +1,8 @@
+PWA
+Index.html files should contain all css and PWA data
+sw.js - service worker
+manifest.json - pwa manifest
+
+All assets, except the manifests, including javascript should be placed in the assets folder
+
+firebase deploy --only hosting:__hostingname__

@@ -1,0 +1,63 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "dependsOn": [
+                "typescript",
+                "obfuscate"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "typescript",
+            "type": "typescript",
+            "tsconfig": "game/tsconfig.json",
+            "problemMatcher": [
+                "$tsc"
+            ],
+            "presentation": {
+                "reveal": "always"
+            },
+            "group": "build"
+        },
+        {
+            "label": "obfuscate",
+            "type": "shell",
+            "command": "javascript-obfuscator \"/c/Users/marka/OneDrive2018/OneDrive/Taara Games/002_KAIOS_PENGUINJUMP/game/dist/assets/game.js\" --output \"/c/Users/marka/OneDrive2018/OneDrive/Taara Games/002_KAIOS_PENGUINJUMP/game/dist/assets/game.min.js\" --compact: true --controlFlowFlattening: true --controlFlowFlatteningThreshold: 1 --deadCodeInjection: true --deadCodeInjectionThreshold: 1 --debugProtection: true --debugProtectionInterval: true --disableConsoleOutput: true --log: false --mangle: true --renameGlobals: false --rotateStringArray: true --selfDefending: true --stringArray: true --stringArrayEncoding: 'rc4' --stringArrayThreshold: 1 --unicodeEscapeSequence: false",
+            
+            // "args": [
+            //     "${cwd}\\assets\\games.js",
+            //     "--output game.min.js"
+            // ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                // "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage":true,
+                "clear": true,
+                "revealProblems": "onProblem",
+                
+            }
+        },
+        {
+            "label": "My Task",
+            "command": "echo hello",
+            "type": "shell",
+            "args": [],
+            "problemMatcher": [
+                "$tsc"
+            ],
+            "presentation": {
+                "reveal": "always"
+            },
+            "group": "build"
+        }
+    ]
+}

@@ -1,0 +1,34 @@
+{
+  "version":"1.0.0",
+  "build":"1911063",
+  "name": "TEMPLATE",
+  "description": "__TEMPLATE__DESCRIPTION__",
+  "scope": ".",
+  "launch_path": "/index.html",
+   "locales": {
+    "en-US": {
+      "name": "TEMPLATE",
+      "subtitle": "Made by Taara Games",
+      "description":  "__TEMPLATE__DESCRIPTION__"
+    }
+  },
+   "icons": {
+    "56":  "/assets/icons/icon56.png",
+    "112": "/assets/icons/icon112.png"
+  },
+  "display": "fullscreen",
+  "fullscreen":"true",
+  "type": "web",
+  "orientation": "Portrait",
+  "theme_color": "#FBF200",
+  "background_color": "#000000",
+  "developer": {
+    "name": "Taara Games",
+    "url": "https://www.taaragames.com"
+  },
+  "permissions": {
+    "serviceworker":{}
+  },
+  "cursor": "false",
+  "default_locale": "en-US"
+}
