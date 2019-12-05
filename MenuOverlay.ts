@@ -7,6 +7,7 @@ class MenuOverlay extends Phaser.Scene {
     // debugInfo;
 
     kHideDistance = 150;
+    _SHOWFPS = false;
 
     kHOME_BUTTON_INDEX = 1;
 
@@ -19,6 +20,12 @@ class MenuOverlay extends Phaser.Scene {
     btnPlay;
     btnSound;
     btnHelp;
+
+    //containers for the buttons so I can hold the number badges
+    c_btnPlay;
+    c_btnSound;
+    c_btnHelp;
+
     //btnPause;
     buttonTween;
     buttons; // the array to hold the buttons for keyboard navigation
@@ -71,13 +78,10 @@ class MenuOverlay extends Phaser.Scene {
         this.events.on('gameover', this.gameover, this);
         this.events.on('setscore', this.setScore, this);
         this.events.on('setscorefloat', this.setScoreFloat, this);
-        // this.events.on('showAdSceneButtons', this.showAdSceneButtons, this);
-        // this.events.on('hideAdSceneButtons', this.hideAdSceneButtons, this);
 
         emitter.on('keydown', this.keydown, this);
         emitter.on('keyup', this.keyup, this);
 
-        //AAAds.showBannerAd_WEB(true);
         // this.debugInfo = this.add.text(0, 0, 'Click to add objects', { fill: '#00ff00' });
 
     }
@@ -94,6 +98,10 @@ class MenuOverlay extends Phaser.Scene {
     }
 
     keydown(theKeyEvent) {
+        if ((this.transitioning) || (AAFunctions.areButtonsBouncing())) {
+            return;
+        }
+        
         if (gGameState != states.kSTATE_MENU) {
             if (theKeyEvent.key == "Backspace") {
                 theKeyEvent.preventDefault();
@@ -106,7 +114,7 @@ class MenuOverlay extends Phaser.Scene {
             case "1":
             case "2":
             case "3":
-            case "5":
+            case "8":
                 theKeyEvent.preventDefault();
                 break;
 
@@ -157,7 +165,7 @@ class MenuOverlay extends Phaser.Scene {
             case "1":
             case "2":
             case "3":
-            case "5":
+            case "8":
                 theKeyEvent.preventDefault();
                 break;
 
@@ -170,14 +178,10 @@ class MenuOverlay extends Phaser.Scene {
 
     //Set the game to it's initial state by initializing all the variables
     reset() {
-        // if (gAdShowing == true) {
-        //     return;
-        // }
+
         AAKaiAnalytics.sendEvent("play");
-        //AAKaiAnalytics.sendButtonEvent("play");
         this.gameoverSprite.setVisible(false);
         this.hideAllButtons();
-        // this.btnPause.setVisible(true);
         let restartFromAd = false;
         this.scene.get("MenuScene").scene.start("GameScene", { restartFromAd });
         (<SponsorOverlay>this.scene.get("SponsorOverlay")).hideBanner();
@@ -195,11 +199,13 @@ class MenuOverlay extends Phaser.Scene {
         }
         gGameState = states.kSTATE_MENU;
 
-        this.showButton(this.btnSound, this.buttonY, this.btnSound.x);
-        this.showButton(this.btnPlay, this.buttonY, this.btnPlay.x);
+        this.showButton(this.c_btnSound, this.buttonY, this.c_btnSound.x);
+        this.showButton(this.c_btnPlay, this.buttonY, this.c_btnPlay.x);
 
         this.btnHelp.setTexture('spriteAtlas', 'btnHelp.png');
-        AAFunctions.tweenBounce(this, this.btnHelp);
+        AAFunctions.tweenBounce(this, this.c_btnHelp);
+
+        (<SponsorOverlay>this.scene.get("SponsorOverlay")).showBanner();
 
         this.scene.get("HelpScene").scene.start("MenuScene");
         AAKaiAnalytics.sendEvent("back-help");
@@ -216,11 +222,11 @@ class MenuOverlay extends Phaser.Scene {
 
         // AAFunctions.tweenBounce(this, this.btnPlay);
         // this.btnPlay.setTexture('spriteAtlas', 'btnPlay.png');
-        AAFunctions.tweenBounce(this, this.btnHelp);
+        AAFunctions.tweenBounce(this, this.c_btnHelp);
         this.btnHelp.setTexture('spriteAtlas', 'btnHelp.png');
 
-        this.showButton(this.btnSound, this.buttonY, this.btnSound.x);
-        this.showButton(this.btnPlay, this.buttonY, this.btnPlay.x);
+        this.showButton(this.c_btnSound, this.buttonY, this.c_btnSound.x);
+        this.showButton(this.c_btnPlay, this.buttonY, this.c_btnPlay.x);
 
         // this.btnPause.setVisible(false);
         this.pauseImage.setVisible(false);
@@ -270,6 +276,12 @@ class MenuOverlay extends Phaser.Scene {
             this.resetFromHelp();
             this.singlePress = true;
         }
+
+        if (theKey == "*") {
+            this.singlePress = true;
+            this._SHOWFPS = !this._SHOWFPS
+            this.fpsText.visible = !this.fpsText.visible
+        }
     }
 
     checkPauseControls(theKey) {
@@ -284,7 +296,7 @@ class MenuOverlay extends Phaser.Scene {
     checkMenuControls(theKey) {
 
         switch (theKey) {
-            case "5":
+            case "8":
                 this.visitSponsor();
                 break;
             case "Enter":
@@ -351,8 +363,8 @@ class MenuOverlay extends Phaser.Scene {
             targets: who,
             y: { value: _y, duration: scaleSpeed, ease: theEase },
             x: { value: _x, duration: scaleSpeed, ease: theEase },
-            scaleX: { value: .25, duration: scaleSpeed / 1.5, ease: 'BounceInOut', yoyo: true },
-            scaleY: { value: 2.5, duration: scaleSpeed / 1.5, ease: 'BounceInOut', yoyo: true },
+            // scaleX: { value: .25, duration: scaleSpeed / 1.5, ease: 'BounceInOut', yoyo: true },
+            // scaleY: { value: 2.5, duration: scaleSpeed / 1.5, ease: 'BounceInOut', yoyo: true },
         });
     }
 
@@ -364,34 +376,57 @@ class MenuOverlay extends Phaser.Scene {
 
 
         let isVis = true;
+        let numBadge;
+
+        let nudge2x = 2;
+        // if (isKaiOS){
+        //     nudge2x = 2;
+        // }
 
         this.btnPlay = new Button(this, 0, 0, 'spriteAtlas', 'btnPlay.png', this.play, "play", true).setVisible(isVis);
+
+
+        numBadge = this.add.image(34 * nudge2x, -27 * nudge2x, "spriteAtlas", "btn2.png").setVisible(isKaiOS);
+
+
+        this.c_btnPlay = this.add.container(0, 0, [this.btnPlay, numBadge]).setVisible(isVis);
 
         let whichButton = 'btnSoundOff.png';
         if (AAPrefs.playAudio) {
             whichButton = 'btnSoundOn.png';
         }
 
-        this.btnSound = new Button(this, this.cameras.main.width - 15, this.cameras.main.height - 20, 'spriteAtlas', whichButton, this.toggleSound, "sound", true).setVisible(isVis);
+        this.btnSound = new Button(this, 0, 5 * nudge2x, 'spriteAtlas', whichButton, this.toggleSound, "sound", true).setVisible(isVis);
 
+
+        numBadge = this.add.image(21 * nudge2x, -14 * nudge2x, "spriteAtlas", "btn3.png").setVisible(isKaiOS);
+
+
+        this.c_btnSound = this.add.container(this.cameras.main.width - 10, this.cameras.main.height - 10, [this.btnSound, numBadge]).setVisible(isVis);
 
 
         whichButton = 'btnHelp.png';
-        this.btnHelp = new Button(this, 15, this.cameras.main.height - 20, 'spriteAtlas', whichButton, this.showHelp, "help", true).setVisible(isVis);
+        this.btnHelp = new Button(this, 0, 5 * nudge2x, 'spriteAtlas', whichButton, this.showHelp, "help", true).setVisible(true);
+
+
+        numBadge = this.add.image(21 * nudge2x, -14 * nudge2x, "spriteAtlas", "btn1.png").setVisible(isKaiOS);
+
+
+        this.c_btnHelp = this.add.container(15, this.cameras.main.height - 10, [this.btnHelp, numBadge]).setVisible(true);
 
 
         whichButton = 'btnPause.png';
 
-        this.buttons = [this.btnHelp, this.btnPlay, this.btnSound];
+        this.buttons = [this.c_btnHelp, this.c_btnPlay, this.c_btnSound];
 
         this.btnHelpIndex = 0;
         this.btnPlayIndex = 1;
         this.btnSoundIndex = 2;
         let col = 0xffde17;
 
-        this.buttonY = (this.cameras.main.height - 20);
+        this.buttonY = (this.cameras.main.height - 20 * nudge2x);
 
-        AAFunctions.displayButtons([this.btnHelp, this.btnPlay, this.btnSound], this.cameras.main, this.buttonY, 5);
+        AAFunctions.displayButtons([this.c_btnHelp, this.c_btnPlay, this.c_btnSound], this.cameras.main, this.buttonY, 5);
 
         this.createPauseGrc();
 
@@ -399,27 +434,32 @@ class MenuOverlay extends Phaser.Scene {
 
         this.makeTheNumbersFont();
 
-        let scoreSize = 15;
-        this.scoreText = this.add.bitmapText(3, 45, 'numbersFont', '0', scoreSize).setDepth(999);
+        let scoreSize = 80;
+        this.scoreText = this.add.bitmapText(3, 45 * nudge2x, 'numbersFont', '0', scoreSize).setDepth(999);
         this.scoreText.setOrigin(0);
         this.scoreText.setTint(0x000000);
+        this.scoreText.scaleX = .5;
+        this.scoreText.scaleY = .5;
 
-        scoreSize = 10;
-        this.highScoreText = this.add.bitmapText(5, 70, 'numbersFont', AAHighScores.highScore, scoreSize).setDepth(999);
+        scoreSize = 40;
+        this.highScoreText = this.add.bitmapText(5, 70 * nudge2x, 'numbersFont', AAHighScores.highScore, scoreSize).setDepth(999);
         this.highScoreText.setOrigin(0);
         this.highScoreText.setTint(0x000000);
+        this.highScoreText.scaleX = .5;
+        this.highScoreText.scaleY = .5;
 
-        if (kSHOWFPS) {
-            this.fpsText = this.add.bitmapText(this.sys.canvas.width - 40, 60, 'numbersFont', '0.0', 8);
-        }
+        // if (gSHOWFPS) {
+        this.fpsText = this.add.bitmapText(this.sys.canvas.width - 40 * nudge2x, 60 * nudge2x, 'numbersFont', '0.0', 15).setVisible(false);
+        this.fpsText.setTint(0x666666);
+        // }
 
     }
 
     makeTheNumbersFont() {
         let config = {
             image: 'numbersFont',
-            width: 20,
-            height: 20,
+            width: 80,
+            height: 80,
             offset: { x: 0 },
             chars: '0123456789.',
             charsPerRow: 11
@@ -483,7 +523,7 @@ class MenuOverlay extends Phaser.Scene {
                 AAKaiAnalytics.sendEvent("soundOff");
             }
             //AAAnalytics.sendButtonEvent('sound', kIOS_WRAPPED);
-            AAFunctions.tweenBounce(this, this.btnSound);
+            AAFunctions.tweenBounce(this, this.c_btnSound);
 
         }
     }
@@ -502,13 +542,13 @@ class MenuOverlay extends Phaser.Scene {
 
         if (!this.areButtonsTweening()) {
             if (isGameOver) {
-                this.btnPlay.setTexture('spriteAtlas', 'btnPlay.png');
-                this.showButton(this.btnSound, this.buttonY, this.btnSound.x);
-                this.showButton(this.btnHelp, this.buttonY, this.btnHelp.x);
+                // this.btnPlay.setTexture('spriteAtlas', 'btnPlay.png');
+                this.showButton(this.c_btnSound, this.buttonY, this.c_btnSound.x);
+                this.showButton(this.c_btnHelp, this.buttonY, this.c_btnHelp.x);
             }
 
 
-            this.showButton(this.btnPlay, this.buttonY, this.btnPlay.x);
+            this.showButton(this.c_btnPlay, this.buttonY, this.c_btnPlay.x);
             // Hilight and select the button to make the keyboard work
             //this.btnPlay.select(false);
         }
@@ -517,9 +557,16 @@ class MenuOverlay extends Phaser.Scene {
     }
 
     areButtonsTweening() {
+        let isATweeing = false;
         if (this.buttonTween != null) {
-            return this.buttonTween.isPlaying();
+            isATweeing =  this.buttonTween.isPlaying();
         }
+
+        if (gTween != null) {
+            isATweeing = gTween.isPlaying();
+        }
+
+        return isATweeing;
     }
 
     hideAllButtons() {
@@ -528,9 +575,9 @@ class MenuOverlay extends Phaser.Scene {
             // this.showButton(this.btnSound, -this.btnSound.y, this.btnSound.x, false);
             // this.showButton(this.btnHelp, -this.btnHelp.y, this.btnHelp.x, false);
 
-            this.showButton(this.btnPlay, this.buttonY + this.kHideDistance, this.btnPlay.x);
-            this.showButton(this.btnSound, this.buttonY + this.kHideDistance, this.btnSound.x);
-            this.showButton(this.btnHelp, this.buttonY + this.kHideDistance, this.btnHelp.x);
+            this.showButton(this.c_btnPlay, this.buttonY + this.kHideDistance, this.c_btnPlay.x);
+            this.showButton(this.c_btnSound, this.buttonY + this.kHideDistance, this.c_btnSound.x);
+            this.showButton(this.c_btnHelp, this.buttonY + this.kHideDistance, this.c_btnHelp.x);
         }
     }
 
@@ -552,8 +599,8 @@ class MenuOverlay extends Phaser.Scene {
 
                 gGameState = states.kSTATE_PAUSED;
                 //this.showButtons(false);
-                this.showButton(this.btnHelp, this.buttonY, this.btnHelp.x);
-                this.showButton(this.btnSound, this.buttonY, this.btnSound.x);
+                this.showButton(this.c_btnHelp, this.buttonY, this.c_btnHelp.x);
+                this.showButton(this.c_btnSound, this.buttonY, this.c_btnSound.x);
 
                 this.pauseImage.setVisible(true);
                 AAFunctions.tweenBounce(this, this.pauseImage);
@@ -566,8 +613,8 @@ class MenuOverlay extends Phaser.Scene {
 
                 gGameState = states.kSTATE_PLAYING;
                 //this.showButton(this.btnPlay, -this.btnPlay.y, this.btnPlay.x, false);
-                this.showButton(this.btnHelp, this.buttonY + this.kHideDistance, this.btnHelp.x);
-                this.showButton(this.btnSound, this.buttonY + this.kHideDistance, this.btnSound.x);
+                this.showButton(this.c_btnHelp, this.buttonY + this.kHideDistance, this.c_btnHelp.x);
+                this.showButton(this.c_btnSound, this.buttonY + this.kHideDistance, this.c_btnSound.x);
                 this.pauseImage.setVisible(false);
                 //AAAds.showBannerAd_WEB(false);
                 (<SponsorOverlay>this.scene.get("SponsorOverlay")).hideBanner();
@@ -592,20 +639,19 @@ class MenuOverlay extends Phaser.Scene {
                 case states.kSTATE_MENU:
                     this.scene.get("MenuScene").scene.start("HelpScene");
                     gGameState = states.kSTATE_HELP;
-                    this.showButton(this.btnSound, this.buttonY + this.kHideDistance, this.btnSound.x);
-                    this.showButton(this.btnPlay, this.buttonY + this.kHideDistance, this.btnPlay.x);
+                    this.showButton(this.c_btnSound, this.buttonY + this.kHideDistance, this.c_btnSound.x);
+                    this.showButton(this.c_btnPlay, this.buttonY + this.kHideDistance, this.c_btnPlay.x);
                     this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
-                    // this.btnPlay.setTexture('spriteAtlas', 'btnHome.png');
-                    AAFunctions.tweenBounce(this, this.btnHelp);
+                    (<SponsorOverlay>this.scene.get("SponsorOverlay")).hideBanner(); AAFunctions.tweenBounce(this, this.c_btnHelp);
                     AAKaiAnalytics.sendEvent("help");
                     break;
 
                 case states.kSTATE_GAMEOVER:
-                    this.btnPlay.setTexture('spriteAtlas', 'btnPlay.png');
+                    // this.btnPlay.setTexture('spriteAtlas', 'btnPlay.png');
                     this.btnHelp.setTexture('spriteAtlas', 'btnHelp.png');
 
-                    AAFunctions.tweenBounce(this, this.btnPlay);
-                    AAFunctions.tweenBounce(this, this.btnHelp);
+                    AAFunctions.tweenBounce(this, this.c_btnPlay);
+                    AAFunctions.tweenBounce(this, this.c_btnHelp);
 
                     this.scene.get("GameScene").scene.start("MenuScene");
                     gGameState = states.kSTATE_MENU;
@@ -633,7 +679,7 @@ class MenuOverlay extends Phaser.Scene {
     // **************************************************************************
 
     update(time, delta) {
-        if (kSHOWFPS) {
+        if (this._SHOWFPS) {
             this.fpsText.setText('FPS: ' + (1000 / delta).toFixed(1));
         }
         // this.debugInfo.setText([
@@ -663,13 +709,12 @@ class MenuOverlay extends Phaser.Scene {
         }
     }
 
-    
-    visitSponsor(){
+
+    visitSponsor() {
         AAKaiAnalytics.sendSponsorEvent();
         let txt = this.cache.text.get('sponsorURL');
         console.log(txt);
-        window.location.href =  txt;
-        //'https://littlegames.app';
+        window.location.href = txt;
     }
 
 
@@ -679,10 +724,10 @@ class MenuOverlay extends Phaser.Scene {
 
         graphics.beginPath();
 
-        graphics.moveTo(0, 57);
-        graphics.lineTo(this.sys.canvas.width, 57);
-        graphics.lineTo(this.sys.canvas.width, 127);
-        graphics.lineTo(0, 127);
+        graphics.moveTo(0, 160);
+        graphics.lineTo(this.sys.canvas.width, 160);
+        graphics.lineTo(this.sys.canvas.width, 240);
+        graphics.lineTo(0, 240);
 
         graphics.closePath();
         graphics.strokePath();
@@ -694,13 +739,13 @@ class MenuOverlay extends Phaser.Scene {
 
         let graphics2 = this.add.graphics();
 
-        let startx = 90;
-        let starty = 67;
-        let pHeight = 117;
+        let startx = this.sys.canvas.width/2 - 30;
+        let starty = 170;
+        let pHeight = 60;
         graphics2.moveTo(startx, starty);
-        graphics2.lineTo(110, starty);
-        graphics2.lineTo(110, pHeight);
-        graphics2.lineTo(startx, pHeight);
+        graphics2.lineTo(startx+20, starty);
+        graphics2.lineTo(startx+20, starty+pHeight);
+        graphics2.lineTo(startx, starty+pHeight);
 
         graphics2.closePath();
         graphics2.strokePath();
@@ -711,17 +756,18 @@ class MenuOverlay extends Phaser.Scene {
 
         let graphics3 = this.add.graphics();
 
-        let offset = 35;
-        graphics2.moveTo(startx + offset, starty);
-        graphics2.lineTo(110 + offset, starty);
-        graphics2.lineTo(110 + offset, pHeight);
-        graphics2.lineTo(startx + offset, pHeight);
+        startx =this.sys.canvas.width/2 + 10;
+        
+        graphics3.moveTo(startx, starty);
+        graphics3.lineTo(startx+20, starty);
+        graphics3.lineTo(startx+20, starty+pHeight);
+        graphics3.lineTo(startx, starty+pHeight);
 
-        graphics2.closePath();
-        graphics2.strokePath();
-        graphics2.fillStyle(0xFFFFFF, 1);
-        graphics2.fill();
+        graphics3.closePath();
+        graphics3.strokePath();
+        graphics3.fillStyle(0xFFFFFF, 1);
+        graphics3.fill();
 
-        this.pauseImage = this.add.container(0, 0, [graphics, graphics2, graphics3]).setVisible(false);
+        this.pauseImage = this.add.container(0, 0, [graphics, graphics2,graphics3]).setVisible(false);
     }
 }//end scene

@@ -243,7 +243,7 @@ var GameScene = /** @class */ (function (_super) {
         }
     };
     GameScene.prototype.gameover = function () {
-        AAKaiAnalytics.sendEvent("gameover", "gameEvent");
+        AAKaiAnalytics.sendEvent("gameover");
         gGameState = states.kSTATE_GAMEOVER;
         // show the game over button layout.
         this.scene.get('MenuOverlay').events.emit('gameover');
@@ -270,6 +270,7 @@ var HelpScene = /** @class */ (function (_super) {
         return _super.call(this, { key: 'HelpScene' }) || this;
     }
     HelpScene.prototype.preload = function () {
+        this.scene.sendToBack('HelpScene');
     };
     HelpScene.prototype.create = function () {
         //    gGameState = states.kSTATE_HELP;
@@ -285,6 +286,7 @@ var MenuOverlay = /** @class */ (function (_super) {
         // debugText;
         // debugInfo;
         _this.kHideDistance = 150;
+        _this._SHOWFPS = false;
         _this.kHOME_BUTTON_INDEX = 1;
         return _this;
     }
@@ -302,11 +304,8 @@ var MenuOverlay = /** @class */ (function (_super) {
         this.events.on('gameover', this.gameover, this);
         this.events.on('setscore', this.setScore, this);
         this.events.on('setscorefloat', this.setScoreFloat, this);
-        // this.events.on('showAdSceneButtons', this.showAdSceneButtons, this);
-        // this.events.on('hideAdSceneButtons', this.hideAdSceneButtons, this);
         emitter.on('keydown', this.keydown, this);
         emitter.on('keyup', this.keyup, this);
-        //AAAds.showBannerAd_WEB(true);
         // this.debugInfo = this.add.text(0, 0, 'Click to add objects', { fill: '#00ff00' });
     };
     MenuOverlay.prototype.removeAllListeners = function () {
@@ -319,6 +318,9 @@ var MenuOverlay = /** @class */ (function (_super) {
         // this.events.removeListener('hideAdSceneButtons');
     };
     MenuOverlay.prototype.keydown = function (theKeyEvent) {
+        if ((this.transitioning) || (AAFunctions.areButtonsBouncing())) {
+            return;
+        }
         if (gGameState != states.kSTATE_MENU) {
             if (theKeyEvent.key == "Backspace") {
                 theKeyEvent.preventDefault();
@@ -328,7 +330,7 @@ var MenuOverlay = /** @class */ (function (_super) {
             case "1":
             case "2":
             case "3":
-            case "5":
+            case "8":
                 theKeyEvent.preventDefault();
                 break;
         }
@@ -372,7 +374,7 @@ var MenuOverlay = /** @class */ (function (_super) {
             case "1":
             case "2":
             case "3":
-            case "5":
+            case "8":
                 theKeyEvent.preventDefault();
                 break;
         }
@@ -382,20 +384,15 @@ var MenuOverlay = /** @class */ (function (_super) {
     };
     //Set the game to it's initial state by initializing all the variables
     MenuOverlay.prototype.reset = function () {
-        // if (gAdShowing == true) {
-        //     return;
-        // }
-        AAKaiAnalytics.sendEvent("play", gGameVersion);
-        //AAKaiAnalytics.sendButtonEvent("play");
+        AAKaiAnalytics.sendEvent("play");
         this.gameoverSprite.setVisible(false);
         this.hideAllButtons();
-        // this.btnPause.setVisible(true);
         var restartFromAd = false;
         this.scene.get("MenuScene").scene.start("GameScene", { restartFromAd: restartFromAd });
         this.scene.get("SponsorOverlay").hideBanner();
     };
     MenuOverlay.prototype.resetFromGame = function () {
-        AAKaiAnalytics.sendEvent("back-paused", gGameVersion);
+        AAKaiAnalytics.sendEvent("back-paused");
         this.resetToMenu();
         this.scene.stop('GameScene');
     };
@@ -404,12 +401,13 @@ var MenuOverlay = /** @class */ (function (_super) {
             return;
         }
         gGameState = states.kSTATE_MENU;
-        this.showButton(this.btnSound, this.buttonY, this.btnSound.x);
-        this.showButton(this.btnPlay, this.buttonY, this.btnPlay.x);
+        this.showButton(this.c_btnSound, this.buttonY, this.c_btnSound.x);
+        this.showButton(this.c_btnPlay, this.buttonY, this.c_btnPlay.x);
         this.btnHelp.setTexture('spriteAtlas', 'btnHelp.png');
-        AAFunctions.tweenBounce(this, this.btnHelp);
+        AAFunctions.tweenBounce(this, this.c_btnHelp);
+        this.scene.get("SponsorOverlay").showBanner();
         this.scene.get("HelpScene").scene.start("MenuScene");
-        AAKaiAnalytics.sendEvent("back-help", gGameVersion);
+        AAKaiAnalytics.sendEvent("back-help");
     };
     MenuOverlay.prototype.resetToMenu = function () {
         if (this.transitioning) {
@@ -420,10 +418,10 @@ var MenuOverlay = /** @class */ (function (_super) {
         this.gameoverSprite.setVisible(false);
         // AAFunctions.tweenBounce(this, this.btnPlay);
         // this.btnPlay.setTexture('spriteAtlas', 'btnPlay.png');
-        AAFunctions.tweenBounce(this, this.btnHelp);
+        AAFunctions.tweenBounce(this, this.c_btnHelp);
         this.btnHelp.setTexture('spriteAtlas', 'btnHelp.png');
-        this.showButton(this.btnSound, this.buttonY, this.btnSound.x);
-        this.showButton(this.btnPlay, this.buttonY, this.btnPlay.x);
+        this.showButton(this.c_btnSound, this.buttonY, this.c_btnSound.x);
+        this.showButton(this.c_btnPlay, this.buttonY, this.c_btnPlay.x);
         // this.btnPause.setVisible(false);
         this.pauseImage.setVisible(false);
         this.scene.get("GameScene").scene.start("MenuScene");
@@ -460,6 +458,11 @@ var MenuOverlay = /** @class */ (function (_super) {
             this.resetFromHelp();
             this.singlePress = true;
         }
+        if (theKey == "*") {
+            this.singlePress = true;
+            this._SHOWFPS = !this._SHOWFPS;
+            this.fpsText.visible = !this.fpsText.visible;
+        }
     };
     MenuOverlay.prototype.checkPauseControls = function (theKey) {
         if (theKey == "1") {
@@ -470,7 +473,7 @@ var MenuOverlay = /** @class */ (function (_super) {
     };
     MenuOverlay.prototype.checkMenuControls = function (theKey) {
         switch (theKey) {
-            case "5":
+            case "8":
                 this.visitSponsor();
                 break;
             case "Enter":
@@ -528,8 +531,6 @@ var MenuOverlay = /** @class */ (function (_super) {
             targets: who,
             y: { value: _y, duration: scaleSpeed, ease: theEase },
             x: { value: _x, duration: scaleSpeed, ease: theEase },
-            scaleX: { value: .25, duration: scaleSpeed / 1.5, ease: 'BounceInOut', yoyo: true },
-            scaleY: { value: 2.5, duration: scaleSpeed / 1.5, ease: 'BounceInOut', yoyo: true },
         });
     };
     // **************************************************************************
@@ -537,42 +538,58 @@ var MenuOverlay = /** @class */ (function (_super) {
     // **************************************************************************
     MenuOverlay.prototype.setUpUI = function () {
         var isVis = true;
+        var numBadge;
+        var nudge2x = 2;
+        // if (isKaiOS){
+        //     nudge2x = 2;
+        // }
         this.btnPlay = new Button(this, 0, 0, 'spriteAtlas', 'btnPlay.png', this.play, "play", true).setVisible(isVis);
+        numBadge = this.add.image(34 * nudge2x, -27 * nudge2x, "spriteAtlas", "btn2.png").setVisible(isKaiOS);
+        this.c_btnPlay = this.add.container(0, 0, [this.btnPlay, numBadge]).setVisible(isVis);
         var whichButton = 'btnSoundOff.png';
         if (AAPrefs.playAudio) {
             whichButton = 'btnSoundOn.png';
         }
-        this.btnSound = new Button(this, this.cameras.main.width - 15, this.cameras.main.height - 20, 'spriteAtlas', whichButton, this.toggleSound, "sound", true).setVisible(isVis);
+        this.btnSound = new Button(this, 0, 5 * nudge2x, 'spriteAtlas', whichButton, this.toggleSound, "sound", true).setVisible(isVis);
+        numBadge = this.add.image(21 * nudge2x, -14 * nudge2x, "spriteAtlas", "btn3.png").setVisible(isKaiOS);
+        this.c_btnSound = this.add.container(this.cameras.main.width - 10, this.cameras.main.height - 10, [this.btnSound, numBadge]).setVisible(isVis);
         whichButton = 'btnHelp.png';
-        this.btnHelp = new Button(this, 15, this.cameras.main.height - 20, 'spriteAtlas', whichButton, this.showHelp, "help", true).setVisible(isVis);
+        this.btnHelp = new Button(this, 0, 5 * nudge2x, 'spriteAtlas', whichButton, this.showHelp, "help", true).setVisible(true);
+        numBadge = this.add.image(21 * nudge2x, -14 * nudge2x, "spriteAtlas", "btn1.png").setVisible(isKaiOS);
+        this.c_btnHelp = this.add.container(15, this.cameras.main.height - 10, [this.btnHelp, numBadge]).setVisible(true);
         whichButton = 'btnPause.png';
-        this.buttons = [this.btnHelp, this.btnPlay, this.btnSound];
+        this.buttons = [this.c_btnHelp, this.c_btnPlay, this.c_btnSound];
         this.btnHelpIndex = 0;
         this.btnPlayIndex = 1;
         this.btnSoundIndex = 2;
         var col = 0xffde17;
-        this.buttonY = (this.cameras.main.height - 20);
-        AAFunctions.displayButtons([this.btnHelp, this.btnPlay, this.btnSound], this.cameras.main, this.buttonY, 5);
+        this.buttonY = (this.cameras.main.height - 20 * nudge2x);
+        AAFunctions.displayButtons([this.c_btnHelp, this.c_btnPlay, this.c_btnSound], this.cameras.main, this.buttonY, 5);
         this.createPauseGrc();
         this.gameoverSprite = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 3, 'spriteAtlas', 'gameover.png').setVisible(false);
         this.makeTheNumbersFont();
-        var scoreSize = 15;
-        this.scoreText = this.add.bitmapText(3, 45, 'numbersFont', '0', scoreSize).setDepth(999);
+        var scoreSize = 80;
+        this.scoreText = this.add.bitmapText(3, 45 * nudge2x, 'numbersFont', '0', scoreSize).setDepth(999);
         this.scoreText.setOrigin(0);
         this.scoreText.setTint(0x000000);
-        scoreSize = 10;
-        this.highScoreText = this.add.bitmapText(5, 70, 'numbersFont', AAHighScores.highScore, scoreSize).setDepth(999);
+        this.scoreText.scaleX = .5;
+        this.scoreText.scaleY = .5;
+        scoreSize = 40;
+        this.highScoreText = this.add.bitmapText(5, 70 * nudge2x, 'numbersFont', AAHighScores.highScore, scoreSize).setDepth(999);
         this.highScoreText.setOrigin(0);
         this.highScoreText.setTint(0x000000);
-        if (kSHOWFPS) {
-            this.fpsText = this.add.bitmapText(this.sys.canvas.width - 40, 60, 'numbersFont', '0.0', 8);
-        }
+        this.highScoreText.scaleX = .5;
+        this.highScoreText.scaleY = .5;
+        // if (gSHOWFPS) {
+        this.fpsText = this.add.bitmapText(this.sys.canvas.width - 40 * nudge2x, 60 * nudge2x, 'numbersFont', '0.0', 15).setVisible(false);
+        this.fpsText.setTint(0x666666);
+        // }
     };
     MenuOverlay.prototype.makeTheNumbersFont = function () {
         var config = {
             image: 'numbersFont',
-            width: 20,
-            height: 20,
+            width: 80,
+            height: 80,
             offset: { x: 0 },
             chars: '0123456789.',
             charsPerRow: 11
@@ -621,15 +638,15 @@ var MenuOverlay = /** @class */ (function (_super) {
             if (AAPrefs.playAudio == true) {
                 // If we playAudio we flip the frame of the button to show the ON state when up and the OFF state when pressed         
                 this.btnSound.setFrames('btnSoundOn.png', 'btnSoundOff.png', 'btnSoundOn.png');
-                AAKaiAnalytics.sendEvent("soundOn", gGameVersion);
+                AAKaiAnalytics.sendEvent("soundOn");
             }
             else {
                 // This will display the the OFF state when up and the ON state when pressed
                 this.btnSound.setFrames('btnSoundOff.png', 'btnSoundOn.png', 'btnSoundOff.png'); //, 'btn_sound_off.png');
-                AAKaiAnalytics.sendEvent("soundOff", gGameVersion);
+                AAKaiAnalytics.sendEvent("soundOff");
             }
             //AAAnalytics.sendButtonEvent('sound', kIOS_WRAPPED);
-            AAFunctions.tweenBounce(this, this.btnSound);
+            AAFunctions.tweenBounce(this, this.c_btnSound);
         }
     };
     MenuOverlay.prototype.playBtnSnd = function () {
@@ -643,28 +660,33 @@ var MenuOverlay = /** @class */ (function (_super) {
     MenuOverlay.prototype.showButtons = function (isGameOver) {
         if (!this.areButtonsTweening()) {
             if (isGameOver) {
-                this.btnPlay.setTexture('spriteAtlas', 'btnPlay.png');
-                this.showButton(this.btnSound, this.buttonY, this.btnSound.x);
-                this.showButton(this.btnHelp, this.buttonY, this.btnHelp.x);
+                // this.btnPlay.setTexture('spriteAtlas', 'btnPlay.png');
+                this.showButton(this.c_btnSound, this.buttonY, this.c_btnSound.x);
+                this.showButton(this.c_btnHelp, this.buttonY, this.c_btnHelp.x);
             }
-            this.showButton(this.btnPlay, this.buttonY, this.btnPlay.x);
+            this.showButton(this.c_btnPlay, this.buttonY, this.c_btnPlay.x);
             // Hilight and select the button to make the keyboard work
             //this.btnPlay.select(false);
         }
     };
     MenuOverlay.prototype.areButtonsTweening = function () {
+        var isATweeing = false;
         if (this.buttonTween != null) {
-            return this.buttonTween.isPlaying();
+            isATweeing = this.buttonTween.isPlaying();
         }
+        if (gTween != null) {
+            isATweeing = gTween.isPlaying();
+        }
+        return isATweeing;
     };
     MenuOverlay.prototype.hideAllButtons = function () {
         if (!this.areButtonsTweening()) {
             // this.showButton(this.btnPlay, -this.btnPlay.y, this.btnPlay.x, false);
             // this.showButton(this.btnSound, -this.btnSound.y, this.btnSound.x, false);
             // this.showButton(this.btnHelp, -this.btnHelp.y, this.btnHelp.x, false);
-            this.showButton(this.btnPlay, this.buttonY + this.kHideDistance, this.btnPlay.x);
-            this.showButton(this.btnSound, this.buttonY + this.kHideDistance, this.btnSound.x);
-            this.showButton(this.btnHelp, this.buttonY + this.kHideDistance, this.btnHelp.x);
+            this.showButton(this.c_btnPlay, this.buttonY + this.kHideDistance, this.c_btnPlay.x);
+            this.showButton(this.c_btnSound, this.buttonY + this.kHideDistance, this.c_btnSound.x);
+            this.showButton(this.c_btnHelp, this.buttonY + this.kHideDistance, this.c_btnHelp.x);
         }
     };
     MenuOverlay.prototype.pauseGame = function (_state) {
@@ -680,25 +702,25 @@ var MenuOverlay = /** @class */ (function (_super) {
                 this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
                 gGameState = states.kSTATE_PAUSED;
                 //this.showButtons(false);
-                this.showButton(this.btnHelp, this.buttonY, this.btnHelp.x);
-                this.showButton(this.btnSound, this.buttonY, this.btnSound.x);
+                this.showButton(this.c_btnHelp, this.buttonY, this.c_btnHelp.x);
+                this.showButton(this.c_btnSound, this.buttonY, this.c_btnSound.x);
                 this.pauseImage.setVisible(true);
                 AAFunctions.tweenBounce(this, this.pauseImage);
                 // AAAds.showBannerAd_WEB(true);
                 this.scene.get("SponsorOverlay").showBanner();
                 game.scene.pause("GameScene");
-                AAKaiAnalytics.sendEvent("pause", gGameVersion);
+                AAKaiAnalytics.sendEvent("pause");
             }
             else if (gGameState == states.kSTATE_PAUSED) {
                 gGameState = states.kSTATE_PLAYING;
                 //this.showButton(this.btnPlay, -this.btnPlay.y, this.btnPlay.x, false);
-                this.showButton(this.btnHelp, this.buttonY + this.kHideDistance, this.btnHelp.x);
-                this.showButton(this.btnSound, this.buttonY + this.kHideDistance, this.btnSound.x);
+                this.showButton(this.c_btnHelp, this.buttonY + this.kHideDistance, this.c_btnHelp.x);
+                this.showButton(this.c_btnSound, this.buttonY + this.kHideDistance, this.c_btnSound.x);
                 this.pauseImage.setVisible(false);
                 //AAAds.showBannerAd_WEB(false);
                 this.scene.get("SponsorOverlay").hideBanner();
                 game.scene.resume("GameScene");
-                AAKaiAnalytics.sendEvent("resume", gGameVersion);
+                AAKaiAnalytics.sendEvent("resume");
             }
         }
     };
@@ -715,21 +737,21 @@ var MenuOverlay = /** @class */ (function (_super) {
                 case states.kSTATE_MENU:
                     this.scene.get("MenuScene").scene.start("HelpScene");
                     gGameState = states.kSTATE_HELP;
-                    this.showButton(this.btnSound, this.buttonY + this.kHideDistance, this.btnSound.x);
-                    this.showButton(this.btnPlay, this.buttonY + this.kHideDistance, this.btnPlay.x);
+                    this.showButton(this.c_btnSound, this.buttonY + this.kHideDistance, this.c_btnSound.x);
+                    this.showButton(this.c_btnPlay, this.buttonY + this.kHideDistance, this.c_btnPlay.x);
                     this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
-                    // this.btnPlay.setTexture('spriteAtlas', 'btnHome.png');
-                    AAFunctions.tweenBounce(this, this.btnHelp);
-                    AAKaiAnalytics.sendEvent("help", gGameVersion);
+                    this.scene.get("SponsorOverlay").hideBanner();
+                    AAFunctions.tweenBounce(this, this.c_btnHelp);
+                    AAKaiAnalytics.sendEvent("help");
                     break;
                 case states.kSTATE_GAMEOVER:
-                    this.btnPlay.setTexture('spriteAtlas', 'btnPlay.png');
+                    // this.btnPlay.setTexture('spriteAtlas', 'btnPlay.png');
                     this.btnHelp.setTexture('spriteAtlas', 'btnHelp.png');
-                    AAFunctions.tweenBounce(this, this.btnPlay);
-                    AAFunctions.tweenBounce(this, this.btnHelp);
+                    AAFunctions.tweenBounce(this, this.c_btnPlay);
+                    AAFunctions.tweenBounce(this, this.c_btnHelp);
                     this.scene.get("GameScene").scene.start("MenuScene");
                     gGameState = states.kSTATE_MENU;
-                    AAKaiAnalytics.sendEvent("back-gameover", gGameVersion);
+                    AAKaiAnalytics.sendEvent("back-gameover");
                     break;
                 case states.kSTATE_PAUSED:
                 case states.kSTATE_HELP:
@@ -747,7 +769,7 @@ var MenuOverlay = /** @class */ (function (_super) {
     // SET UP THE GAME
     // **************************************************************************
     MenuOverlay.prototype.update = function (time, delta) {
-        if (kSHOWFPS) {
+        if (this._SHOWFPS) {
             this.fpsText.setText('FPS: ' + (1000 / delta).toFixed(1));
         }
         // this.debugInfo.setText([
@@ -777,43 +799,42 @@ var MenuOverlay = /** @class */ (function (_super) {
         var txt = this.cache.text.get('sponsorURL');
         console.log(txt);
         window.location.href = txt;
-        //'https://littlegames.app';
     };
     MenuOverlay.prototype.createPauseGrc = function () {
         var graphics = this.add.graphics();
         graphics.beginPath();
-        graphics.moveTo(0, 57);
-        graphics.lineTo(this.sys.canvas.width, 57);
-        graphics.lineTo(this.sys.canvas.width, 127);
-        graphics.lineTo(0, 127);
+        graphics.moveTo(0, 160);
+        graphics.lineTo(this.sys.canvas.width, 160);
+        graphics.lineTo(this.sys.canvas.width, 240);
+        graphics.lineTo(0, 240);
         graphics.closePath();
         graphics.strokePath();
         graphics.fillStyle(0xff0000, .75);
         graphics.fill();
         // =======================================================
         var graphics2 = this.add.graphics();
-        var startx = 90;
-        var starty = 67;
-        var pHeight = 117;
+        var startx = this.sys.canvas.width / 2 - 30;
+        var starty = 170;
+        var pHeight = 60;
         graphics2.moveTo(startx, starty);
-        graphics2.lineTo(110, starty);
-        graphics2.lineTo(110, pHeight);
-        graphics2.lineTo(startx, pHeight);
+        graphics2.lineTo(startx + 20, starty);
+        graphics2.lineTo(startx + 20, starty + pHeight);
+        graphics2.lineTo(startx, starty + pHeight);
         graphics2.closePath();
         graphics2.strokePath();
         graphics2.fillStyle(0xFFFFFF, 1);
         graphics2.fill();
         // =======================================================
         var graphics3 = this.add.graphics();
-        var offset = 35;
-        graphics2.moveTo(startx + offset, starty);
-        graphics2.lineTo(110 + offset, starty);
-        graphics2.lineTo(110 + offset, pHeight);
-        graphics2.lineTo(startx + offset, pHeight);
-        graphics2.closePath();
-        graphics2.strokePath();
-        graphics2.fillStyle(0xFFFFFF, 1);
-        graphics2.fill();
+        startx = this.sys.canvas.width / 2 + 10;
+        graphics3.moveTo(startx, starty);
+        graphics3.lineTo(startx + 20, starty);
+        graphics3.lineTo(startx + 20, starty + pHeight);
+        graphics3.lineTo(startx, starty + pHeight);
+        graphics3.closePath();
+        graphics3.strokePath();
+        graphics3.fillStyle(0xFFFFFF, 1);
+        graphics3.fill();
         this.pauseImage = this.add.container(0, 0, [graphics, graphics2, graphics3]).setVisible(false);
     };
     return MenuOverlay;
@@ -946,15 +967,32 @@ var PreloadScene = /** @class */ (function (_super) {
         });
         this.meterBar = this.add.graphics();
         this.meterBar.beginPath();
-        this.meterBar.moveTo(0, 211);
-        this.meterBar.lineTo(this.sys.canvas.width, 211);
-        this.meterBar.lineTo(this.sys.canvas.width, 215);
-        this.meterBar.lineTo(0, 215);
+        this.meterBar.moveTo(0, this.sys.game.canvas.height - 40);
+        this.meterBar.lineTo(this.sys.canvas.width, this.sys.game.canvas.height - 40);
+        this.meterBar.lineTo(this.sys.canvas.width, this.sys.game.canvas.height - 45);
+        this.meterBar.lineTo(0, this.sys.game.canvas.height - 45);
         this.meterBar.closePath();
         this.meterBar.strokePath();
         this.meterBar.fillStyle(0xff0000, .75);
         this.meterBar.fill();
         this.meterBar.scaleX = .1;
+        this.kitt = this.add.graphics();
+        this.kitt.moveTo(0, this.sys.game.canvas.height - 40);
+        this.kitt.lineTo(10, this.sys.game.canvas.height - 40);
+        this.kitt.lineTo(10, this.sys.game.canvas.height - 45);
+        this.kitt.lineTo(0, this.sys.game.canvas.height - 45);
+        this.kitt.closePath();
+        this.kitt.strokePath();
+        this.kitt.fillStyle(0xffffff, .90);
+        this.kitt.fill();
+        this.tweens.add({
+            targets: this.kitt,
+            x: this.sys.canvas.width - 10,
+            ease: 'Sine.easeInOut',
+            yoyo: true,
+            duration: 500,
+            repeat: -1
+        });
         this.loadAssets();
     };
     PreloadScene.prototype.loadAssets = function () {
@@ -973,6 +1011,7 @@ var PreloadScene = /** @class */ (function (_super) {
         // *** LOAD ASSETS ***
         // Spritesheets
         this.load.setPath("assets/images/");
+        this.load.image('sponsor', 'sponsor.png');
         this.load.atlas("spriteAtlas", "spriteAtlas.png", "spriteAtlas.json", null, null);
         //Fonts
         this.load.image('numbersFont', 'numbers.png');
@@ -993,29 +1032,72 @@ var PreloadScene = /** @class */ (function (_super) {
 var SponsorOverlay = /** @class */ (function (_super) {
     __extends(SponsorOverlay, _super);
     function SponsorOverlay() {
-        return _super.call(this, { key: 'SponsorOverlay' }) || this;
+        var _this = _super.call(this, { key: 'SponsorOverlay' }) || this;
+        _this.bottomPos = 80;
+        return _this;
     }
     SponsorOverlay.prototype.preload = function () {
     };
     SponsorOverlay.prototype.create = function () {
-        var adFrame = this.add.graphics();
-        adFrame.beginPath();
-        adFrame.moveTo(0, 0);
-        adFrame.lineTo(this.sys.canvas.width, 0);
-        adFrame.lineTo(this.sys.canvas.width, 42);
-        adFrame.lineTo(0, 42);
-        adFrame.closePath();
-        adFrame.strokePath();
-        adFrame.fillStyle(0xff0000, .75);
-        adFrame.fill();
-        var btn = this.add.image(this.sys.canvas.width - 25, 42, "spriteAtlas", "btn5.png");
-        this.adContainer = this.add.container(0, 0, [adFrame, btn]).setVisible(true);
+        var adFrame = this.add.image(0, 0, 'sponsor');
+        adFrame.setOrigin(0, 0);
+        this.btn = this.add.image(this.sys.canvas.width - 50, this.bottomPos, "spriteAtlas", "btn8.png").setVisible(isKaiOS);
+        this.adContainer = this.add.container(0, 0, [adFrame, this.btn]).setVisible(true);
+        adFrame.setInteractive();
+        var xthis = this;
+        adFrame.on('pointerup', function (pointer) {
+            xthis.scene.get("MenuOverlay").visitSponsor();
+        });
+        this.startyScore = this.scene.get("MenuOverlay").scoreText.y;
+        this.startyHighScore = this.scene.get("MenuOverlay").highScoreText.y;
     };
     SponsorOverlay.prototype.hideBanner = function () {
-        this.adContainer.setVisible(false);
+        // this.adContainer.setVisible(false);
+        this.tweens.add({
+            targets: [this.adContainer, this.btn],
+            y: -110,
+            ease: 'Sine.easeIn',
+            duration: 250
+        });
+        this.tweens.add({
+            targets: this.scene.get("MenuOverlay").scoreText,
+            y: this.startyScore - this.bottomPos,
+            ease: 'Sine.easeIn',
+            duration: 250
+        });
+        gTween = this.tweens.add({
+            targets: this.scene.get("MenuOverlay").highScoreText,
+            y: this.startyHighScore - this.bottomPos,
+            ease: 'Sine.easeIn',
+            duration: 250
+        });
     };
     SponsorOverlay.prototype.showBanner = function () {
-        this.adContainer.setVisible(true);
+        // this.adContainer.setVisible(true);
+        this.tweens.add({
+            targets: this.adContainer,
+            y: 0,
+            ease: 'Sine.easeOut',
+            duration: 500
+        });
+        this.tweens.add({
+            targets: this.btn,
+            y: this.bottomPos,
+            ease: 'Sine.easeOut',
+            duration: 500
+        });
+        this.tweens.add({
+            targets: this.scene.get("MenuOverlay").scoreText,
+            y: this.startyScore,
+            ease: 'Sine.easeOut',
+            duration: 500
+        });
+        gTween = this.tweens.add({
+            targets: this.scene.get("MenuOverlay").highScoreText,
+            y: this.startyHighScore,
+            ease: 'Sine.easeOut',
+            duration: 500
+        });
     };
     SponsorOverlay.prototype.showFullScreen = function () {
     };
@@ -1551,24 +1633,11 @@ var AAKaiAnalytics;
         if (model == null) {
             model = 'unknown';
         }
-        AAKaiAnalytics.sendEvent("startgame", gGameVersion);
-        AAKaiAnalytics.sendEvent("vendor", vendor + " " + model);
-        AAKaiAnalytics.sendEvent("KaiOS", os.version);
+        AAKaiAnalytics.sendEvent("startgame");
+        AAKaiAnalytics.sendSpecial("vendor", vendor + " " + model);
+        AAKaiAnalytics.sendSpecial("KaiOS", os.version);
     }
     AAKaiAnalytics.getDeviceData = getDeviceData;
-    function initAnalyticsLocal(googleID, _gameName) {
-        this.gameName = _gameName;
-        var currdate = new Date();
-        window['GoogleAnalyticsObject'] = 'ga';
-        window.ga = window.ga || function () {
-            window.ga.q = window.ga.q || [];
-            window.ga.q.push(arguments);
-        };
-        window.ga.l = 1 * currdate;
-        window.ga("create", googleID, "beacon");
-        window.ga("send", "pageview");
-    }
-    AAKaiAnalytics.initAnalyticsLocal = initAnalyticsLocal;
     function initAnalytics(googleID, _gameName) {
         this.gameName = _gameName;
         var currdate = new Date();
@@ -1584,48 +1653,97 @@ var AAKaiAnalytics;
             a.async = 1;
             a.src = g;
             m.parentNode.insertBefore(a, m);
-        })(window, document, "script", "http://www.google-analytics.com/analytics.js", "ga", this.gaNewElem, this.gaElems);
+        })(window, document, "script", "https://www.google-analytics.com/analytics.js", "ga", this.gaNewElem, this.gaElems);
         //NOTE: ga ERRORS are false possitives! Ignore
         window.ga("create", googleID, "beacon");
         window.ga("send", "pageview");
         AAKaiAnalytics.getDeviceData();
     }
     AAKaiAnalytics.initAnalytics = initAnalytics;
+    function sendSpecial(_action, _label, _nointeract, _value) {
+        if (_nointeract === void 0) { _nointeract = true; }
+        if (_value === void 0) { _value = 0; }
+        if (gAnalytic == kGOOGLE) {
+            if (window.ga != undefined) {
+                console.log('sending');
+                window.ga('send', {
+                    'transport': 'beacon',
+                    'hitType': 'event',
+                    'eventCategory': gGameName,
+                    'eventAction': _action,
+                    'eventLabel': _label,
+                    'eventValue': _value,
+                    'nonInteraction': _nointeract
+                });
+            }
+        }
+        else if (gAnalytic == kMATOMO) {
+            window._paq.push(['setRequestMethod', 'POST']);
+            window._paq.push(['trackEvent', gGameName, _action, _label]);
+        }
+    }
+    AAKaiAnalytics.sendSpecial = sendSpecial;
     // ga('send', 'event', [eventCategory], [eventAction], [eventLabel], [eventValue], [fieldsObject]);
     // sendEvent("play", gGameVersion);
     // sendEvent("os", '1.0.0',false);
-    function sendEvent(_action, _label, _nointeract, _value) {
+    // export function sendEventGoogle(_action: String, _label: String, _nointeract = true, _value = 0) {
+    function sendEvent(_action, _nointeract, _value) {
         if (_nointeract === void 0) { _nointeract = true; }
         if (_value === void 0) { _value = 0; }
-        if (window.ga != undefined) {
-            console.log('sending');
-            window.ga('send', {
-                'transport': 'beacon',
-                'hitType': 'event',
-                'eventCategory': this.gameName,
-                'eventAction': _action,
-                'eventLabel': _label,
-                'eventValue': _value,
-                'nonInteraction': _nointeract
-            });
+        if (gAnalytic == kGOOGLE) {
+            if (window.ga != undefined) {
+                console.log('sending');
+                window.ga('send', {
+                    'transport': 'beacon',
+                    'hitType': 'event',
+                    'eventCategory': gGameName,
+                    'eventAction': _action,
+                    'eventLabel': gGameVersion,
+                    'eventValue': _value,
+                    'nonInteraction': _nointeract
+                });
+            }
+        }
+        else if (gAnalytic == kMATOMO) {
+            window._paq.push(['setRequestMethod', 'POST']);
+            window._paq.push(['trackEvent', gGameName, _action, gGameVersion]);
         }
     }
     AAKaiAnalytics.sendEvent = sendEvent;
     function sendSponsorEvent() {
-        if (window.ga != undefined) {
-            console.log('sending');
-            window.ga('send', {
-                'transport': 'beacon',
-                'hitType': 'event',
-                'eventCategory': "sponsorClick",
-                'eventAction': this.gameName,
-                'eventLabel': "web",
-                'eventValue': 0,
-                'nonInteraction': false
-            });
+        if (gAnalytic == kGOOGLE) {
+            if (window.ga != undefined) {
+                console.log('sending');
+                window.ga('send', {
+                    'transport': 'beacon',
+                    'hitType': 'event',
+                    'eventCategory': "sponsorClick",
+                    'eventAction': gGameName,
+                    'eventLabel': "web",
+                    'eventValue': 0,
+                    'nonInteraction': false
+                });
+            }
+        }
+        else {
+            window._paq.push(['setRequestMethod', 'POST']);
+            window._paq.push(['trackEvent', "sponsorClick", gGameName, gGameVersion]);
         }
     }
     AAKaiAnalytics.sendSponsorEvent = sendSponsorEvent;
+    // THIS IS LEFT HERE AS A REMINDER OF HOOW I LOADED A LOCAL VERIOSN OF ANALYTICS
+    // export function initAnalyticsLocal(googleID, _gameName) {
+    //   this.gameName = _gameName;
+    //   var currdate: any = new Date();
+    //   window['GoogleAnalyticsObject'] = 'ga';
+    //   (<any>window).ga = (<any>window).ga || function () {
+    //     (<any>window).ga.q = (<any>window).ga.q || [];
+    //     (<any>window).ga.q.push(arguments);
+    //   };
+    //   (<any>window).ga.l = 1 * currdate;
+    //   (<any>window).ga("create", googleID, "beacon");
+    //   (<any>window).ga("send", "pageview");
+    // }
 })(AAKaiAnalytics || (AAKaiAnalytics = {})); //end module
 /// <reference path='GameScene.ts'/>
 /// <reference path='MenuScene.ts'/>
@@ -1639,17 +1757,17 @@ var AAKaiAnalytics;
 /// <reference path='../AAShared/AAHighScores.ts'/>
 /// <reference path='../AAShared/AAKaiAnalytics.ts'/>
 var kTESTMODE = 1; /* set to 0 for real ads */
-var gameName = "Template";
+var gGameName = "Template";
 var gGameVersion = "1.0.0";
 var gamePrefsFile = "gameTemplate_000";
 var gameBGColor = 0x333333;
-var stageWidth = 240;
-var stageHeight = 228;
-var kSHOWFPS = true;
 var gLogoDisplayLength = 2000;
+var gStageWidth = 240 * 2;
+var gStageHeight = 228 * 2;
 // gSpeedNormalize is used to make testing and working on the PC normal speed
 // KaiOS Phaser runs at 30fps so I compensate and double most things.
 var gSpeedNormalize = 1.0;
+var gTween;
 var isKaiOS = false;
 if (navigator.userAgent.toLowerCase().indexOf('kaios') > -1) {
     isKaiOS = true;
@@ -1672,16 +1790,27 @@ var game;
 var gGameState = states.kSTATE_NOTHING;
 var emitter = new Phaser.Events.EventEmitter();
 var gGameTimeStart;
-//TEST:UA-150350318-3
-//PROD:UA-150350318-1
-AAKaiAnalytics.initAnalytics('UA-150350318-3', gameName);
+// 1 = google
+// 2 = matomo
+var kGOOGLE = 1;
+var kMATOMO = 2;
+var gAnalytic = kGOOGLE;
+// ******************************************************************************
+// ******************************************************************************
+// NOTE ******* If using Matomo the init is in the index.html file */
+// DON"T USE MATOMO FOR ONLINE GAMES. USE GOOGLE.
+// Using Google Analytics //////////////////////////////////////////////////////
+// TEST:UA-150350318-3
+// PROD:UA-150350318-1
+// ******************************************************************************
+AAKaiAnalytics.initAnalytics('UA-150350318-3', gGameName);
 window.onload = function () {
     var config = {
         type: Phaser.WEBGL,
         renderType: Phaser.WEBGL,
         scene: scenes,
         banner: false,
-        title: gameName,
+        title: gGameName,
         backgroundColor: gameBGColor,
         url: 'https://taaragames.com/',
         version: gGameVersion,
@@ -1696,8 +1825,8 @@ window.onload = function () {
             mode: Phaser.Scale.FIT,
             autoCenter: Phaser.Scale.CENTER_BOTH,
             parent: 'gameStage',
-            width: stageWidth,
-            height: stageHeight,
+            width: gStageWidth,
+            height: gStageHeight,
         }
     };
     gGameTimeStart = new Date().getMilliseconds();

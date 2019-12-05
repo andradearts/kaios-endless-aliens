@@ -1,8 +1,8 @@
 
 class PreloadScene extends Phaser.Scene {
 
-    //pieMeter;
     meterBar;
+    kitt;
 
     constructor() {
         super({ key: 'PreloadScene' });
@@ -10,10 +10,10 @@ class PreloadScene extends Phaser.Scene {
 
     preload() {
 
-        
+
         this.cameras.main.setBackgroundColor(0xFFDD18);
 
-        let logo = this.add.image(this.sys.canvas.width/2,this.sys.canvas.height/2,"logo").setAlpha(0);
+        let logo = this.add.image(this.sys.canvas.width / 2, this.sys.canvas.height / 2, "logo").setAlpha(0);
 
         this.tweens.add({
             targets: logo,
@@ -26,10 +26,10 @@ class PreloadScene extends Phaser.Scene {
 
         this.meterBar.beginPath();
 
-        this.meterBar.moveTo(0, 211);
-        this.meterBar.lineTo(this.sys.canvas.width, 211);
-        this.meterBar.lineTo(this.sys.canvas.width, 215);
-        this.meterBar.lineTo(0, 215);
+        this.meterBar.moveTo(0, this.sys.game.canvas.height - 40);
+        this.meterBar.lineTo(this.sys.canvas.width, this.sys.game.canvas.height - 40);
+        this.meterBar.lineTo(this.sys.canvas.width, this.sys.game.canvas.height - 45);
+        this.meterBar.lineTo(0, this.sys.game.canvas.height - 45);
 
         this.meterBar.closePath();
         this.meterBar.strokePath();
@@ -37,10 +37,30 @@ class PreloadScene extends Phaser.Scene {
         this.meterBar.fill();
 
         this.meterBar.scaleX = .1;
-        
-    
+
+
+        this.kitt = this.add.graphics();
+        this.kitt.moveTo(0, this.sys.game.canvas.height - 40);
+        this.kitt.lineTo(10, this.sys.game.canvas.height - 40);
+        this.kitt.lineTo(10, this.sys.game.canvas.height - 45);
+        this.kitt.lineTo(0, this.sys.game.canvas.height - 45);
+
+        this.kitt.closePath();
+        this.kitt.strokePath();
+        this.kitt.fillStyle(0xffffff, .90);
+        this.kitt.fill();
+
+        this.tweens.add({
+            targets: this.kitt,
+            x: this.sys.canvas.width-10,
+            ease: 'Sine.easeInOut',
+            yoyo: true,
+            duration:500,
+            repeat: -1
+        });
+
         this.loadAssets();
-        
+
     }
 
     loadAssets(){
@@ -64,6 +84,9 @@ class PreloadScene extends Phaser.Scene {
          // *** LOAD ASSETS ***
         // Spritesheets
         this.load.setPath("assets/images/");
+
+        this.load.image('sponsor', 'sponsor.png');
+
         this.load.atlas(
             "spriteAtlas",
             "spriteAtlas.png",

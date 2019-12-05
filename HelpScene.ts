@@ -5,7 +5,7 @@ class HelpScene extends Phaser.Scene {
     }
 
     preload() {
-        
+        this.scene.sendToBack('HelpScene');
     }
 
     create() {

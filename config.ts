@@ -18,22 +18,20 @@ const gGameName = "Template";
 const gGameVersion = "1.0.0";
 const gamePrefsFile = "gameTemplate_000";
 const gameBGColor = 0x333333;
-
-const stageWidth = 240;
-const stageHeight = 228;
-
-const kSHOWFPS = true;
 const gLogoDisplayLength = 2000;
 
-
+let gStageWidth = 240*2;
+let gStageHeight = 228*2;
 // gSpeedNormalize is used to make testing and working on the PC normal speed
 // KaiOS Phaser runs at 30fps so I compensate and double most things.
 let gSpeedNormalize = 1.0;
+let gTween;
 
 let isKaiOS = false;
 if (navigator.userAgent.toLowerCase().indexOf('kaios') > -1) {
     isKaiOS = true;
     gSpeedNormalize = 2.0 // double things up on the device.  Could break in the future?
+
 }
 
 const scenes = [BootScene, PreloadScene, SponsorOverlay, MenuOverlay, MenuScene, HelpScene, GameScene];
@@ -54,6 +52,12 @@ let game;
 let gGameState = states.kSTATE_NOTHING;
 let emitter = new Phaser.Events.EventEmitter();
 let gGameTimeStart;
+
+// 1 = google
+// 2 = matomo
+const kGOOGLE  = 1;
+const kMATOMO = 2;
+const gAnalytic = kGOOGLE;
 
 // ******************************************************************************
 // ******************************************************************************
@@ -88,8 +92,8 @@ window.onload = () => {
             mode: Phaser.Scale.FIT,
             autoCenter: Phaser.Scale.CENTER_BOTH,
             parent: 'gameStage',
-            width: stageWidth,
-            height: stageHeight,
+            width: gStageWidth,
+            height: gStageHeight,
         }
     }
 
