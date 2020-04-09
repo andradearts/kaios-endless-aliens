@@ -3,10 +3,11 @@
   "compilerOptions": {
     /* Basic Options */
     "target": "es5", /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017','ES2018' or 'ESNEXT'. */
+    "allowJs": true,
     "module": "amd", /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */
     "watch": true, /* Compile automatically when there is an edit to a .ts file*/
     "sourceMap": true, /* Generates corresponding '.map' file. */
-    "outFile": "dist/assets/game.js", /* Concatenate and emit output to single file. */
+    "outFile": "game/dist/assets/game.js", /* Concatenate and emit output to single file. */
     "outDir": "dist/",
     "esModuleInterop": true, /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */
     "noImplicitAny": false, /* Raise error on expressions and declarations with an implied 'any' type. */
@@ -15,6 +16,22 @@
   "lib": [
     "es2015", "es2017",
     "dom"
-  ]
+  ],
+  "files": [
+    "./game/src/ua-parser.js",
+    "./game/src/Button.ts",
+    "./game/src/PieMeter.ts",
+    "./game/src/BootScene.ts",
+    "./game/src/MoreGamesScene.ts",
+    "./game/src/SettingsScene.ts",
+    "./game/src/PreloadScene.ts",
+    "./game/src/MenuOverlay.ts",
+    "./game/src/MenuScene.ts",
+    "./game/src/HelpScene.ts",
+    "./game/src/Sponsor.ts",
+    "./game/src/GameScene.ts",
+    "./game/src/const.ts", 
+    "./game/src/config.ts"
+]
   
 }

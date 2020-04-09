@@ -6,3 +6,5 @@ manifest.json - pwa manifest
 All assets, except the manifests, including javascript should be placed in the assets folder
 
 firebase deploy --only hosting:__hostingname__
+
+__hostingname__ is somthing like "tgcowabunga" or "asterstorm" w/o quotes
