@@ -32,6 +32,8 @@ class MenuOverlay extends Phaser.Scene {
     c_btnMoreGames;
     c_btnFullScreen;
 
+    buttons;
+    currentActiveButton = 4; // start on the play button
 
     btnPause;
     buttonTween;
@@ -50,6 +52,8 @@ class MenuOverlay extends Phaser.Scene {
     pauseKey;
 
 
+    cursors;
+
     constructor() {
         super({ key: 'MenuOverlay' });
     }
@@ -66,7 +70,14 @@ class MenuOverlay extends Phaser.Scene {
 
     create() {
 
-        AAKaiControls.setUpInputs(this);
+        if (isKaiOS) {
+            AAKaiControls.setUpInputs(this);
+            emitter.on('keydown', this.keydown, this);
+            emitter.on('keyup', this.keyup, this);
+        } else {
+            AAControls.setUpInputs(this);
+        }
+        // this.cursors = this.input.keyboard.createCursorKeys();
 
         this.setUpAudio();
         this.setUpUI();
@@ -82,8 +93,7 @@ class MenuOverlay extends Phaser.Scene {
         // THIS IS CALLED FROM THE FIREFOX UI WHEN A USER CLICKS "EXIT"
         emitter.on('fullscreen', this.action_btnFullscreen, this);
 
-        emitter.on('keydown', this.keydown, this);
-        emitter.on('keyup', this.keyup, this);
+
 
 
         // var txt = [
@@ -512,6 +522,11 @@ class MenuOverlay extends Phaser.Scene {
 
         AAFunctions.displayButtons([this.c_btnSettings, this.c_btnMoreGames, this.c_btnFullScreen], this.cameras.main, this.buttonY2, 0);
 
+        this.buttons = [
+            this.c_btnSettings, this.c_btnMoreGames, this.c_btnFullScreen,
+            this.c_btnHelp, this.c_btnPlay, this.c_btnSound
+        ];
+
         // Pause Graphic #######################################################################
 
         this.createPauseGrc();
@@ -644,6 +659,44 @@ class MenuOverlay extends Phaser.Scene {
         if (this._SHOWFPS) {
             this.fpsText.setText('FPS: ' + (1000 / delta).toFixed(1));
         }
+
+        // let left = Phaser.Input.Keyboard.JustDown(AAControls.cursors.left) || Phaser.Input.Keyboard.JustDown(AAControls.AKey);
+        // if (left){
+        //     console.log('left yo 3');
+        // }
+        // AAControls.poll();
+
+        if (!isKaiOS) {
+            let left = Phaser.Input.Keyboard.JustDown(AAControls.AKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.left);
+            let right = Phaser.Input.Keyboard.JustDown(AAControls.DKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.right);
+
+
+            let up = Phaser.Input.Keyboard.JustDown(AAControls.WKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.up);
+            let down = Phaser.Input.Keyboard.JustDown(AAControls.SKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.down);
+
+            if (right) {
+                this.navigateDirectionToButton(1);
+                AAControls.right = 0;
+            } else if (left) {
+                console.log('left yo 4');
+                this.navigateDirectionToButton(-1);
+                AAControls.left = 0;
+            }
+
+            if (down) {
+                this.navigateDirectionToButton(3);
+                AAControls.right = 0;
+            } else if (up) {
+                this.navigateDirectionToButton(-3);
+                AAControls.left = 0;
+            }
+
+            let click = Phaser.Input.Keyboard.JustDown(AAControls.spacebar) || Phaser.Input.Keyboard.JustDown(AAControls.returnKey);
+            if (click) {
+                this.buttons[this.currentActiveButton].first.pointerUp(null);
+            }
+
+        }
         // if (this.debugInfo) {
         //     this.debugInfo.setText([
         //         'GameData.rockcount: ' + GameData.rockCount
@@ -651,6 +704,38 @@ class MenuOverlay extends Phaser.Scene {
         //     ]);
         //     // this.debugText.text = gGameState.toString();
         // }
+    }
+    watchControls() {
+
+
+    }
+
+    navigateDirectionToButton(dir) {
+
+        // let nextButton = this.currentActiveButton + dir;
+        let nextButton = Phaser.Math.Clamp(this.currentActiveButton + dir, 0, this.buttons.length - 1);
+
+        if (this.buttons[nextButton].visible == false) {
+            // if ( nextButton == 2 ) {
+            nextButton += dir;
+            // }
+        }
+        nextButton = Phaser.Math.Clamp(nextButton, 0, this.buttons.length - 1);
+        if (this.buttons[nextButton].visible == true) {
+            this.buttons[this.currentActiveButton].first.deselect();
+            // this.currentActiveButton = this.currentActiveButton + dir;
+            // this.currentActiveButton = Phaser.Math.Clamp(this.currentActiveButton, 0, this.buttons.length - 1);
+            this.buttons[nextButton].first.select(true);
+            this.currentActiveButton = nextButton;
+
+        }
+
+        // this.buttons[this.currentActiveButton].deselect();
+        // this.currentActiveButton = this.currentActiveButton + dir;
+        // this.currentActiveButton = Phaser.Math.Clamp(this.currentActiveButton, 0, this.buttons.length - 1);
+        // this.buttons[this.currentActiveButton].select(true);
+
+
     }
 
     setScore(data) {

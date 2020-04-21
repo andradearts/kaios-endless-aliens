@@ -26,6 +26,7 @@
     "./game/src/SettingsScene.ts",
     "./game/src/PreloadScene.ts",
     "./game/src/MenuOverlay.ts",
+    "./game/src/MoreGamesScene.ts",
     "./game/src/MenuScene.ts",
     "./game/src/HelpScene.ts",
     "./game/src/Sponsor.ts",

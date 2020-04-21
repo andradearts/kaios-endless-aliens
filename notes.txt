@@ -8,3 +8,8 @@ All assets, except the manifests, including javascript should be placed in the a
 firebase deploy --only hosting:__hostingname__
 
 __hostingname__ is somthing like "tgcowabunga" or "asterstorm" w/o quotes
+
+
+#Manifest file
+
+The scope must be "/" not "." or "./" otherwise it won't install on KaiOS!  Can't tell you how many times this hs bitten me.

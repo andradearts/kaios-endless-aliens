@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>__TEMPLATE__</title>
+    <title>Soap Bubbles</title>
     <meta charset="UTF-8">
     <meta name="viewport"
         content="initial-scale=1,maximum-scale=1, user-scalable=no, minimum-scale=1, width=device-width, height=device-height">
@@ -64,17 +64,14 @@
 
 
     <!-- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= -->
-    <!-- <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="@andradearts" />
     <meta name="twitter:title"
         content="Soap Bubbles — Wash away all the germs with your soap bubbles! A free game for mobile and desktop.  Wash Your Hands!!" />
     <meta name="twitter:description" content="Play it now for free!" />
-    <meta name="twitter:image" content="https://soapbubbles.taara.games/assets/soap-bubbles-twitter-card.jpg" /> -->
+    <meta name="twitter:image" content="https://soapbubbles.taara.games/assets/soap-bubbles-twitter-card.jpg" />
     <!-- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= -->
 
-
-
-    <!-- /// -->
     <meta name="theme-color" content="#000000" />
 
 
@@ -89,15 +86,14 @@
     <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/icon16.png">
 
 
-    <!-- /// -->
+
     <script src="assets/kaiads.min.js"></script>
     <!-- <script src="https://static.kaiads.com/ads-sdk/ads-sdk.v3.min.js"></script> -->
 
-    <!-- <script src="assets/ua-parser.min.js"></script> -->
+    <script src="assets/ua-parser.min.js"></script>
 
     <!-- NOTE: Custom build of Phaser!! -->
-    <script src="assets/phaser-arcade-physics.min.js"></script>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/phaser@3.19.0/dist/phaser-arcade-physics.min.js"></script> -->
+    <script src="./assets/phaser322-custom.min.js"></script>
 
     <link rel='manifest' href='manifest.webapp'>
     <style>
@@ -107,10 +103,12 @@
         }
 
         :root {
+            /* ad heights 54px or 36px */
             --ad-height: 54px;
             --ad-width: 216px;
             --ad-height-offest: -54px;
         }
+
 
         html,
         body {
@@ -131,71 +129,86 @@
             top: 0;
             height: 100%;
             width: 100%;
+            max-width: 240px;
             z-index: 0;
         }
 
-
         .centerad {
-            width: var(--ad-width);
+            width: 100%;
+            /* var(--ad-width); */
             text-align: center;
             margin: 0 auto;
         }
 
-        .kaisponsor {
+        .sponsorbanner {
             z-index: 9999;
             position: absolute;
+            top: 0;
             width: var(--ad-width);
         }
 
-        #kaiosad {
+        #sponsorad {
+            background-color: transparent;
             position: relative;
             width: var(--ad-width);
             min-height: var(--ad-height);
             max-height: var(--ad-height);
             min-width: var(--ad-width);
-            max-width: 300px;
+            max-width: var(--ad-width);
             margin: 0 auto;
             margin-bottom: var(--ad-height-offest) !important;
             z-index: 9999;
             top: var(--ad-height-offest);
-            /* visibility: hidden; */
+
         }
 
         /* Tag is the number associated with activating the ad */
-        #tag {
+        .tagNum {
             position: absolute;
             z-index: 99999;
-            top: 40px;
+            top: 45px;
             right: -10px;
-            visibility: hidden;
             opacity: .8;
+            visibility: hidden;
         }
+
     </style>
 </head>
 
 <body>
+    <script>
+        // If a user end up on this page and is not on KaiOS I send them
+        // to the regular index.html page.
+
+        if (navigator.userAgent.toLowerCase().indexOf('kaios') == -1) {
+            //window.location.href = 'https://soapbubbles.taara.games';  
+        }
+    </script>
     <noscript>
         <p>Javascript must be enabled to play games on this site!</p>
     </noscript>
-    <div class="centerad">
-        <!-- class="kaisponsor" -->
-        <div class="kaisponsor" id='kaiosad'>
-            <div id="tag"><img src="./assets/images/tag8_small.png" alt=""></div>
-        </div>
 
+    <div id="gameStage">
+        <div class="centerad">
+            <div class="sponsorbanner" id='sponsorad'>
+                <div class="tagNum" id="tag"><img src="./assets/images/tag8_small.png" alt=""></div>
+            </div>
+        </div>
     </div>
-    <div id="gameStage"></div>
-    <script src="assets/game.js"></script>
+
+    <script src="./assets/game.js"></script>
+
     <script>
 
         // This is here to STOP the screen from scrolling when loading KaiAds.
-        window.addEventListener("keydown", function (e) {
-            // page up, page down and arrow keys:
-            if ([33, 34, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
-                e.preventDefault();
-            }
-        }, false);
-
+        if (navigator.userAgent.toLowerCase().indexOf('kaios') > -1) {
+            window.addEventListener("keydown", function (e) {
+                // page up, page down and arrow keys:
+                if ([33, 34, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+                    e.preventDefault();
+                }
+            }, false);
+        }
 
         // if ("serviceWorker" in navigator) {
         //     if (navigator.serviceWorker.controller) {
@@ -212,6 +225,7 @@
         //     }
         // }
     </script>
+
 </body>
 
 </html>

@@ -12,6 +12,7 @@
 /// <reference path='../../../AAShared/AAPrefs.ts'/>
 /// <reference path='../../../AAShared/AAKaiAds.ts'/>
 /// <reference path='../../../AAShared/AAKaiControls.ts'/>
+/// <reference path='../../../AAShared/AAControls.ts'/>
 /// <reference path='../../../AAShared/AAHighScores.ts'/>
 /// <reference path='../../../AAShared/AAKaiAnalytics.ts'/>
 
@@ -33,6 +34,7 @@ const gLogoDisplayLength = 2000;
 // SPONSOR
 let gTween; //sponsor tween
 let kUSESPONSOR = true;
+let gChangeBackToFullscreenFromAdView = false;
 
 let gIsKaiOSAppMode = (window.location.protocol == 'app:');
 
@@ -60,7 +62,7 @@ if (window.innerHeight <= 228) {
 
 let centerGame = Phaser.Scale.CENTER_HORIZONTALLY;//CENTER_BOTH;
 let myScale;
-if (gRunnngInBrowser) {
+// if (gRunnngInBrowser) {
     // Phaser.Scale.CENTER_HORIZONTALLY;
 
     myScale = {
@@ -70,15 +72,15 @@ if (gRunnngInBrowser) {
         width: gStageWidth,
         height: gStageHeight
     }
-} else {
-    myScale = {
-        parent: 'gameStage',
-        autoCenter: Phaser.Scale.CENTER_BOTH, //Phaser.Scale.CENTER_HORIZONTALLY,
-        mode: Phaser.Scale.FIT, // we will resize the game with our own code (see Boot.js)
-        width: gStageWidth,
-        height: gStageHeight
-    }
-}
+// } else {
+//     myScale = {
+//         parent: 'gameStage',
+//         autoCenter: Phaser.Scale.CENTER_BOTH, //Phaser.Scale.CENTER_HORIZONTALLY,
+//         mode: Phaser.Scale.FIT, // we will resize the game with our own code (see Boot.js)
+//         width: gStageWidth,
+//         height: gStageHeight
+//     }
+// }
 
 const scenes = [BootScene, PreloadScene, MenuOverlay, SponsorOverlay, MenuScene, HelpScene, GameScene,MoreGamesScene,SettingsScene];
 
@@ -132,7 +134,7 @@ AAKaiAnalytics.getDeviceData();
 
 function resize() {
 
-    if (gRunnngInBrowser) {
+    // if (gRunnngInBrowser) {
         let game_ratio = 1;//(9 * 32) / (15 * 32);
 
         // Make div full height of browser and keep the ratio of game resolution
@@ -152,7 +154,7 @@ function resize() {
         game.canvas.style.width = gStageWidth + 'px';
         game.canvas.style.height = gStageHeight + 'px';
 
-    }
+    // }
 
 }
 
@@ -205,9 +207,12 @@ window.onload = () => {
         // is in fullscreen mode if there is one. If there isn't one,
         // the value of the property is null.
         if (document.fullscreenElement) {
-            emitter.emit('fullscreen', [2.5]);
+            gStageHeight = window.innerHeight-30;// * (dpi_w / dpi_h);
+            game.canvas.style.height = gStageHeight + 'px';
+
+            // emitter.emit('fullscreen', [2.5]);
         } else {
-            emitter.emit('fullscreen', [1]);
+            // emitter.emit('fullscreen', [1]);
 
         }
     });

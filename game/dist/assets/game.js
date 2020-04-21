@@ -413,13 +413,46 @@ var MoreGamesScene = /** @class */ (function (_super) {
         return _super.call(this, { key: 'MoreGamesScene' }) || this;
     }
     MoreGamesScene.prototype.preload = function () {
+        this.cameras.main.setBackgroundColor(0xFBF200);
+        gGameState = states.kSTATE_MOREGAMES;
     };
     MoreGamesScene.prototype.create = function () {
-        gGameState = states.kSTATE_MOREGAMES;
+        this.scene.sendToBack();
+        this.bg = this.add.image(0, 0, 'logo').setOrigin(0, 0);
+        // this.add.tileSprite(0, 0, this.sys.canvas.width, this.sys.canvas.height, 'spriteAtlas', 'bgpattern.jpg').setAlpha(.5);
+        // this.bg.setOrigin(0, 0);
+        var graphics = this.add.graphics();
+        graphics.beginPath();
+        graphics.moveTo(0, 0);
+        graphics.lineTo(this.sys.canvas.width, 0);
+        graphics.lineTo(this.sys.canvas.width, this.sys.canvas.height);
+        graphics.lineTo(0, this.sys.canvas.height);
+        graphics.closePath();
+        graphics.strokePath();
+        graphics.fillStyle(0x00000, .75);
+        graphics.fill();
         var mo = this.scene.get('MenuOverlay');
         mo.scoreText.setVisible(false);
         mo.highScoreText.setVisible(false);
-        this.add.image(0, 0, 'spriteAtlas', 'help_en.png').setOrigin(0, 0);
+        //this.add.image(0,0,'spriteAtlas','moreGames.png').setOrigin(0,0);
+        // add the icons
+        // should be in AAShared in the future!
+        // and SHOULD be an html file
+        var element = this.add.dom(0, 80).createFromCache('moreGamesHTML').setOrigin(0, 0);
+        this.add.image(this.sys.canvas.width / 2, this.sys.canvas.height - 150, 'spriteAtlas', 'kaiStore.png');
+        if (gRunnngInBrowser) {
+            //display link to website taara.games
+        }
+        else {
+            //display KaiStore badge
+        }
+    };
+    MoreGamesScene.prototype.update = function () {
+        if (this.bg) {
+            this.bg.tilePositionY = this.bg.tilePositionY + .2;
+            //  this.bg2.tilePositionY = this.bg2.tilePositionY - .12;
+            // ;
+        }
     };
     return MoreGamesScene;
 }(Phaser.Scene));
@@ -445,7 +478,7 @@ var PreloadScene = /** @class */ (function (_super) {
         return _super.call(this, { key: 'PreloadScene' }) || this;
     }
     PreloadScene.prototype.preload = function () {
-        AAKaiAds.preLoadDisplayAd();
+        // AAKaiAds.preLoadFullscreenAd();
         //    AAKaiAds.preLoadBannerAd();
         this.cameras.main.setBackgroundColor(0xFFDD18);
         var logo = this.add.image(this.sys.canvas.width / 2, this.sys.canvas.height / 2, "logo").setAlpha(0);
@@ -516,6 +549,8 @@ var PreloadScene = /** @class */ (function (_super) {
         // let d = '?' + new Date().getTime();
         // this.load.text('sponsorURL', 'https://taara.games/sponsor.txt' + d);
         // this.load.image('sponsor', 'https://taara.games/sponsor.png' + d);
+        this.load.setPath("assets/html/");
+        this.load.html('moreGamesHTML', 'moregames.html');
         // Spritesheets
         this.load.setPath("assets/images/");
         this.load.atlas("spriteAtlas", "spriteAtlas.png", "spriteAtlas.json", null, null);
@@ -572,6 +607,7 @@ var MenuOverlay = /** @class */ (function (_super) {
         _this.kHideDistance = 350;
         _this._SHOWFPS = false;
         _this.pauseEnabled = false;
+        _this.currentActiveButton = 4; // start on the play button
         return _this;
     }
     MenuOverlay.prototype.preload = function () {
@@ -582,7 +618,15 @@ var MenuOverlay = /** @class */ (function (_super) {
         AAKaiAds.preLoadBannerAd();
     };
     MenuOverlay.prototype.create = function () {
-        AAKaiControls.setUpInputs(this);
+        if (isKaiOS) {
+            AAKaiControls.setUpInputs(this);
+            emitter.on('keydown', this.keydown, this);
+            emitter.on('keyup', this.keyup, this);
+        }
+        else {
+            AAControls.setUpInputs(this);
+        }
+        // this.cursors = this.input.keyboard.createCursorKeys();
         this.setUpAudio();
         this.setUpUI();
         gGameState = states.kSTATE_MENU;
@@ -593,8 +637,6 @@ var MenuOverlay = /** @class */ (function (_super) {
         // IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // THIS IS CALLED FROM THE FIREFOX UI WHEN A USER CLICKS "EXIT"
         emitter.on('fullscreen', this.action_btnFullscreen, this);
-        emitter.on('keydown', this.keydown, this);
-        emitter.on('keyup', this.keyup, this);
         // var txt = [
         //     "window innerHeight: " + window.innerHeight + " ",
         //     "window innerWidth: " + window.innerWidth + " ",
@@ -925,6 +967,10 @@ var MenuOverlay = /** @class */ (function (_super) {
         // SETTINGS -- MORE GAMES -- FULLSCREEN
         this.buttonY2 = (this.cameras.main.height - 210);
         AAFunctions.displayButtons([this.c_btnSettings, this.c_btnMoreGames, this.c_btnFullScreen], this.cameras.main, this.buttonY2, 0);
+        this.buttons = [
+            this.c_btnSettings, this.c_btnMoreGames, this.c_btnFullScreen,
+            this.c_btnHelp, this.c_btnPlay, this.c_btnSound
+        ];
         // Pause Graphic #######################################################################
         this.createPauseGrc();
         // GameOver Sprite #######################################################################
@@ -1020,6 +1066,38 @@ var MenuOverlay = /** @class */ (function (_super) {
         if (this._SHOWFPS) {
             this.fpsText.setText('FPS: ' + (1000 / delta).toFixed(1));
         }
+        // let left = Phaser.Input.Keyboard.JustDown(AAControls.cursors.left) || Phaser.Input.Keyboard.JustDown(AAControls.AKey);
+        // if (left){
+        //     console.log('left yo 3');
+        // }
+        // AAControls.poll();
+        if (!isKaiOS) {
+            var left = Phaser.Input.Keyboard.JustDown(AAControls.AKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.left);
+            var right = Phaser.Input.Keyboard.JustDown(AAControls.DKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.right);
+            var up = Phaser.Input.Keyboard.JustDown(AAControls.WKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.up);
+            var down = Phaser.Input.Keyboard.JustDown(AAControls.SKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.down);
+            if (right) {
+                this.navigateDirectionToButton(1);
+                AAControls.right = 0;
+            }
+            else if (left) {
+                console.log('left yo 4');
+                this.navigateDirectionToButton(-1);
+                AAControls.left = 0;
+            }
+            if (down) {
+                this.navigateDirectionToButton(3);
+                AAControls.right = 0;
+            }
+            else if (up) {
+                this.navigateDirectionToButton(-3);
+                AAControls.left = 0;
+            }
+            var click = Phaser.Input.Keyboard.JustDown(AAControls.spacebar) || Phaser.Input.Keyboard.JustDown(AAControls.returnKey);
+            if (click) {
+                this.buttons[this.currentActiveButton].first.pointerUp(null);
+            }
+        }
         // if (this.debugInfo) {
         //     this.debugInfo.setText([
         //         'GameData.rockcount: ' + GameData.rockCount
@@ -1027,6 +1105,29 @@ var MenuOverlay = /** @class */ (function (_super) {
         //     ]);
         //     // this.debugText.text = gGameState.toString();
         // }
+    };
+    MenuOverlay.prototype.watchControls = function () {
+    };
+    MenuOverlay.prototype.navigateDirectionToButton = function (dir) {
+        // let nextButton = this.currentActiveButton + dir;
+        var nextButton = Phaser.Math.Clamp(this.currentActiveButton + dir, 0, this.buttons.length - 1);
+        if (this.buttons[nextButton].visible == false) {
+            // if ( nextButton == 2 ) {
+            nextButton += dir;
+            // }
+        }
+        nextButton = Phaser.Math.Clamp(nextButton, 0, this.buttons.length - 1);
+        if (this.buttons[nextButton].visible == true) {
+            this.buttons[this.currentActiveButton].first.deselect();
+            // this.currentActiveButton = this.currentActiveButton + dir;
+            // this.currentActiveButton = Phaser.Math.Clamp(this.currentActiveButton, 0, this.buttons.length - 1);
+            this.buttons[nextButton].first.select(true);
+            this.currentActiveButton = nextButton;
+        }
+        // this.buttons[this.currentActiveButton].deselect();
+        // this.currentActiveButton = this.currentActiveButton + dir;
+        // this.currentActiveButton = Phaser.Math.Clamp(this.currentActiveButton, 0, this.buttons.length - 1);
+        // this.buttons[this.currentActiveButton].select(true);
     };
     MenuOverlay.prototype.setScore = function (data) {
         var thescore = data[0];
@@ -1324,8 +1425,8 @@ var SponsorOverlay = /** @class */ (function (_super) {
         this.events.removeListener('showAd');
         emitter.on('hideAd', this.hideBanner, this);
         emitter.on('showAd', this.showBanner, this);
-        this.domad = document.getElementById('kaiosad');
-        this.sponsorTag = document.getElementById('tag');
+        this.domad = document.getElementById('sponsorad');
+        this.sponsorTag = document.getElementsByClassName('tagNum')[0];
         ///////////////////////////////////////////////////
         var adFrame = this.add.image(0, 0, 'sponsor');
         adFrame.setOrigin(0, 0);
@@ -1344,7 +1445,14 @@ var SponsorOverlay = /** @class */ (function (_super) {
         this.startyHighScore = this.scene.get("MenuOverlay").highScoreText.y;
         // Sponsor Button #####################################################################
         this.btnSponsor = new Button(this, this.sys.canvas.width - 60, this.sys.canvas.height + 60, 'spriteAtlas', "sponsor.png", this.action_sponsorButton, "sponsor", true).setVisible(true).setOrigin(.5, 1).setVisible(isKaiOS);
+        if (gRunnngInBrowser) {
+            this.btnSponsor.setVisible(false);
+        }
         // this.showBanner();
+        this.scene.bringToTop();
+        if (!isKaiOS) {
+            this.showBanner();
+        }
     };
     SponsorOverlay.prototype.hideBanner = function () {
         // this.adContainer.setVisible(false);
@@ -1363,15 +1471,19 @@ var SponsorOverlay = /** @class */ (function (_super) {
             callbackScope: this,
             duration: 250
         });
-        this.tweens.add({
-            targets: this.scene.get("MenuOverlay").scoreText,
-            y: this.startyScore,
+        if (isKaiOS) {
+            this.sponsorTag.style.visibility = "visible";
+        }
+        gTween = this.tweens.add({
+            targets: this.btnSponsor,
+            y: this.sys.game.canvas.height + 60,
             ease: 'Sine.easeIn',
             duration: 250
         });
+        // MOVE SCORE ================================
         this.tweens.add({
-            targets: this.btnSponsor,
-            y: this.sys.game.canvas.height + 80,
+            targets: this.scene.get("MenuOverlay").scoreText,
+            y: this.startyScore,
             ease: 'Sine.easeIn',
             duration: 250
         });
@@ -1383,6 +1495,7 @@ var SponsorOverlay = /** @class */ (function (_super) {
         });
     };
     SponsorOverlay.prototype.showBanner = function () {
+        this.scene.bringToTop();
         //works
         //this.domad.style.visibility = "visible";
         // if (gAdShowingBanner) {
@@ -1392,15 +1505,42 @@ var SponsorOverlay = /** @class */ (function (_super) {
         // } else {
         //     return;
         // }
-        if (gGameState == states.kSTATE_PLAYING) {
-            return;
+        if (isKaiOS) {
+            this.sponsorTag.style.visibility = "visible";
         }
+        switch (true) {
+            case (gGameState == states.kSTATE_PLAYING):
+            case (gGameState == states.kSTATE_SETTINGS):
+            case (gGameState == states.kSTATE_HELP):
+            case (gGameState == states.kSTATE_MOREGAMES):
+                return;
+                break;
+            default:
+                break;
+        }
+        // if (gGameState == states.kSTATE_PLAYING) {
+        //     return;
+        // }
+        // if (gGameState == states.kSTATE_SETTINGS) {
+        //     return;
+        // }
+        // if (gGameState == states.kSTATE_HELP) {
+        //     return;
+        // }
+        // if (gGameState == states.kSTATE_MOREGAMES) {
+        //     return;
+        // }
         if (kUSESPONSOR == false) {
             return;
         }
+        if (gAdShowingBanner == false) {
+            return;
+        }
+        // let newX = (window.innerWidth /2)-120 ; //150; 150 is for non kaios
+        // this.domad.style.left = newX + "px";
         // this.adContainer.setVisible(true);
         this.tweens.add({
-            targets: this.adContainer,
+            targets: [this.adContainer, this.btn],
             y: 0,
             ease: 'Sine.easeOut',
             onUpdate: function () {
@@ -1415,17 +1555,18 @@ var SponsorOverlay = /** @class */ (function (_super) {
             ease: 'Sine.easeOut',
             duration: 500
         });
+        gTween = this.tweens.add({
+            targets: this.btnSponsor,
+            y: this.sys.game.canvas.height,
+            ease: 'Sine.easeOut',
+            duration: 250
+        });
+        // MOVE SCORE ==========================
         this.tweens.add({
             targets: this.scene.get("MenuOverlay").scoreText,
             y: this.startyScore + this.bottomPos,
             ease: 'Sine.easeOut',
             duration: 500
-        });
-        this.tweens.add({
-            targets: this.btnSponsor,
-            y: this.sys.game.canvas.height,
-            ease: 'Sine.easeOut',
-            duration: 250
         });
         gTween = this.tweens.add({
             targets: this.scene.get("MenuOverlay").highScoreText,
@@ -1465,7 +1606,6 @@ var GameScene = /** @class */ (function (_super) {
         // this.events.on('startgame', this.startGame, this);
         this.scene.bringToTop("MenuOverlay");
         this.startGame();
-        AAKaiAds.preLoadDisplayAd();
     };
     // removeAllListeners() {
     //     this.events.removeListener('startgame');
@@ -1502,7 +1642,7 @@ var GameScene = /** @class */ (function (_super) {
         if (++this.jumps % 3 == 0) {
             // Display Fullscreen!
             AAKaiAds.displayFullscreenAd();
-            AAKaiAds.preLoadDisplayAd();
+            AAKaiAds.preLoadFullscreenAd();
         }
     };
     GameScene.prototype.setUpSprites = function () {
@@ -1672,13 +1812,13 @@ var AAKaiAds;
     // display ad when app is loaded
     // the escape key will dismiss the ad on the PC 
     // on the device or simulator press left soft key
-    var fullscreenAd = true; /* switch between fullscreen and responsive ad */
+    //var fullscreenAd = true; /* switch between fullscreen and responsive ad */
     //var testMode = 1; /* set to 0 for real ads */
     var theAd;
     var theAdDom;
     AAKaiAds.err = 0;
-    function preLoadDisplayAd() {
-        if (!isKaiOS || gRunnngInBrowser) {
+    function preLoadFullscreenAd() {
+        if (!isKaiOS) {
             return;
         }
         var _this = this;
@@ -1695,45 +1835,25 @@ var AAKaiAds;
                 /* https://www.kaiads.com/publishers/sdk.html#error */
                 onerror: function (err) {
                     _this.err = err;
-                    // (<any>window).firebase.analytics().logEvent("kaiAds", {
-                    //     'hitType': 'event',
-                    //     'error': err,
-                    //     'game': gameName,
-                    //     'version': gGameVersion
-                    // });
-                    // (<any>window).ga('send', 'event', gameName, 'kaiAds', "error", err, {
-                    //     nonInteraction: true
-                    // });
-                    // AAKaiAnalytics.sendSpecial("kaiads", "error", err);
-                    AAKaiAnalytics.sendSpecial("kaiads", "error");
+                    //AAKaiAnalytics.sendSpecial("kaiads", "error");
                     console.warn('KaiAds error catch:', _this.err);
                 },
                 onready: function (ad) {
                     _this.theAd = ad;
-                    //console.log("Add Ready:" + new Date().getTime())
                     ad.on('close', function () {
                         setTimeout(function () {
                             gAdShowing = false;
                         }, 500); /* delayed to avoid button click on current scene */
                         // show banner
-                        document.getElementById('kaiosad').style.visibility = "visible";
-                        if (isKaiOS) {
-                            document.getElementById('tag').style.visibility = "visible";
-                        }
-                        AAKaiAnalytics.sendSpecial("kaiads", "close");
+                        // document.getElementById('kaiosad').style.visibility = "visible";
+                        // if (isKaiOS) {
+                        //     document.getElementById('tagNum').style.visibility = "visible";
+                        // }
+                        //AAKaiAnalytics.sendSpecial("kaiads", "close");
                     });
                     // Kept here for reference ------------------------------------
                     ad.on('click', function () {
-                        // (<any>window).firebase.analytics().logEvent("kaiAds", {
-                        //     'hitType': 'event',
-                        //     'kaiAdEvent':"click",
-                        //     'game': gameName,
-                        //     'version': gGameVersion
-                        // });
-                        // (<any>window).ga('send', 'event', gameName, 'kaiAds', "click", {
-                        //     nonInteraction: true
-                        // });
-                        AAKaiAnalytics.sendSpecial("kaiads", "click");
+                        //AAKaiAnalytics.sendSpecial("kaiads", "click");
                     });
                     ad.on('display', function () {
                         // (<any>window).firebase.analytics().logEvent("kaiAds", {
@@ -1747,21 +1867,26 @@ var AAKaiAds;
                         //     nonInteraction: true
                         // });
                         document.getElementById('kaiosad').style.visibility = "hidden";
-                        document.getElementById('tag').style.visibility = "hidden";
-                        AAKaiAnalytics.sendSpecial("kaiads", "display");
+                        if (isKaiOS) {
+                            document.getElementById('tag').style.visibility = "hidden";
+                        }
+                        //AAKaiAnalytics.sendSpecial("kaiads", "display")
                     });
                     // _this)
                 }
             });
         }
     }
-    AAKaiAds.preLoadDisplayAd = preLoadDisplayAd;
-    function killAd() {
+    AAKaiAds.preLoadFullscreenAd = preLoadFullscreenAd;
+    function killFullscreenAd() {
+        if (!isKaiOS) {
+            return;
+        }
         this.theAd = null;
     }
-    AAKaiAds.killAd = killAd;
+    AAKaiAds.killFullscreenAd = killFullscreenAd;
     function getError() {
-        if (!isKaiOS || gRunnngInBrowser) {
+        if (!isKaiOS) {
             return;
         }
         var error = 0;
@@ -1780,16 +1905,22 @@ var AAKaiAds;
         return error;
     }
     AAKaiAds.getError = getError;
-    function clikcAd() {
+    function clickAd() {
+        if (!isKaiOS) {
+            return;
+        }
         this.theAd.call('click');
     }
-    AAKaiAds.clikcAd = clikcAd;
+    AAKaiAds.clickAd = clickAd;
     function displayBannerAd() {
         //kaisponsor
+        if (!isKaiOS) {
+            return;
+        }
     }
     AAKaiAds.displayBannerAd = displayBannerAd;
     function displayFullscreenAd() {
-        if (!isKaiOS || gRunnngInBrowser) {
+        if (!isKaiOS) {
             return;
         }
         // If the ad isn't ready theAd will be undefinded 
@@ -1797,12 +1928,6 @@ var AAKaiAds;
         if (this.theAd) {
             if (this.err == 0) { // continue only if there isn't an error
                 // gAdShowing = true;
-                // AAKaiAnalytics.sendEvent("kaiAds_display","KaiAds");
-                // (<any>window).firebase.analytics().logEvent("kaiAds_display_called", {
-                //     'hitType': 'event',
-                //     'game': gameName,
-                //     'version': gGameVersion
-                // });
                 this.theAd.call('display');
             }
         }
@@ -1810,6 +1935,9 @@ var AAKaiAds;
     AAKaiAds.displayFullscreenAd = displayFullscreenAd;
     // BANNER ADS
     function preLoadBannerAd() {
+        if (!isKaiOS) {
+            return;
+        }
         var _this = this;
         // start off without an error
         this.err = 0;
@@ -1822,14 +1950,16 @@ var AAKaiAds;
                 timeout: 1000 * 120,
                 h: 54,
                 w: 216,
-                container: document.getElementById('kaiosad'),
+                container: document.getElementById('sponsorad'),
                 /* error codes */
                 /* https://www.kaiads.com/publishers/sdk.html#error */
                 onerror: function (err) {
                     _this.err = err;
-                    AAKaiAnalytics.sendSpecial("kaisponsor", "error");
+                    //AAKaiAnalytics.sendSpecial("kaisponsor", "error");
                     console.warn('KaiAds error catch:', _this.err);
-                    document.getElementById('tag').style.visibility = "hidden";
+                    // if (isKaiOS) {
+                    //     document.getElementById('tagNum').style.visibility = "hidden";
+                    // }
                     gAdShowingBanner = false;
                     emitter.emit('hideAd');
                 },
@@ -1844,7 +1974,7 @@ var AAKaiAds;
                         // a classname to navigate
                         // this classname will be applied
                         // to the container
-                        navClass: 'kaisponsor',
+                        navClass: 'sponsor',
                         // display style will be applied
                         // to the container block or inline-block
                         display: 'block',
@@ -1853,19 +1983,26 @@ var AAKaiAds;
                     //    document.getElementById('kaiosad').style.top = "50px";
                     //    document.getElementById('gameStage').style.top = "-50px !important";
                     ad.on('close', function () {
-                        AAKaiAnalytics.sendSpecial("kaiadsbanner", "close");
+                        // if (isKaiOS) {
+                        //     document.getElementById('tagNum').style.visibility = "hidden";
+                        // }
+                        // check if was fullscreen before ad clicked.
+                        setTimeout(function () {
+                            emitter.emit('bannerAdClosed');
+                        }, 500); /* delayed to avoid button click on current scene */
+                        //AAKaiAnalytics.sendSpecial("kaiadsbanner", "close");
                     });
                     // Kept here for reference ------------------------------------
                     ad.on('click', function () {
-                        AAKaiAnalytics.sendSpecial("kaiadsbanner", "click");
+                        //AAKaiAnalytics.sendSpecial("kaiadsbanner", "click");
                     });
                     ad.on('display', function () {
                         gAdShowingBanner = true;
                         emitter.emit('showAd');
-                        if (isKaiOS) {
-                            document.getElementById('tag').style.visibility = "visible";
-                        }
-                        AAKaiAnalytics.sendSpecial("kaiadsbanner", "display");
+                        // if (isKaiOS) {
+                        //     document.getElementById('tagNum').style.visibility = "visible";
+                        // }
+                        //AAKaiAnalytics.sendSpecial("kaiadsbanner", "display")
                     });
                     // _this)
                 }
@@ -2102,6 +2239,92 @@ var AAKaiControls;
     }
     AAKaiControls.deSeclectAllButtons = deSeclectAllButtons;
 })(AAKaiControls || (AAKaiControls = {}));
+// / <reference path='../phaser.d.ts'/>
+var AAControls;
+(function (AAControls) {
+    AAControls.leftShoulder = false;
+    AAControls.rightShoulder = false;
+    AAControls.leftTrigger = 0.0;
+    AAControls.rightTrigger = 0.0;
+    AAControls.axis1 = { x: 0, y: 0, right: 0, left: 0, up: 0, down: 0 };
+    AAControls.axis2 = { x: 0, y: 0, right: 0, left: 0, up: 0, down: 0 };
+    //export let pointer;
+    var singlePress = false;
+    var inited = false;
+    function setUpInputs(theScene) {
+        this.cursors = theScene.input.keyboard.createCursorKeys();
+        this.WKey = theScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+        this.AKey = theScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+        this.SKey = theScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+        this.DKey = theScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+        this.PKey = theScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+        this.spacebar = theScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        this.returnKey = theScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+        this.inited = true;
+        //  this.pointer = theScene.input.activePointer;
+    }
+    AAControls.setUpInputs = setUpInputs;
+    function poll() {
+        if (this.inited) {
+            this.left = 0;
+            this.right = 0;
+            this.up = 0;
+            this.down = 0;
+            this.a = 0;
+            this.p = 0;
+            this.menu = 0;
+            this.changeView = 0;
+            var gamepads = navigator.getGamepads();
+            if (this.gamepad) {
+                this.left = gamepads[this.gamepad.index].buttons[14].pressed; // || this.WKey.isDown || this.cursors.left.isDown;
+                this.right = gamepads[this.gamepad.index].buttons[15].pressed; // || this.AKey.isDown || this.cursors.right.isDown;
+                this.up = gamepads[this.gamepad.index].buttons[12].pressed; // || this.WKey.isDown || this.cursors.up.isDown;
+                this.down = gamepads[this.gamepad.index].buttons[13].pressed; // || this.SKey.isDown || this.cursors.down.isDown;
+                this.a = gamepads[this.gamepad.index].buttons[0].pressed || this.spacebar.isDown || this.returnKey.isDown;
+                this.changeView = gamepads[this.gamepad.index].buttons[8].pressed;
+                this.p = gamepads[this.gamepad.index].buttons[9].pressed;
+                this.menu = gamepads[this.gamepad.index].buttons[9].pressed;
+                this.b = gamepads[this.gamepad.index].buttons[0].pressed;
+                this.x = gamepads[this.gamepad.index].buttons[0].pressed;
+                this.y = gamepads[this.gamepad.index].buttons[0].pressed;
+                this.leftShoulder = gamepads[this.gamepad.index].buttons[4].pressed;
+                this.rightShoulder = gamepads[this.gamepad.index].buttons[5].pressed;
+                this.leftTrigger = gamepads[this.gamepad.index].buttons[6].pressed;
+                this.leftTrigger = gamepads[this.gamepad.index].buttons[7].pressed;
+                this.axis1.x = gamepads[this.gamepad.index].axes[0];
+                this.axis1.y = gamepads[this.gamepad.index].axes[1];
+                this.axis1.right = gamepads[this.gamepad.index].axes[0] > .5 ? 1 : 0;
+                this.axis1.left = gamepads[this.gamepad.index].axes[0] < -.5 ? 1 : 0;
+                this.axis1.up = gamepads[this.gamepad.index].axes[1] < -.5 ? 1 : 0;
+                this.axis1.down = gamepads[this.gamepad.index].axes[1] > .5 ? 1 : 0;
+                this.axis2.x = gamepads[this.gamepad.index].axes[2];
+                this.axis2.y = gamepads[this.gamepad.index].axes[3];
+                this.axis2.right = gamepads[this.gamepad.index].axes[2] > .5 ? 1 : 0;
+                this.axis2.left = gamepads[this.gamepad.index].axes[2] < -.5 ? 1 : 0;
+                this.axis2.up = gamepads[this.gamepad.index].axes[3] < -.5 ? 1 : 0;
+                this.axis2.down = gamepads[this.gamepad.index].axes[3] > .5 ? 1 : 0;
+            }
+            if (this.cursors) {
+                this.up |= this.WKey.isDown;
+                this.left |= this.cursors.left.isDown;
+                this.left |= this.AKey.isDown;
+                this.right |= this.cursors.right.isDown;
+                this.right |= this.DKey.isDown;
+                this.up |= this.WKey.isDown || this.cursors.up.isDown;
+                this.down |= this.SKey.isDown || this.cursors.down.isDown;
+            }
+            this.a |= this.spacebar.isDown || this.returnKey.isDown;
+            this.p |= this.PKey.isDown;
+        }
+    }
+    AAControls.poll = poll;
+    function deSeclectAllButtons(theList) {
+        for (var i = 0; i < theList.length; i++) {
+            theList[i].deselect();
+        }
+    }
+    AAControls.deSeclectAllButtons = deSeclectAllButtons;
+})(AAControls || (AAControls = {}));
 var AAHighScores;
 (function (AAHighScores) {
     // High Score Variables ===========================================================
@@ -2422,6 +2645,7 @@ var AAKaiAnalytics;
 /// <reference path='../../../AAShared/AAPrefs.ts'/>
 /// <reference path='../../../AAShared/AAKaiAds.ts'/>
 /// <reference path='../../../AAShared/AAKaiControls.ts'/>
+/// <reference path='../../../AAShared/AAControls.ts'/>
 /// <reference path='../../../AAShared/AAHighScores.ts'/>
 /// <reference path='../../../AAShared/AAKaiAnalytics.ts'/>
 var kTESTMODE = 1; /* set to 0 for real ads */
@@ -2436,6 +2660,7 @@ var gLogoDisplayLength = 2000;
 // SPONSOR
 var gTween; //sponsor tween
 var kUSESPONSOR = true;
+var gChangeBackToFullscreenFromAdView = false;
 var gIsKaiOSAppMode = (window.location.protocol == 'app:');
 // Display certain buttons if needed.  There are only two that are shown or not
 var kSHOW_SETTINGS_BUTTON = false;
@@ -2456,25 +2681,24 @@ if (window.innerHeight <= 228) {
 }
 var centerGame = Phaser.Scale.CENTER_HORIZONTALLY; //CENTER_BOTH;
 var myScale;
-if (gRunnngInBrowser) {
-    // Phaser.Scale.CENTER_HORIZONTALLY;
-    myScale = {
-        parent: 'gameStage',
-        // autoCenter: Phaser.Scale.CENTER_BOTH, //Phaser.Scale.CENTER_HORIZONTALLY,
-        mode: Phaser.Scale.NONE,
-        width: gStageWidth,
-        height: gStageHeight
-    };
-}
-else {
-    myScale = {
-        parent: 'gameStage',
-        autoCenter: Phaser.Scale.CENTER_BOTH,
-        mode: Phaser.Scale.FIT,
-        width: gStageWidth,
-        height: gStageHeight
-    };
-}
+// if (gRunnngInBrowser) {
+// Phaser.Scale.CENTER_HORIZONTALLY;
+myScale = {
+    parent: 'gameStage',
+    // autoCenter: Phaser.Scale.CENTER_BOTH, //Phaser.Scale.CENTER_HORIZONTALLY,
+    mode: Phaser.Scale.NONE,
+    width: gStageWidth,
+    height: gStageHeight
+};
+// } else {
+//     myScale = {
+//         parent: 'gameStage',
+//         autoCenter: Phaser.Scale.CENTER_BOTH, //Phaser.Scale.CENTER_HORIZONTALLY,
+//         mode: Phaser.Scale.FIT, // we will resize the game with our own code (see Boot.js)
+//         width: gStageWidth,
+//         height: gStageHeight
+//     }
+// }
 var scenes = [BootScene, PreloadScene, MenuOverlay, SponsorOverlay, MenuScene, HelpScene, GameScene, MoreGamesScene, SettingsScene];
 var states;
 (function (states) {
@@ -2521,21 +2745,21 @@ var gAnalytic = 1;
 AAKaiAnalytics.initAnalytics('UA-150350318-3', gGameName);
 AAKaiAnalytics.getDeviceData();
 function resize() {
-    if (gRunnngInBrowser) {
-        var game_ratio = 1; //(9 * 32) / (15 * 32);
-        // Make div full height of browser and keep the ratio of game resolution
-        var div = document.getElementById('gameStage');
-        div.style.width = (window.innerHeight * game_ratio) + 'px';
-        div.style.height = window.innerHeight + 'px';
-        // Check if device DPI messes up the width-height-ratio
-        var canvas = document.getElementsByTagName('canvas')[0];
-        var dpi_w = (parseInt(div.style.width) / canvas.width);
-        var dpi_h = (parseInt(div.style.height) / canvas.height);
-        gStageHeight = window.innerHeight; // * (dpi_w / dpi_h);
-        gStageWidth = window.innerWidth; // height* 0.6;
-        game.canvas.style.width = gStageWidth + 'px';
-        game.canvas.style.height = gStageHeight + 'px';
-    }
+    // if (gRunnngInBrowser) {
+    var game_ratio = 1; //(9 * 32) / (15 * 32);
+    // Make div full height of browser and keep the ratio of game resolution
+    var div = document.getElementById('gameStage');
+    div.style.width = (window.innerHeight * game_ratio) + 'px';
+    div.style.height = window.innerHeight + 'px';
+    // Check if device DPI messes up the width-height-ratio
+    var canvas = document.getElementsByTagName('canvas')[0];
+    var dpi_w = (parseInt(div.style.width) / canvas.width);
+    var dpi_h = (parseInt(div.style.height) / canvas.height);
+    gStageHeight = window.innerHeight; // * (dpi_w / dpi_h);
+    gStageWidth = window.innerWidth; // height* 0.6;
+    game.canvas.style.width = gStageWidth + 'px';
+    game.canvas.style.height = gStageHeight + 'px';
+    // }
 }
 window.onload = function () {
     var config = {
@@ -2580,10 +2804,12 @@ window.onload = function () {
         // is in fullscreen mode if there is one. If there isn't one,
         // the value of the property is null.
         if (document.fullscreenElement) {
-            emitter.emit('fullscreen', [2.5]);
+            gStageHeight = window.innerHeight - 30; // * (dpi_w / dpi_h);
+            game.canvas.style.height = gStageHeight + 'px';
+            // emitter.emit('fullscreen', [2.5]);
         }
         else {
-            emitter.emit('fullscreen', [1]);
+            // emitter.emit('fullscreen', [1]);
         }
     });
 };

@@ -10,7 +10,7 @@ class PreloadScene extends Phaser.Scene {
 
     preload() {
 
-         AAKaiAds.preLoadDisplayAd();
+        // AAKaiAds.preLoadFullscreenAd();
     //    AAKaiAds.preLoadBannerAd();
 
         this.cameras.main.setBackgroundColor(0xFFDD18);
@@ -105,7 +105,8 @@ class PreloadScene extends Phaser.Scene {
         // this.load.text('sponsorURL', 'https://taara.games/sponsor.txt' + d);
         // this.load.image('sponsor', 'https://taara.games/sponsor.png' + d);
 
-
+        this.load.setPath("assets/html/");
+        this.load.html('moreGamesHTML', 'moregames.html');
         
         // Spritesheets
         this.load.setPath("assets/images/");
@@ -117,6 +118,8 @@ class PreloadScene extends Phaser.Scene {
             null
         );
 
+
+       
 
         // this.load.image('gamefont', 'numbers.png');
 

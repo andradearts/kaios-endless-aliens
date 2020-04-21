@@ -1,3 +1,4 @@
+# KaiOSGameTemplate_480x640
 # Template Project for KaiOS apps
 ## KIAOS Phaser 3 Template for Web Games
 
@@ -7,9 +8,9 @@ Games are locked at 240x320 pixels screen size (was 240x228 but kept being rejec
 Full screen enabled via '#'
 Pause button is '*'
 
-Using latest Phaser linked to CDN (currently 3.21.x)
+Using latest Phaser linked to CDN (currently 3.22.x)
 
-~~WHEN UPDATING PHASER YOU MUST CHANGE window.requestAnimationFrame TO window.mozRequestAnimationFrame
-OTHERWISE IT'S 30fps~~
+WHEN UPDATING PHASER YOU MUST CHANGE window.requestAnimationFrame TO window.mozRequestAnimationFrame
+OTHERWISE IT'S 30fps
 
 

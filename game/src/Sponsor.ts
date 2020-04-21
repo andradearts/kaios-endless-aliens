@@ -25,13 +25,14 @@ class SponsorOverlay extends Phaser.Scene {
             return;
         }
 
+
         this.events.removeListener('hideAd');
         this.events.removeListener('showAd');
         emitter.on('hideAd', this.hideBanner, this);
         emitter.on('showAd', this.showBanner, this);
 
-        this.domad = document.getElementById('kaiosad');
-        this.sponsorTag = document.getElementById('tag');
+        this.domad = document.getElementById('sponsorad');
+        this.sponsorTag = document.getElementsByClassName('tagNum')[0];
 
         ///////////////////////////////////////////////////
         let adFrame = this.add.image(0, 0, 'sponsor');
@@ -57,7 +58,14 @@ class SponsorOverlay extends Phaser.Scene {
         // Sponsor Button #####################################################################
         this.btnSponsor = new Button(this, this.sys.canvas.width - 60, this.sys.canvas.height + 60, 'spriteAtlas', "sponsor.png", this.action_sponsorButton, "sponsor", true).setVisible(true).setOrigin(.5, 1).setVisible(isKaiOS);
 
+        if (gRunnngInBrowser) {
+            this.btnSponsor.setVisible(false);
+        }
         // this.showBanner();
+        this.scene.bringToTop();
+        if (!isKaiOS) {
+            this.showBanner();
+        }
     }
 
     hideBanner() {
@@ -80,20 +88,26 @@ class SponsorOverlay extends Phaser.Scene {
             duration: 250
         });
 
-        this.tweens.add({
+        if (isKaiOS) {
+            this.sponsorTag.style.visibility = "visible";
+        }
+
+       
+
+        gTween = this.tweens.add({
+            targets: this.btnSponsor,
+            y: this.sys.game.canvas.height + 60,
+            ease: 'Sine.easeIn',
+            duration: 250
+        });
+
+        // MOVE SCORE ================================
+         this.tweens.add({
             targets: (<MenuOverlay>this.scene.get("MenuOverlay")).scoreText,
             y: this.startyScore,
             ease: 'Sine.easeIn',
             duration: 250
         });
-
-        this.tweens.add({
-            targets: this.btnSponsor,
-            y: this.sys.game.canvas.height + 80,
-            ease: 'Sine.easeIn',
-            duration: 250
-        });
-
         gTween = this.tweens.add({
             targets: (<MenuOverlay>this.scene.get("MenuOverlay")).highScoreText,
             y: this.startyHighScore,
@@ -104,7 +118,7 @@ class SponsorOverlay extends Phaser.Scene {
 
 
     showBanner() {
-
+        this.scene.bringToTop();
         //works
         //this.domad.style.visibility = "visible";
         // if (gAdShowingBanner) {
@@ -114,16 +128,50 @@ class SponsorOverlay extends Phaser.Scene {
         // } else {
         //     return;
         // }
-
-        if (gGameState == states.kSTATE_PLAYING) {
-            return;
+        if (isKaiOS) {
+            this.sponsorTag.style.visibility = "visible";
         }
+
+        switch (true) {
+            case (gGameState == states.kSTATE_PLAYING):
+            case (gGameState == states.kSTATE_SETTINGS):
+            case (gGameState == states.kSTATE_HELP):
+            case (gGameState == states.kSTATE_MOREGAMES):
+                return;
+                break;
+
+            default:
+                break;
+        }
+        // if (gGameState == states.kSTATE_PLAYING) {
+        //     return;
+        // }
+        // if (gGameState == states.kSTATE_SETTINGS) {
+        //     return;
+        // }
+        // if (gGameState == states.kSTATE_HELP) {
+        //     return;
+        // }
+        // if (gGameState == states.kSTATE_MOREGAMES) {
+        //     return;
+        // }
+
+
         if (kUSESPONSOR == false) {
             return;
         }
+
+        if (gAdShowingBanner == false) {
+            return;
+        }
+
+        // let newX = (window.innerWidth /2)-120 ; //150; 150 is for non kaios
+        // this.domad.style.left = newX + "px";
+
+
         // this.adContainer.setVisible(true);
         this.tweens.add({
-            targets: this.adContainer,
+            targets: [this.adContainer, this.btn], //this.adContainer,
             y: 0, //'+=' + this.bottomPos.toString(),
             ease: 'Sine.easeOut',
             onUpdate: function () {
@@ -138,18 +186,23 @@ class SponsorOverlay extends Phaser.Scene {
             ease: 'Sine.easeOut',
             duration: 500
         });
-        this.tweens.add({
-            targets: (<MenuOverlay>this.scene.get("MenuOverlay")).scoreText,
-            y: this.startyScore + this.bottomPos,
-            ease: 'Sine.easeOut',
-            duration: 500
-        });
+       
 
-        this.tweens.add({
+        gTween = this.tweens.add({
             targets: this.btnSponsor,
             y: this.sys.game.canvas.height,
             ease: 'Sine.easeOut',
             duration: 250
+        });
+
+
+
+        // MOVE SCORE ==========================
+         this.tweens.add({
+            targets: (<MenuOverlay>this.scene.get("MenuOverlay")).scoreText,
+            y: this.startyScore + this.bottomPos,
+            ease: 'Sine.easeOut',
+            duration: 500
         });
         gTween = this.tweens.add({
             targets: (<MenuOverlay>this.scene.get("MenuOverlay")).highScoreText,

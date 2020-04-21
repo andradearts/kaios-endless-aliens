@@ -29,7 +29,7 @@ class GameScene extends Phaser.Scene {
         this.scene.bringToTop("MenuOverlay");
 
         this.startGame();
-        AAKaiAds.preLoadDisplayAd();
+        
     }
 
     // removeAllListeners() {
@@ -81,7 +81,7 @@ class GameScene extends Phaser.Scene {
         if (++this.jumps % 3 == 0) {
             // Display Fullscreen!
             AAKaiAds.displayFullscreenAd();
-            AAKaiAds.preLoadDisplayAd();
+            AAKaiAds.preLoadFullscreenAd();
         }
        
     }

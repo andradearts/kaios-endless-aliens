@@ -1,0 +1,66 @@
+<style>
+    .flex-container {
+        /* We first create a flex layout context */
+        display: flex;
+        height: 120px;
+        width: 100vw;
+        /* Then we define the flow direction 
+     and if we allow the items to wrap 
+   * Remember this is the same as:
+   * flex-direction: row;
+   * flex-wrap: wrap;
+   */
+        flex-flow: row wrap;
+
+        /* Then we define how is distributed the remaining space */
+        justify-content: space-around;
+
+        padding: 0;
+        margin: 0;
+        list-style: none;
+
+        background: transparent;
+    }
+
+    .flex-item {
+        background: transparent;
+        padding: 0px;
+        /* background-color: tomato; */
+
+        /* width: 112px; */
+        height: 56px;
+        margin-top: 0px;
+        line-height: 50px;
+        color: white;
+        /* font-weight: bold;
+        font-size: 3em; */
+        text-align: center;
+    }
+
+    .flex-item img {
+        width: 56px;
+        height: 56px;
+        /* max-width: 112px;
+        max-height: 112px; */
+    }
+
+    .kaibadge {
+        width: 100%;
+        margin: auto 0;
+        background: yellow;
+    }
+    .kaibadge img{
+        max-width:240px;
+        max-width:240px;
+    }
+</style>
+
+<ul class="flex-container">
+    <li class="flex-item"><img src="https://bubblebee.taara.games/assets/icons/icon112.png" alt="Bubble Bee"></li>
+    <li class="flex-item"><img src="https://penguinjump.taara.games/assets/icons/icon112.png" alt="Penguin jump"></li>
+    <li class="flex-item"><img src="https://yinyang.taara.games/assets/icons/icon112.png" alt="Yin Yang"></li>
+    <li class="flex-item"><img src="https://asteroidstorm.taara.games/assets/icons/icon112.png" alt="Meteor Storm"></li>
+    <li class="flex-item"><img src="https://cowabunga.taara.games/assets/icons/icon112.png" alt="Cowabunga"></li>
+    <li class="flex-item"><img src="https://bubbles.taara.games/assets/icons/icon112.png" alt="Soap Bubbles"></li>
+
+</ul>
