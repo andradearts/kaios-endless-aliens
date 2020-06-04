@@ -93,9 +93,6 @@ class MenuOverlay extends Phaser.Scene {
         // THIS IS CALLED FROM THE FIREFOX UI WHEN A USER CLICKS "EXIT"
         emitter.on('fullscreen', this.action_btnFullscreen, this);
 
-
-
-
         // var txt = [
         //     "window innerHeight: " + window.innerHeight + " ",
         //     "window innerWidth: " + window.innerWidth + " ",
@@ -134,10 +131,10 @@ class MenuOverlay extends Phaser.Scene {
 
         switch (theKeyEvent.key) {
             case "1": //help
-            case "2": //play 
+            case "2": //moregames 
             case "3": //sound
             case "4": //settings
-            case "5": //moregames
+            case "5": //play
             case "#": //fullscreen
             case "8": //sponsor
                 theKeyEvent.preventDefault();
@@ -201,10 +198,10 @@ class MenuOverlay extends Phaser.Scene {
         switch (theKeyEvent.key) {
 
             case "1": //help
-            case "2": //play 
+            case "2": //moregames 
             case "3": //sound
             case "4": //settings
-            case "5": //moregames
+            case "5": //play
             case "#": //fullscreen
             case "8": //sponsor
                 theKeyEvent.preventDefault();
@@ -366,15 +363,15 @@ class MenuOverlay extends Phaser.Scene {
 
     checkMenuControls(theKey) {
 
-        if (gAdShowing) { return };
+        if (gFullscreenAdShowing) { return };
 
         switch (theKey) {
             case "8":
                 this.visitSponsor();
                 break;
-            case "Enter":
             case "2":
-                this.btnPlay.pointerUp(null);
+                this.btnMoreGames.pointerUp(null);
+
                 break;
             // case "SoftRight":
             case "3":
@@ -391,9 +388,9 @@ class MenuOverlay extends Phaser.Scene {
                     this.btnSettings.pointerUp(null);
                 }
                 break;
-
+            case "Enter":
             case "5":
-                this.btnMoreGames.pointerUp(null);
+                this.btnPlay.pointerUp(null);
                 break;
 
             case "#":
@@ -464,7 +461,7 @@ class MenuOverlay extends Phaser.Scene {
 
         // Play Button #######################################################################
         this.btnPlay = new Button(this, 0, 0, 'spriteAtlas', 'btnPlay.png', this.action_BtnPlay, "play", true).setVisible(isVis);
-        numBadge = this.add.image(0, -50, "spriteAtlas", "tag2.png").setVisible(isKaiOS);
+        numBadge = this.add.image(0, -50, "spriteAtlas", "tag5.png").setVisible(isKaiOS);
         this.c_btnPlay = this.add.container(0, 0, [this.btnPlay, numBadge]).setVisible(isVis);
 
 
@@ -494,7 +491,7 @@ class MenuOverlay extends Phaser.Scene {
 
         // More Games Button #######################################################################
         this.btnMoreGames = new Button(this, 0, 0, 'spriteAtlas', 'btnMoreGames.png', this.action_btnMoreGames, "more", true).setVisible(isVis);
-        numBadge = this.add.image(0, -40, "spriteAtlas", "tag5.png").setVisible(isKaiOS);
+        numBadge = this.add.image(0, -40, "spriteAtlas", "tag2.png").setVisible(isKaiOS);
         this.c_btnMoreGames = this.add.container(0, 0, [this.btnMoreGames, numBadge]).setVisible(isVis);
 
         // Fullscreen Button #######################################################################
@@ -564,7 +561,10 @@ class MenuOverlay extends Phaser.Scene {
         this.fpsText.setTint(0x666666);
         // }
 
-        // this.debugInfo = this.add.bitmapText(10, 130, 'numbersFont', '0', scoreSize).setDepth(999);
+        // this.debugInfo = this.add.bitmapText(10, 130, 'numbersFont', '0', scoreSize).setDepth
+        (999);
+
+        var element = this.add.dom(10, 90).createFromCache('newgameHTML').setOrigin(0, 0);
 
     }
 
@@ -1048,6 +1048,7 @@ class MenuOverlay extends Phaser.Scene {
         }
     }
 
+    
     // action_sponsorButton(_state) {
     //     if (_state == 'up') {
 

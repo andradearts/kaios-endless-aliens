@@ -549,16 +549,21 @@ var PreloadScene = /** @class */ (function (_super) {
         // let d = '?' + new Date().getTime();
         // this.load.text('sponsorURL', 'https://taara.games/sponsor.txt' + d);
         // this.load.image('sponsor', 'https://taara.games/sponsor.png' + d);
+        // this.load.setPath("assets/");
+        // let it:Phaser.Types.Loader.XHRSettingsObject = Phaser.Loader.XHRSettings();
+        // it.header = "Access-Control-Allow-Origin: *";
+        // it.headerValue = "Access-Control-Allow-Origin: *";
+        //this.load.script('analytics', 'https://www.google-analytics.com/analytics.js');
         this.load.setPath("assets/html/");
         this.load.html('moreGamesHTML', 'moregames.html');
+        this.load.html('newgameHTML', 'newgame.html');
         // Spritesheets
         this.load.setPath("assets/images/");
         this.load.atlas("spriteAtlas", "spriteAtlas.png", "spriteAtlas.json", null, null);
-        // this.load.image('gamefont', 'numbers.png');
-        this.load.bitmapFont('sysFont', 'retroSystem.png', 'retroSystem.fnt', null, null);
         // this.load.image('coverart', 'coverart.png');
         //Fonts
         this.load.image('numbersFont', 'numbers@2x.png');
+        this.load.bitmapFont('sysFont', 'retroSystem.png', 'retroSystem.fnt', null, null);
         //Sound Effects
         this.load.setPath("assets/audio/");
         var ext = '.ogg';
@@ -570,6 +575,19 @@ var PreloadScene = /** @class */ (function (_super) {
         this.scene.start('MenuScene');
         this.scene.start('MenuOverlay');
         this.scene.start('SponsorOverlay');
+        var element = document.getElementsByClassName('spinner')[0];
+        var op = 1; // initial opacity
+        var timer = setInterval(function () {
+            if (op <= 0.1) {
+                clearInterval(timer);
+                // (<any>element).style.opacity = 0;
+                // (<any>element).style.display = 'none';
+                element.remove();
+            }
+            element.style.opacity = op;
+            element.style.filter = 'alpha(opacity=' + op * 100 + ")";
+            op -= op * 0.3;
+        }, 50);
         // switch (true) {
         //     // this.sys.game.device.os.chromeOS     // Is running on chromeOS?
         //     // this.sys.game.device.os.cordova      // Is the game running under Apache Cordova?
@@ -665,10 +683,10 @@ var MenuOverlay = /** @class */ (function (_super) {
         }
         switch (theKeyEvent.key) {
             case "1": //help
-            case "2": //play 
+            case "2": //moregames 
             case "3": //sound
             case "4": //settings
-            case "5": //moregames
+            case "5": //play
             case "#": //fullscreen
             case "8": //sponsor
                 theKeyEvent.preventDefault();
@@ -720,10 +738,10 @@ var MenuOverlay = /** @class */ (function (_super) {
         }
         switch (theKeyEvent.key) {
             case "1": //help
-            case "2": //play 
+            case "2": //moregames 
             case "3": //sound
             case "4": //settings
-            case "5": //moregames
+            case "5": //play
             case "#": //fullscreen
             case "8": //sponsor
                 theKeyEvent.preventDefault();
@@ -847,7 +865,7 @@ var MenuOverlay = /** @class */ (function (_super) {
         }
     };
     MenuOverlay.prototype.checkMenuControls = function (theKey) {
-        if (gAdShowing) {
+        if (gFullscreenAdShowing) {
             return;
         }
         ;
@@ -855,9 +873,8 @@ var MenuOverlay = /** @class */ (function (_super) {
             case "8":
                 this.visitSponsor();
                 break;
-            case "Enter":
             case "2":
-                this.btnPlay.pointerUp(null);
+                this.btnMoreGames.pointerUp(null);
                 break;
             // case "SoftRight":
             case "3":
@@ -874,8 +891,9 @@ var MenuOverlay = /** @class */ (function (_super) {
                     this.btnSettings.pointerUp(null);
                 }
                 break;
+            case "Enter":
             case "5":
-                this.btnMoreGames.pointerUp(null);
+                this.btnPlay.pointerUp(null);
                 break;
             case "#":
                 if (kSHOW_FULLSCREEN_BUTTON) {
@@ -926,7 +944,7 @@ var MenuOverlay = /** @class */ (function (_super) {
         var numBadge;
         // Play Button #######################################################################
         this.btnPlay = new Button(this, 0, 0, 'spriteAtlas', 'btnPlay.png', this.action_BtnPlay, "play", true).setVisible(isVis);
-        numBadge = this.add.image(0, -50, "spriteAtlas", "tag2.png").setVisible(isKaiOS);
+        numBadge = this.add.image(0, -50, "spriteAtlas", "tag5.png").setVisible(isKaiOS);
         this.c_btnPlay = this.add.container(0, 0, [this.btnPlay, numBadge]).setVisible(isVis);
         // Sound Button #######################################################################
         var whichButton = 'btnSoundOff.png';
@@ -948,7 +966,7 @@ var MenuOverlay = /** @class */ (function (_super) {
         this.c_btnSettings = this.add.container(15, this.cameras.main.height - 10, [this.btnSettings, numBadge]).setVisible(kSHOW_SETTINGS_BUTTON);
         // More Games Button #######################################################################
         this.btnMoreGames = new Button(this, 0, 0, 'spriteAtlas', 'btnMoreGames.png', this.action_btnMoreGames, "more", true).setVisible(isVis);
-        numBadge = this.add.image(0, -40, "spriteAtlas", "tag5.png").setVisible(isKaiOS);
+        numBadge = this.add.image(0, -40, "spriteAtlas", "tag2.png").setVisible(isKaiOS);
         this.c_btnMoreGames = this.add.container(0, 0, [this.btnMoreGames, numBadge]).setVisible(isVis);
         // Fullscreen Button #######################################################################
         this.btnFullscreen = new Button(this, 0, 5, 'spriteAtlas', 'btnFullscreenOn.png', this.action_btnFullscreen, "fullscreen", true).setVisible(isVis);
@@ -996,7 +1014,9 @@ var MenuOverlay = /** @class */ (function (_super) {
         this.fpsText = this.add.bitmapText(9, 80, 'numbersFont', '0.0', 15).setVisible(false);
         this.fpsText.setTint(0x666666);
         // }
-        // this.debugInfo = this.add.bitmapText(10, 130, 'numbersFont', '0', scoreSize).setDepth(999);
+        // this.debugInfo = this.add.bitmapText(10, 130, 'numbersFont', '0', scoreSize).setDepth
+        (999);
+        var element = this.add.dom(10, 90).createFromCache('newgameHTML').setOrigin(0, 0);
     };
     MenuOverlay.prototype.makeTheNumbersFont = function () {
         var config = {
@@ -1388,6 +1408,7 @@ var MenuScene = /** @class */ (function (_super) {
     };
     MenuScene.prototype.create = function () {
         this.scene.sendToBack();
+        var element = this.add.dom(10, 140).createFromCache('newgameHTML').setOrigin(0, 0);
         this.add.text(12, this.sys.canvas.height - 17, gGameVersion);
     };
     return MenuScene;
@@ -1577,7 +1598,7 @@ var SponsorOverlay = /** @class */ (function (_super) {
     };
     SponsorOverlay.prototype.action_sponsorButton = function (_state) {
         if (_state == 'up') {
-            if (!gAdShowing) {
+            if (!gFullscreenAdShowing) {
                 //this.playBtnSnd();
                 AAKaiAds.theBannerAd.call('click');
             }
@@ -1754,10 +1775,10 @@ var AAPrefs;
     AAPrefs.playAudio = false;
     AAPrefs.playMusic = false;
     function initGamePrefs(_gameName) {
-        this.prefsPlayAudio = 'com.taaragames.' + _gameName + '.playAudio';
-        this.prefsPlayMusic = 'com.taaragames.' + _gameName + '.playMusic';
-        this.prefsHighScore = 'com.taaragames.' + _gameName + '.highScore';
-        this.leaderboardFile = 'com.taaragames.' + _gameName + '.leaderboard5';
+        this.prefsPlayAudio = 'games.taara.' + _gameName + '.playAudio';
+        this.prefsPlayMusic = 'games.taara.' + _gameName + '.playMusic';
+        this.prefsHighScore = 'games.taara.' + _gameName + '.highScore';
+        this.leaderboardFile = 'games.taara.' + _gameName + '.leaderboard5';
         this.gameName = _gameName;
         this.getAudioPref();
         this.getMusicPref();
@@ -1805,18 +1826,25 @@ var AAPrefs;
     AAPrefs.toggleAudio = toggleAudio;
 })(AAPrefs || (AAPrefs = {}));
 var aakaiads_ready = false;
-var gAdShowing = false;
+var gFullscreenAdShowing = false;
 var gAdShowingBanner = false;
 var AAKaiAds;
 (function (AAKaiAds) {
     // display ad when app is loaded
-    // the escape key will dismiss the ad on the PC 
-    // on the device or simulator press left soft key
-    //var fullscreenAd = true; /* switch between fullscreen and responsive ad */
-    //var testMode = 1; /* set to 0 for real ads */
-    var theAd;
-    var theAdDom;
     AAKaiAds.err = 0;
+    // export function getFullscreenAd() {
+    //     getKaiAd({
+    //         publisher: '60580691-026e-426e-8dac-a3b92289a352',
+    //         app: gGameName,
+    //         test: kTESTMODE,
+    //         onerror: err => console.error('Custom catch:', err),
+    //         onready: ad => {
+    //             // Ad is ready to be displayed
+    //             // calling 'display' will display the ad
+    //             ad.call('display')
+    //         }
+    //     })
+    // }
     function preLoadFullscreenAd() {
         if (!isKaiOS) {
             return;
@@ -1830,47 +1858,36 @@ var AAKaiAds;
                 publisher: '60580691-026e-426e-8dac-a3b92289a352',
                 app: gGameName,
                 test: kTESTMODE,
-                timeout: 1000 * 120,
+                timeout: 1000 * 90,
                 /* error codes */
                 /* https://www.kaiads.com/publishers/sdk.html#error */
                 onerror: function (err) {
                     _this.err = err;
-                    //AAKaiAnalytics.sendSpecial("kaiads", "error");
-                    console.warn('KaiAds error catch:', _this.err);
+                    // console.warn("kaiads error: %d", err);
+                    gFullscreenAdShowing = false;
                 },
                 onready: function (ad) {
-                    _this.theAd = ad;
+                    _this.theAdFullscreen = ad;
+                    // console.warn("kaiads onready: " + ad);
+                    // ad.call('display');
                     ad.on('close', function () {
-                        setTimeout(function () {
-                            gAdShowing = false;
-                        }, 500); /* delayed to avoid button click on current scene */
-                        // show banner
-                        // document.getElementById('kaiosad').style.visibility = "visible";
-                        // if (isKaiOS) {
-                        //     document.getElementById('tagNum').style.visibility = "visible";
-                        // }
-                        //AAKaiAnalytics.sendSpecial("kaiads", "close");
+                        gFullscreenAdShowing = false;
+                        // setTimeout(function () {
+                        //     // ad.call('display');
+                        //     gFullscreenAdShowing = false;
+                        // }, 500); /* delayed to avoid button click on current scene */
                     });
                     // Kept here for reference ------------------------------------
                     ad.on('click', function () {
-                        //AAKaiAnalytics.sendSpecial("kaiads", "click");
+                        AAKaiAnalytics.sendSpecial("kaiads_fullscreen", "click");
                     });
                     ad.on('display', function () {
-                        // (<any>window).firebase.analytics().logEvent("kaiAds", {
-                        //     'hitType': 'event',
-                        //     'kaiAdEvent':"display",
-                        //     'game': gameName,
-                        //     'version': gGameVersion
-                        // });
-                        gAdShowing = true;
-                        // (<any>window).ga('send', 'event', gameName, 'kaiAds', "display", {
-                        //     nonInteraction: true
-                        // });
-                        document.getElementById('kaiosad').style.visibility = "hidden";
-                        if (isKaiOS) {
-                            document.getElementById('tag').style.visibility = "hidden";
-                        }
-                        //AAKaiAnalytics.sendSpecial("kaiads", "display")
+                        gFullscreenAdShowing = true;
+                        // document.getElementById('kaiosad').style.visibility = "hidden";
+                        // if (isKaiOS) {
+                        //     document.getElementById('tag').style.visibility = "hidden";
+                        // }
+                        AAKaiAnalytics.sendSpecial("kaiads_fullscreen", "display");
                     });
                     // _this)
                 }
@@ -1882,7 +1899,7 @@ var AAKaiAds;
         if (!isKaiOS) {
             return;
         }
-        this.theAd = null;
+        this.theAdFullscreen = null;
     }
     AAKaiAds.killFullscreenAd = killFullscreenAd;
     function getError() {
@@ -1892,7 +1909,7 @@ var AAKaiAds;
         var error = 0;
         // If the add was never inited or unable to get called I have my own error code
         // Otherwise I return 0 or the error returned by the KaiAds sdk.
-        if ((this.theAd == null) || (this.theAd == undefined)) {
+        if ((this.theAdFullscreen == null) || (this.theAdFullscreen == undefined)) {
             error = -1;
         }
         else {
@@ -1905,11 +1922,19 @@ var AAKaiAds;
         return error;
     }
     AAKaiAds.getError = getError;
+    function clickActiveAd() {
+        if (gFullscreenAdShowing == false) {
+            //     this.theAdFullscreen.call('click');
+            // }else{
+            this.theBannerAd.call('click');
+        }
+    }
+    AAKaiAds.clickActiveAd = clickActiveAd;
     function clickAd() {
         if (!isKaiOS) {
             return;
         }
-        this.theAd.call('click');
+        this.theAdFullscreen.call('click');
     }
     AAKaiAds.clickAd = clickAd;
     function displayBannerAd() {
@@ -1925,10 +1950,10 @@ var AAKaiAds;
         }
         // If the ad isn't ready theAd will be undefinded 
         // so I need to check to make sure it's valid
-        if (this.theAd) {
+        if (this.theAdFullscreen) {
             if (this.err == 0) { // continue only if there isn't an error
-                // gAdShowing = true;
-                this.theAd.call('display');
+                // gFullscreenAdShowing = true;
+                this.theAdFullscreen.call('display');
             }
         }
     }
@@ -1947,8 +1972,10 @@ var AAKaiAds;
                 publisher: '60580691-026e-426e-8dac-a3b92289a352',
                 app: gGameName,
                 test: kTESTMODE,
-                timeout: 1000 * 120,
-                h: 54,
+                timeout: 1000 * 90,
+                // 36 or 54 height
+                //36 ALWAYS tiems out and displays 23 in green
+                h: 36,
                 w: 216,
                 container: document.getElementById('sponsorad'),
                 /* error codes */
@@ -1956,7 +1983,7 @@ var AAKaiAds;
                 onerror: function (err) {
                     _this.err = err;
                     //AAKaiAnalytics.sendSpecial("kaisponsor", "error");
-                    console.warn('KaiAds error catch:', _this.err);
+                    // console.warn('KaiAds error catch:', _this.err);
                     // if (isKaiOS) {
                     //     document.getElementById('tagNum').style.visibility = "hidden";
                     // }
@@ -1965,6 +1992,7 @@ var AAKaiAds;
                 },
                 onready: function (ad) {
                     _this.theBannerAd = ad;
+                    // console.error('onready:', ad);
                     ad.call('display', {
                         // In KaiOS the app developer is responsible
                         // for user navigation, and can provide
@@ -1979,30 +2007,23 @@ var AAKaiAds;
                         // to the container block or inline-block
                         display: 'block',
                     });
-                    //console.log("Add Ready:" + new Date().getTime())
-                    //    document.getElementById('kaiosad').style.top = "50px";
-                    //    document.getElementById('gameStage').style.top = "-50px !important";
                     ad.on('close', function () {
-                        // if (isKaiOS) {
-                        //     document.getElementById('tagNum').style.visibility = "hidden";
-                        // }
                         // check if was fullscreen before ad clicked.
                         setTimeout(function () {
                             emitter.emit('bannerAdClosed');
                         }, 500); /* delayed to avoid button click on current scene */
-                        //AAKaiAnalytics.sendSpecial("kaiadsbanner", "close");
                     });
                     // Kept here for reference ------------------------------------
                     ad.on('click', function () {
-                        //AAKaiAnalytics.sendSpecial("kaiadsbanner", "click");
+                        AAKaiAnalytics.sendSpecial("kaiadsbanner", "click");
                     });
                     ad.on('display', function () {
+                        // if (!gFullscreenAdShowing) {
+                        // console.error('display:', ad);
                         gAdShowingBanner = true;
                         emitter.emit('showAd');
-                        // if (isKaiOS) {
-                        //     document.getElementById('tagNum').style.visibility = "visible";
+                        AAKaiAnalytics.sendSpecial("kaiadsbanner", "display");
                         // }
-                        //AAKaiAnalytics.sendSpecial("kaiadsbanner", "display")
                     });
                     // _this)
                 }
@@ -2011,21 +2032,24 @@ var AAKaiAds;
     }
     AAKaiAds.preLoadBannerAd = preLoadBannerAd;
 })(AAKaiAds || (AAKaiAds = {}));
-// 1    Document body not yet ready	- Please invoke getKaiAd after the DOMContentLoaded event.
-// 2	Ad onready function is required	- Please implement the onready function to handle the returned ad.
-// 3	Ad container dimension is too small	- Try increasing the width/height parameters.
-// 4	Ad iframe is gone - The ad iframe may have been acidentally removed.
-// 5	Ad request timed out - Try another network or adjust the timeout parameter.
-// 6	Server responded 'no ad' - The specified ad dimension may not available, try adjusting the width/height.
-// 7	Frequency capping in effect	- Frequency capping is the limit on how often the device can request for an ad, please try again later.
-// 8	Configuration error: Missing w & h - Please provide the width and height parameters for getKaiAd.
-// 9	Bad server response	- Server error, please contact support.
-// 10, 11, 12	Internal error - SDK internal error, please contact support.
-// 13	Cannot process server response - Server error, please contact support.
-// 14	No server response - Server error, please contact support.
-// 15	Configuration error: Invalid test parameter - The test parameter should either be 1 or 0.
-// 16	ad.call('display') is not allowed to be called more than once - An ad container should only be displaying ads once.
-// 17	Cannot fetch settings
+// 1	Document body not yet ready	Please invoke getKaiAd after the DOMContentLoaded event.
+// 2	Ad onready function is required	Please implement the onready function to handle the returned ad.
+// 3	Ad container dimension is too small	Try increasing the width/height parameters.
+// 4	Ad iframe is gone	The ad iframe may have been acidentally removed.
+// 5	Ad request timed out	Try another network or adjust the timeout parameter.
+// 6	Server responded 'no ad'	The specified ad dimension may not available, try adjusting the width/height.
+// 7	Frequency capping in effect	Frequency capping is the limit on how often the device can request for an ad, please try again later.
+// 8	Configuration error: Missing w & h	Please provide the width and height parameters for getKaiAd.
+// 9	Bad server response	Server error, please contact support.
+// 10, 11, 12	Internal error	SDK internal error, please contact support.
+// 13	Cannot process server response	Server error, please contact support.
+// 14	No server response	Server error, please contact support.
+// 15	Configuration error: Invalid test parameter	The test parameter should either be 1 or 0.
+// 16	ad.call('display') is not allowed to be called more than once	An ad container should only be displaying ads once.
+// 17	Cannot fetch settings	Please provide the correct configurations before invoking getKaiAd.
+// 18	Internal error	SDK internal error, please contact support.
+// 19	Cannot load SDK	Network condition or the SDK is too old. Please check SDK doc for latest SDK version
+// 20	Internal error	SDK internal error, please contact support.
 var AAKaiControls;
 (function (AAKaiControls) {
     AAKaiControls.NumKey1 = 0;
@@ -2476,6 +2500,7 @@ var AAKaiAnalytics;
     AAKaiAnalytics.gaNewElem = {};
     AAKaiAnalytics.gaElems = {};
     AAKaiAnalytics.gameName = '';
+    var _googleID;
     function getDeviceData() {
         var myOwnRegex = [[/(kaios)\/([\w\.]+)/i], [window.UAParser.BROWSER.NAME, window.UAParser.BROWSER.VERSION]];
         var parser = new window.UAParser({ browser: myOwnRegex });
@@ -2492,145 +2517,102 @@ var AAKaiAnalytics;
         if (model == null) {
             model = 'unknown';
         }
-        AAKaiAnalytics.sendEvent("startgame");
-        if (gAnalytic == kFIREBASE) {
-            if (isKaiOS) {
-                window.firebase.analytics().logEvent(gGameName, {
-                    'vendor': vendor,
-                    "model": model,
-                    'version': gGameVersion,
-                });
-                window.firebase.analytics().logEvent(gGameName, {
-                    'KaiOS': os.version,
-                    'version': gGameVersion,
-                });
-            }
-        }
-        else {
-            AAKaiAnalytics.sendSpecial("vendor", vendor + " " + model);
-            AAKaiAnalytics.sendSpecial("KaiOS", os.version);
-        }
+        // AAKaiAnalytics.sendEvent("startgame");
+        // if (gAnalytic == kFIREBASE) {
+        //   if (isKaiOS) {
+        //     (<any>window).firebase.analytics().logEvent(gGameName, {
+        //       'vendor': vendor,
+        //       "model": model,
+        //       'version': gGameVersion,
+        //     });
+        //     (<any>window).firebase.analytics().logEvent(gGameName, {
+        //       'KaiOS': os.version,
+        //       'version': gGameVersion,
+        //     });
+        //   }
+        // } else {
+        AAKaiAnalytics.sendSpecial("vendor", vendor + " " + model);
+        AAKaiAnalytics.sendSpecial("KaiOS", os.version);
+        // }
     }
     AAKaiAnalytics.getDeviceData = getDeviceData;
-    function initAnalytics(googleID, _gameName) {
-        this.gameName = _gameName;
-        var currdate = new Date();
-        (function (i, s, o, g, r, a, m) {
-            i["GoogleAnalyticsObject"] = r;
-            (i[r] =
-                i[r] ||
-                    function () {
-                        (i[r].q = i[r].q || []).push(arguments);
-                    }),
-                (i[r].l = 1 * currdate);
-            (a = s.createElement(o)), (m = s.getElementsByTagName(o)[0]);
-            a.async = 1;
-            a.src = g;
-            m.parentNode.insertBefore(a, m);
-        })(window, document, "script", "https://www.google-analytics.com/analytics.js", "ga", this.gaNewElem, this.gaElems);
-        //NOTE: ga ERRORS are false possitives! Ignore
-        window.ga("create", googleID, "auto");
-        window.ga("send", "pageview");
-        //AAKaiAnalytics.getDeviceData();
+    function sendUA() {
+        var ua = escape(window.navigator.userAgent);
+        var pageName = location.pathname.substring(location.pathname.lastIndexOf("/") + 1);
+        var data = 'v=1&t=event&tid=' + this._googleID + '&cid=' + escape(this.cid) + '&ec=' + escape("User Agent") + '&ea=' + escape(window.navigator.userAgent) + "&dp=" + escape(pageName);
+        var http = new window.XMLHttpRequest();
+        http.mozAnon = true;
+        http.mozSystem = true;
+        var url = 'https://www.google-analytics.com/collect?';
+        var params = data;
+        http.open('POST', url, true);
+        //Send the proper header information along with the request
+        http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        http.onreadystatechange = function () {
+            // if (http.readyState == 4 && http.status == 200) {
+            //   console.log(http.responseText);
+            // }else{
+            //   console.error(http.responseText);
+            // }
+        };
+        http.send(params);
+    }
+    AAKaiAnalytics.sendUA = sendUA;
+    function initAnalytics(googleID, _uid) {
+        this._googleID = googleID;
+        this.cid = _uid;
+        var http = new window.XMLHttpRequest();
+        http.mozAnon = true;
+        http.mozSystem = true;
+        var url = 'https://www.google-analytics.com/collect?';
+        // var params = 'v=1&t=pageview&tid='+ googleID +'&cid='+this.cid+'&dh=taara.games&dp='+ gGameName +'&dt='+gGameState;
+        var pageName = location.pathname.substring(location.pathname.lastIndexOf("/") + 1);
+        var params = 'v=1&t=pageview&tid=' + googleID + '&cid=' + escape(this.cid) + '&dt=' + escape(gGameName) + '&an=' + escape(gGameName) + '&av=' + escape(gGameVersion) + "&dp=" + pageName + "&cn=kaiosapp";
+        http.open('POST', url, true);
+        console.log(url + params);
+        //Send the proper header information along with the request
+        http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        http.onreadystatechange = function () {
+            if (http.readyState == 4 && http.status == 200) {
+                //alert(http.responseText);
+            }
+        };
+        http.send(params);
     }
     AAKaiAnalytics.initAnalytics = initAnalytics;
-    function sendSpecial(_action, _label, _nointeract, _value) {
-        if (_nointeract === void 0) { _nointeract = true; }
+    function sendEvent(_action, _value) {
         if (_value === void 0) { _value = 0; }
-        if (gAnalytic == kGOOGLE) {
-            if (window.ga != undefined) {
-                window.ga('send', {
-                    // 'transport': 'beacon',
-                    'hitType': 'event',
-                    'eventCategory': gGameName,
-                    'eventAction': _action,
-                    'eventLabel': _label,
-                    'eventValue': _value,
-                    'nonInteraction': _nointeract
-                });
-            }
-        }
-        else if (gAnalytic == kMATOMO) {
-            window._paq.push(['setRequestMethod', 'POST']);
-            window._paq.push(['trackEvent', gGameName, _action, _label]);
-        }
-        else if (gAnalytic == kFIREBASE) {
-            window.firebase.analytics().logEvent(_action, {
-                'hitType': 'event',
-                'game': gGameName,
-                'version': gGameVersion,
-                'label': _label,
-                'value': _value
-            });
-        }
-    }
-    AAKaiAnalytics.sendSpecial = sendSpecial;
-    // ga('send', 'event', [eventCategory], [eventAction], [eventLabel], [eventValue], [fieldsObject]);
-    // sendEvent("play", gGameVersion);
-    // sendEvent("os", '1.0.0',false);
-    // export function sendEventGoogle(_action: String, _label: String, _nointeract = true, _value = 0) {
-    function sendEvent(_action, _nointeract, _value) {
-        if (_nointeract === void 0) { _nointeract = true; }
-        if (_value === void 0) { _value = 0; }
-        if (gAnalytic == kGOOGLE) {
-            if (window.ga != undefined) {
-                window.ga('send', {
-                    // 'transport': 'beacon',
-                    'hitType': 'event',
-                    'eventCategory': gGameName,
-                    'eventAction': _action,
-                    'eventLabel': gGameVersion,
-                    'eventValue': _value,
-                    'nonInteraction': _nointeract
-                });
-            }
-        }
-        else if (gAnalytic == kMATOMO) {
-            window._paq.push(['setRequestMethod', 'POST']);
-            window._paq.push(['trackEvent', gGameName, _action, gGameVersion]);
-        }
-        else if (gAnalytic == kFIREBASE) {
-            window.firebase.analytics().logEvent(gGameName, {
-                'event': _action,
-                'game': gGameName,
-                'version': gGameVersion
-            });
-        }
+        var pageName = location.pathname.substring(location.pathname.lastIndexOf("/") + 1);
+        var data = 'v=1&t=event&tid=' + this._googleID + '&cid=' + escape(this.cid) + '&ec=' + escape(gGameName) + '&ea=' + escape(_action) + '&an=' + escape(gGameName) + '&av=' + escape(gGameVersion) + "&dp=" + escape(pageName) + "&cn=kaiosapp";
+        //'&ev='+_value+
+        //'&el='+gGameVersion
+        var http = new window.XMLHttpRequest();
+        http.mozAnon = true;
+        http.mozSystem = true;
+        var url = 'https://www.google-analytics.com/collect?';
+        var params = data;
+        http.open('POST', url, true);
+        //Send the proper header information along with the request
+        http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        http.send(params);
     }
     AAKaiAnalytics.sendEvent = sendEvent;
-    function sendSponsorEvent() {
-        if (gAnalytic == kGOOGLE) {
-            if (window.ga != undefined) {
-                window.ga('send', {
-                    // 'transport': 'beacon',
-                    'hitType': 'event',
-                    'eventCategory': "sponsorClick",
-                    'eventAction': gGameName,
-                    'eventLabel': "web",
-                    'eventValue': 0,
-                    'nonInteraction': false
-                });
-            }
-        }
-        else {
-            window._paq.push(['setRequestMethod', 'POST']);
-            window._paq.push(['trackEvent', "sponsorClick", gGameName, gGameVersion]);
-        }
+    // non interact is implied here.
+    function sendSpecial(_action, _label, _value) {
+        if (_value === void 0) { _value = 0; }
+        var pageName = location.pathname.substring(location.pathname.lastIndexOf("/") + 1);
+        var data = 'v=1&t=event&ni=1&tid=' + this._googleID + '&cid=' + this.cid + '&ec=' + escape(gGameName) + '&ea=' + _action + '&el=' + _label + '&ev=' + _value + '&an=' + escape(gGameName) + '&av=' + gGameVersion + "&dp=" + pageName + "&cn=kaiosapp";
+        var http = new window.XMLHttpRequest();
+        http.mozAnon = true;
+        http.mozSystem = true;
+        var url = 'https://www.google-analytics.com/collect?';
+        var params = data;
+        http.open('POST', url, true);
+        //Send the proper header information along with the request
+        http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        http.send(params);
     }
-    AAKaiAnalytics.sendSponsorEvent = sendSponsorEvent;
-    // THIS IS LEFT HERE AS A REMINDER OF HOOW I LOADED A LOCAL VERIOSN OF ANALYTICS
-    // export function initAnalyticsLocal(googleID, _gameName) {
-    //   this.gameName = _gameName;
-    //   var currdate: any = new Date();
-    //   window['GoogleAnalyticsObject'] = 'ga';
-    //   (<any>window).ga = (<any>window).ga || function () {
-    //     (<any>window).ga.q = (<any>window).ga.q || [];
-    //     (<any>window).ga.q.push(arguments);
-    //   };
-    //   (<any>window).ga.l = 1 * currdate;
-    //   (<any>window).ga("create", googleID, "beacon");
-    //   (<any>window).ga("send", "pageview");
-    // }
+    AAKaiAnalytics.sendSpecial = sendSpecial;
 })(AAKaiAnalytics || (AAKaiAnalytics = {})); //end module
 /// <reference path="../../phaser.d.ts" />
 /// <reference path='GameScene.ts'/>
@@ -2651,10 +2633,11 @@ var AAKaiAnalytics;
 var kTESTMODE = 1; /* set to 0 for real ads */
 var gGameName = "_TEMPLATE_";
 var gGameVersion = "1.0.0";
-var gamePrefsFile = "_TEMPLATE_001";
+var gamePrefsFile = "games.taara.prefs._template_";
 var gameBGColor = 0x333333;
 var gStageWidth = 240 * 2; // I'm leaving it as a multiple to remind me of org size
 var gStageHeight = 320 * 2; //228 * 2; //web is 228
+var gShowNewGame = 0;
 // Display length of Taara games Logo
 var gLogoDisplayLength = 2000;
 // SPONSOR
@@ -2681,8 +2664,6 @@ if (window.innerHeight <= 228) {
 }
 var centerGame = Phaser.Scale.CENTER_HORIZONTALLY; //CENTER_BOTH;
 var myScale;
-// if (gRunnngInBrowser) {
-// Phaser.Scale.CENTER_HORIZONTALLY;
 myScale = {
     parent: 'gameStage',
     // autoCenter: Phaser.Scale.CENTER_BOTH, //Phaser.Scale.CENTER_HORIZONTALLY,
@@ -2690,15 +2671,6 @@ myScale = {
     width: gStageWidth,
     height: gStageHeight
 };
-// } else {
-//     myScale = {
-//         parent: 'gameStage',
-//         autoCenter: Phaser.Scale.CENTER_BOTH, //Phaser.Scale.CENTER_HORIZONTALLY,
-//         mode: Phaser.Scale.FIT, // we will resize the game with our own code (see Boot.js)
-//         width: gStageWidth,
-//         height: gStageHeight
-//     }
-// }
 var scenes = [BootScene, PreloadScene, MenuOverlay, SponsorOverlay, MenuScene, HelpScene, GameScene, MoreGamesScene, SettingsScene];
 var states;
 (function (states) {
@@ -2723,27 +2695,32 @@ var states;
 var game;
 var gGameState = states.kSTATE_NOTHING;
 var emitter = new Phaser.Events.EventEmitter();
-var kGOOGLE = 1;
-var kMATOMO = 2;
-var kFIREBASE = 3;
-// gAnalytic is any one of the three above.  Future version will only have 
-//kGOOGLE and maybe kFIREBASE if supported it next revision of kaios
-var gAnalytic = 1;
 // ******************************************************************************
 // ******************************************************************************
 // NOTE ******* 
-//
-// If using Matomo the init is in the index.html file 
-// DON"T USE MATOMO FOR ONLINE GAMES. USE GOOGLE.
-//
 // Firebase does not work on KaiOS.  Period.
 // 
 // Using Google Analytics //////////////////////////////////////////////////////
 // TEST:UA-150350318-3
 // PROD:UA-150350318-1
 // ******************************************************************************
-AAKaiAnalytics.initAnalytics('UA-150350318-3', gGameName);
-AAKaiAnalytics.getDeviceData();
+//AAKaiAnalytics.initAnalytics('UA-150350318-3', gGameName);
+var _uuid = getUUID();
+// console.log(_uuid);
+AAKaiAnalytics.initAnalytics('UA-150350318-3', _uuid);
+setTimeout(function () { AAKaiAnalytics.sendUA(); }, 1000);
+function getUUID() {
+    var lsID = 'games.taara.uuid';
+    var uuid = Phaser.Utils.String.UUID();
+    var scr = localStorage.getItem(lsID);
+    if (scr == undefined) {
+        localStorage.setItem(lsID, uuid);
+    }
+    else {
+        uuid = scr;
+    }
+    return uuid;
+}
 function resize() {
     // if (gRunnngInBrowser) {
     var game_ratio = 1; //(9 * 32) / (15 * 32);
@@ -2772,7 +2749,7 @@ window.onload = function () {
         url: 'https://taaragames.com/',
         version: gGameVersion,
         autoFocus: true,
-        autoRound: true,
+        autoRound: false,
         powerPreference: 'high-performance',
         dom: {
             createContainer: true

@@ -23,10 +23,12 @@ declare var getKaiAd: any;
 const kTESTMODE = 1; /* set to 0 for real ads */
 const gGameName = "_TEMPLATE_";
 const gGameVersion = "1.0.0";
-const gamePrefsFile = "_TEMPLATE_001";
+const gamePrefsFile = "games.taara._template_.prefs";
 const gameBGColor = 0x333333;
-let gStageWidth = 240*2;  // I'm leaving it as a multiple to remind me of org size
-let gStageHeight = 320*2;  //228 * 2; //web is 228
+let gStageWidth = 240 * 2;  // I'm leaving it as a multiple to remind me of org size
+let gStageHeight = 320 * 2;  //228 * 2; //web is 228
+
+let gShowNewGame = 0;
 
 // Display length of Taara games Logo
 const gLogoDisplayLength = 2000;
@@ -62,27 +64,17 @@ if (window.innerHeight <= 228) {
 
 let centerGame = Phaser.Scale.CENTER_HORIZONTALLY;//CENTER_BOTH;
 let myScale;
-// if (gRunnngInBrowser) {
-    // Phaser.Scale.CENTER_HORIZONTALLY;
 
-    myScale = {
-        parent: 'gameStage',
-        // autoCenter: Phaser.Scale.CENTER_BOTH, //Phaser.Scale.CENTER_HORIZONTALLY,
-        mode: Phaser.Scale.NONE, // we will resize the game with our own code (see Boot.js)
-        width: gStageWidth,
-        height: gStageHeight
-    }
-// } else {
-//     myScale = {
-//         parent: 'gameStage',
-//         autoCenter: Phaser.Scale.CENTER_BOTH, //Phaser.Scale.CENTER_HORIZONTALLY,
-//         mode: Phaser.Scale.FIT, // we will resize the game with our own code (see Boot.js)
-//         width: gStageWidth,
-//         height: gStageHeight
-//     }
-// }
+myScale = {
+    parent: 'gameStage',
+    // autoCenter: Phaser.Scale.CENTER_BOTH, //Phaser.Scale.CENTER_HORIZONTALLY,
+    mode: Phaser.Scale.NONE, // we will resize the game with our own code (see Boot.js)
+    width: gStageWidth,
+    height: gStageHeight
+}
 
-const scenes = [BootScene, PreloadScene, MenuOverlay, SponsorOverlay, MenuScene, HelpScene, GameScene,MoreGamesScene,SettingsScene];
+
+const scenes = [BootScene, PreloadScene, MenuOverlay, SponsorOverlay, MenuScene, HelpScene, GameScene, MoreGamesScene, SettingsScene];
 
 enum states {
     kSTATE_NOTHING = 0,
@@ -109,50 +101,58 @@ let gGameState = states.kSTATE_NOTHING;
 let emitter = new Phaser.Events.EventEmitter();
 
 
-const kGOOGLE = 1;
-const kMATOMO = 2;
-const kFIREBASE = 3;
-// gAnalytic is any one of the three above.  Future version will only have 
-//kGOOGLE and maybe kFIREBASE if supported it next revision of kaios
-let gAnalytic = 1;
-
 // ******************************************************************************
 // ******************************************************************************
 // NOTE ******* 
-//
-// If using Matomo the init is in the index.html file 
-// DON"T USE MATOMO FOR ONLINE GAMES. USE GOOGLE.
-//
 // Firebase does not work on KaiOS.  Period.
 // 
 // Using Google Analytics //////////////////////////////////////////////////////
 // TEST:UA-150350318-3
 // PROD:UA-150350318-1
 // ******************************************************************************
-AAKaiAnalytics.initAnalytics('UA-150350318-3', gGameName);
-AAKaiAnalytics.getDeviceData();
+//AAKaiAnalytics.initAnalytics('UA-150350318-3', gGameName);
+
+let _uuid = getUUID();
+
+AAKaiAnalytics.initAnalytics('UA-150350318-3', _uuid);
+setTimeout( function(){AAKaiAnalytics.sendUA();} , 1000);
+
+function getUUID() {
+
+    let lsID = 'games.taara.uuid';
+    let uuid = Phaser.Utils.String.UUID();
+    var scr = localStorage.getItem(lsID);
+    if (scr == undefined) {
+        localStorage.setItem(lsID, uuid);
+    } else {
+        uuid = scr;
+    }
+    return uuid;
+}
+
 
 function resize() {
 
     // if (gRunnngInBrowser) {
-        let game_ratio = 1;//(9 * 32) / (15 * 32);
+    let game_ratio = 1;//(9 * 32) / (15 * 32);
 
-        // Make div full height of browser and keep the ratio of game resolution
-        let div = document.getElementById('gameStage');
-        div.style.width = (window.innerHeight * game_ratio) + 'px';
-        div.style.height = window.innerHeight + 'px';
+    // Make div full height of browser and keep the ratio of game resolution
+    let div = document.getElementById('gameStage');
+    div.style.width = (window.innerHeight * game_ratio) + 'px';
+    div.style.height = window.innerHeight + 'px';
 
-        // Check if device DPI messes up the width-height-ratio
-        let canvas = document.getElementsByTagName('canvas')[0];
+    // Check if device DPI messes up the width-height-ratio
+    let canvas = document.getElementsByTagName('canvas')[0];
 
-        let dpi_w = (parseInt(div.style.width) / canvas.width);
-        let dpi_h = (parseInt(div.style.height) / canvas.height);
+    let dpi_w = (parseInt(div.style.width) / canvas.width);
+    let dpi_h = (parseInt(div.style.height) / canvas.height);
 
-        gStageHeight = window.innerHeight;// * (dpi_w / dpi_h);
-        gStageWidth = window.innerWidth;// height* 0.6;
+    gStageHeight = window.innerHeight;// * (dpi_w / dpi_h);
+    gStageWidth = window.innerWidth;// height* 0.6;
 
-        game.canvas.style.width = gStageWidth + 'px';
-        game.canvas.style.height = gStageHeight + 'px';
+
+    game.canvas.style.width = gStageWidth + 'px';
+    game.canvas.style.height = gStageHeight + 'px';
 
     // }
 
@@ -170,7 +170,7 @@ window.onload = () => {
         url: 'https://taaragames.com/',
         version: gGameVersion,
         autoFocus: true,
-        autoRound: true,
+        autoRound: false,
         powerPreference: 'high-performance',
         dom: {
             createContainer: true
@@ -201,13 +201,13 @@ window.onload = () => {
     }, false);
 
     resize();
-  
+
     document.addEventListener('fullscreenchange', (event) => {
         // document.fullscreenElement will point to the element that
         // is in fullscreen mode if there is one. If there isn't one,
         // the value of the property is null.
         if (document.fullscreenElement) {
-            gStageHeight = window.innerHeight-30;// * (dpi_w / dpi_h);
+            gStageHeight = window.innerHeight - 30;// * (dpi_w / dpi_h);
             game.canvas.style.height = gStageHeight + 'px';
 
             // emitter.emit('fullscreen', [2.5]);
@@ -216,5 +216,7 @@ window.onload = () => {
 
         }
     });
+
+
 
 };

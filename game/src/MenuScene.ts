@@ -14,10 +14,8 @@ class MenuScene extends Phaser.Scene {
     }
 
     create() {
-
-      
         this.scene.sendToBack();
-
+        var element = this.add.dom(10, 140).createFromCache('newgameHTML').setOrigin(0, 0);
         this.add.text(12, this.sys.canvas.height - 17, gGameVersion);
     }
 

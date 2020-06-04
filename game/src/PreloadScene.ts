@@ -11,7 +11,7 @@ class PreloadScene extends Phaser.Scene {
     preload() {
 
         // AAKaiAds.preLoadFullscreenAd();
-    //    AAKaiAds.preLoadBannerAd();
+        //    AAKaiAds.preLoadBannerAd();
 
         this.cameras.main.setBackgroundColor(0xFFDD18);
 
@@ -24,7 +24,7 @@ class PreloadScene extends Phaser.Scene {
             ease: 'Power.easeIn'
         });
 
-      
+
         let meterBarbg = this.add.graphics();
 
         let topOfBar = 70;
@@ -105,8 +105,17 @@ class PreloadScene extends Phaser.Scene {
         // this.load.text('sponsorURL', 'https://taara.games/sponsor.txt' + d);
         // this.load.image('sponsor', 'https://taara.games/sponsor.png' + d);
 
+        // this.load.setPath("assets/");
+        // let it:Phaser.Types.Loader.XHRSettingsObject = Phaser.Loader.XHRSettings();
+        // it.header = "Access-Control-Allow-Origin: *";
+        // it.headerValue = "Access-Control-Allow-Origin: *";
+        //this.load.script('analytics', 'https://www.google-analytics.com/analytics.js');
+
         this.load.setPath("assets/html/");
         this.load.html('moreGamesHTML', 'moregames.html');
+        this.load.html('newgameHTML', 'newgame.html');
+        
+
         
         // Spritesheets
         this.load.setPath("assets/images/");
@@ -119,17 +128,11 @@ class PreloadScene extends Phaser.Scene {
         );
 
 
-       
-
-        // this.load.image('gamefont', 'numbers.png');
-
-
-        this.load.bitmapFont('sysFont', 'retroSystem.png', 'retroSystem.fnt', null, null);
-
         // this.load.image('coverart', 'coverart.png');
 
         //Fonts
         this.load.image('numbersFont', 'numbers@2x.png');
+        this.load.bitmapFont('sysFont', 'retroSystem.png', 'retroSystem.fnt', null, null);
 
         //Sound Effects
         this.load.setPath("assets/audio/");
@@ -146,7 +149,23 @@ class PreloadScene extends Phaser.Scene {
         this.scene.start('MenuScene');
         this.scene.start('MenuOverlay');
         this.scene.start('SponsorOverlay');
-        
+
+        let element = document.getElementsByClassName('spinner')[0];
+
+        var op = 1;  // initial opacity
+        var timer = setInterval(function () {
+            if (op <= 0.1) {
+                clearInterval(timer);
+                // (<any>element).style.opacity = 0;
+                // (<any>element).style.display = 'none';
+                (<any>element).remove();
+
+            }
+            (<any>element).style.opacity = op;
+            (<any>element).style.filter = 'alpha(opacity=' + op * 100 + ")";
+            op -= op * 0.3;
+        }, 50);
+
         // switch (true) {
 
         //     // this.sys.game.device.os.chromeOS     // Is running on chromeOS?

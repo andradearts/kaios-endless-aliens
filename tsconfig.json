@@ -18,7 +18,6 @@
     "dom"
   ],
   "files": [
-    "./game/src/ua-parser.js",
     "./game/src/Button.ts",
     "./game/src/PieMeter.ts",
     "./game/src/BootScene.ts",

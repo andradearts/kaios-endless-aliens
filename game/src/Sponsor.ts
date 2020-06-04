@@ -214,7 +214,7 @@ class SponsorOverlay extends Phaser.Scene {
 
     action_sponsorButton(_state) {
         if (_state == 'up') {
-            if (!gAdShowing) {
+            if (!gFullscreenAdShowing) {
                 //this.playBtnSnd();
                 AAKaiAds.theBannerAd.call('click');
             }

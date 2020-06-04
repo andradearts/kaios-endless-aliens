@@ -13,3 +13,51 @@ __hostingname__ is somthing like "tgcowabunga" or "asterstorm" w/o quotes
 #Manifest file
 
 The scope must be "/" not "." or "./" otherwise it won't install on KaiOS!  Can't tell you how many times this hs bitten me.
+
+
+4/22/20
+
+Finally got google analytics to work.  Code had to be NOT inline, OMFG!!!!
+
+Removed this next check of code from kaios_game.html and instead made the game stage sticky.
+
+ // This is here to STOP the screen from scrolling when loading KaiAds.
+// if (navigator.userAgent.toLowerCase().indexOf('kaios') > -1) {
+//     window.addEventListener("keydown", function (e) {
+//         // page up, page down and arrow keys:
+//         if ([33, 34, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+//             e.preventDefault();
+//         }
+//     }, false);
+// }
+
+also removed this chunk of code since the app in no longer hosted
+<!-- // ** only used for hosted apps ** \\ -->
+<!-- <script>
+    // If a user end up on this page and is not on KaiOS I send them
+    // to the regular index.html page.
+    
+    if (navigator.userAgent.toLowerCase().indexOf('kaios') == -1) {
+        //window.location.href = 'https://soapbubbles.taara.games';  
+    }
+</script> -->
+
+
+also removed the PWA shit
+
+ // ************* only used for hosted apps ************* \\ 
+
+// if ("serviceWorker" in navigator) {
+//     if (navigator.serviceWorker.controller) {
+//         console.log("[PWA Taara Games] active service worker found, no need to register");
+//     } else {
+//         // Register the service worker
+//         navigator.serviceWorker
+//             .register("sw.js", {
+//                 scope: "./"
+//             })
+//             .then(function (reg) {
+//                 console.log("[PWA Taara Games] Service worker has been registered for scope: " + reg.scope);
+//             });
+//     }
+// }

@@ -4,7 +4,7 @@
   "name": "__name__",
   "description": "__DESCRIPTION___",
   "scope": "/",
-  "launch_path": "/kaios_soapbubbles.html",
+  "launch_path": "/kaios_game.html",
    "locales": {
     "en-US": {
       "name": "__name__",
@@ -13,11 +13,11 @@
     }
   },
    "icons": {
-    "56":  "/assets/icons/icon56.png",
-    "112": "/assets/icons/icon112.png"
+    "56":  "https://bubbles.taara.games/assets/icons/icon56.png",
+    "112": "https://bubbles.taara.games/assets/icons/icon112.png"
   },
   "fullscreen":"true",
-  "type": "web",
+  "type": "privileged",
   "orientation": "Portrait",
   "theme_color": "#FBF200",
   "background_color": "#000000",
@@ -26,7 +26,7 @@
     "url": "https://www.taaragames.com"
   },
   "permissions": {
-    "serviceworker":{}
+    "systemXHR": {}
   },
   "cursor": "false",
   "default_locale": "en-US",
