@@ -30,7 +30,6 @@
     "./game/src/HelpScene.ts",
     "./game/src/Sponsor.ts",
     "./game/src/GameScene.ts",
-    "./game/src/const.ts", 
     "./game/src/config.ts"
 ]
   

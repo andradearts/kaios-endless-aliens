@@ -199,211 +199,197 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">../../shared-assets/export/btnBack.png</key>
-            <key type="filename">../../shared-assets/export/btnFullscreenOff.png</key>
-            <key type="filename">../../shared-assets/export/btnFullscreenOn.png</key>
-            <key type="filename">../../shared-assets/export/btnHelp.png</key>
-            <key type="filename">../../shared-assets/export/btnSettings.png</key>
-            <key type="filename">../../shared-assets/export/btnSoundOn.png</key>
+            <key type="filename">../../shared-assets/export/240x320/btnBack.png</key>
+            <key type="filename">../../shared-assets/export/240x320/btnFullscreenOff.png</key>
+            <key type="filename">../../shared-assets/export/240x320/btnFullscreenOn.png</key>
+            <key type="filename">../../shared-assets/export/240x320/btnHelp.png</key>
+            <key type="filename">../../shared-assets/export/240x320/btnSettings.png</key>
+            <key type="filename">../../shared-assets/export/240x320/btnSoundOn.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>17,17,35,35</rect>
+                <rect>9,9,18,18</rect>
                 <key>scale9Paddings</key>
-                <rect>17,17,35,35</rect>
+                <rect>9,9,18,18</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">../../shared-assets/export/btnDownload.png</key>
+            <key type="filename">../../shared-assets/export/240x320/btnDownload.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>20,20,41,40</rect>
+                <rect>10,10,21,20</rect>
                 <key>scale9Paddings</key>
-                <rect>20,20,41,40</rect>
+                <rect>10,10,21,20</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">../../shared-assets/export/btnMoreGames.png</key>
+            <key type="filename">../../shared-assets/export/240x320/btnMoreGames.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>19,20,39,39</rect>
+                <rect>10,10,20,20</rect>
                 <key>scale9Paddings</key>
-                <rect>19,20,39,39</rect>
+                <rect>10,10,20,20</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">../../shared-assets/export/btnPause.png</key>
+            <key type="filename">../../shared-assets/export/240x320/btnPause.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>11,11,23,23</rect>
+                <rect>6,6,12,12</rect>
                 <key>scale9Paddings</key>
-                <rect>11,11,23,23</rect>
+                <rect>6,6,12,12</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">../../shared-assets/export/btnPlay.png</key>
+            <key type="filename">../../shared-assets/export/240x320/btnPlay.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>26,26,52,52</rect>
+                <rect>13,13,27,27</rect>
                 <key>scale9Paddings</key>
-                <rect>26,26,52,52</rect>
+                <rect>13,13,27,27</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">../../shared-assets/export/btnSoundOff.png</key>
+            <key type="filename">../../shared-assets/export/240x320/btnSoundOff.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>17,17,34,34</rect>
+                <rect>9,9,19,18</rect>
                 <key>scale9Paddings</key>
-                <rect>17,17,34,34</rect>
+                <rect>9,9,19,18</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">../../shared-assets/export/gameover.png</key>
+            <key type="filename">../../shared-assets/export/240x320/gameover.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>92,24,184,48</rect>
+                <rect>48,14,95,27</rect>
                 <key>scale9Paddings</key>
-                <rect>92,24,184,48</rect>
+                <rect>48,14,95,27</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">../../shared-assets/export/kaiStore.png</key>
+            <key type="filename">../../shared-assets/export/240x320/kaiStore.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>85,35,169,71</rect>
+                <rect>32,14,65,28</rect>
                 <key>scale9Paddings</key>
-                <rect>85,35,169,71</rect>
+                <rect>32,14,65,28</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">../../shared-assets/export/numbers.png</key>
+            <key type="filename">../../shared-assets/export/240x320/sponsor.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>220,20,440,40</rect>
+                <rect>13,3,27,6</rect>
                 <key>scale9Paddings</key>
-                <rect>220,20,440,40</rect>
+                <rect>13,3,27,6</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">../../shared-assets/export/sponsor.png</key>
+            <key type="filename">../../shared-assets/export/240x320/tag#.png</key>
+            <key type="filename">../../shared-assets/export/240x320/tag1.png</key>
+            <key type="filename">../../shared-assets/export/240x320/tag2.png</key>
+            <key type="filename">../../shared-assets/export/240x320/tag3.png</key>
+            <key type="filename">../../shared-assets/export/240x320/tag4.png</key>
+            <key type="filename">../../shared-assets/export/240x320/tag5.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>26,5,52,10</rect>
+                <rect>4,4,9,9</rect>
                 <key>scale9Paddings</key>
-                <rect>26,5,52,10</rect>
+                <rect>4,4,9,9</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">../../shared-assets/export/tag#.png</key>
-            <key type="filename">../../shared-assets/export/tag1.png</key>
-            <key type="filename">../../shared-assets/export/tag2.png</key>
-            <key type="filename">../../shared-assets/export/tag3.png</key>
-            <key type="filename">../../shared-assets/export/tag4.png</key>
-            <key type="filename">../../shared-assets/export/tag5.png</key>
+            <key type="filename">../../shared-assets/export/240x320/tag8.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>9,9,17,17</rect>
+                <rect>6,6,12,11</rect>
                 <key>scale9Paddings</key>
-                <rect>9,9,17,17</rect>
+                <rect>6,6,12,11</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">../../shared-assets/export/tag8.png</key>
+            <key type="filename">../../shared-assets/export/240x320/tag8_small.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>11,11,22,22</rect>
+                <rect>4,4,8,8</rect>
                 <key>scale9Paddings</key>
-                <rect>11,11,22,22</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../../shared-assets/export/tag8_small.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>7,7,15,15</rect>
-                <key>scale9Paddings</key>
-                <rect>7,7,15,15</rect>
+                <rect>4,4,8,8</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
         </map>
         <key>fileList</key>
         <array>
-            <filename>../../shared-assets/export/btnSoundOff.png</filename>
-            <filename>../../shared-assets/export/btnSoundOn.png</filename>
-            <filename>../../shared-assets/export/gameover.png</filename>
-            <filename>../../shared-assets/export/kaiStore.png</filename>
-            <filename>../../shared-assets/export/numbers.png</filename>
-            <filename>../../shared-assets/export/sponsor.png</filename>
-            <filename>../../shared-assets/export/tag#.png</filename>
-            <filename>../../shared-assets/export/tag1.png</filename>
-            <filename>../../shared-assets/export/tag2.png</filename>
-            <filename>../../shared-assets/export/tag3.png</filename>
-            <filename>../../shared-assets/export/tag4.png</filename>
-            <filename>../../shared-assets/export/tag5.png</filename>
-            <filename>../../shared-assets/export/tag8.png</filename>
-            <filename>../../shared-assets/export/tag8_small.png</filename>
-            <filename>../../shared-assets/export/btnBack.png</filename>
-            <filename>../../shared-assets/export/btnDownload.png</filename>
-            <filename>../../shared-assets/export/btnFullscreenOff.png</filename>
-            <filename>../../shared-assets/export/btnFullscreenOn.png</filename>
-            <filename>../../shared-assets/export/btnHelp.png</filename>
-            <filename>../../shared-assets/export/btnMoreGames.png</filename>
-            <filename>../../shared-assets/export/btnPause.png</filename>
-            <filename>../../shared-assets/export/btnPlay.png</filename>
-            <filename>../../shared-assets/export/btnSettings.png</filename>
+            <filename>../../shared-assets/export/240x320/btnBack.png</filename>
+            <filename>../../shared-assets/export/240x320/btnDownload.png</filename>
+            <filename>../../shared-assets/export/240x320/btnFullscreenOff.png</filename>
+            <filename>../../shared-assets/export/240x320/btnFullscreenOn.png</filename>
+            <filename>../../shared-assets/export/240x320/btnHelp.png</filename>
+            <filename>../../shared-assets/export/240x320/btnMoreGames.png</filename>
+            <filename>../../shared-assets/export/240x320/btnPause.png</filename>
+            <filename>../../shared-assets/export/240x320/btnPlay.png</filename>
+            <filename>../../shared-assets/export/240x320/btnSettings.png</filename>
+            <filename>../../shared-assets/export/240x320/btnSoundOff.png</filename>
+            <filename>../../shared-assets/export/240x320/btnSoundOn.png</filename>
+            <filename>../../shared-assets/export/240x320/gameover.png</filename>
+            <filename>../../shared-assets/export/240x320/kaiStore.png</filename>
+            <filename>../../shared-assets/export/240x320/sponsor.png</filename>
+            <filename>../../shared-assets/export/240x320/tag#.png</filename>
+            <filename>../../shared-assets/export/240x320/tag1.png</filename>
+            <filename>../../shared-assets/export/240x320/tag2.png</filename>
+            <filename>../../shared-assets/export/240x320/tag3.png</filename>
+            <filename>../../shared-assets/export/240x320/tag4.png</filename>
+            <filename>../../shared-assets/export/240x320/tag5.png</filename>
+            <filename>../../shared-assets/export/240x320/tag8.png</filename>
+            <filename>../../shared-assets/export/240x320/tag8_small.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

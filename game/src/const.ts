@@ -1,1 +1,0 @@
-const kBOTTOM_POSITION_FOR_AD = 110;

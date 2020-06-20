@@ -25,73 +25,21 @@ class PreloadScene extends Phaser.Scene {
         });
 
 
-        let meterBarbg = this.add.graphics();
-
-        let topOfBar = 70;
-        let bottomOfBar = 25;
-        meterBarbg.beginPath();
-
-        meterBarbg.moveTo(0, this.sys.game.canvas.height - topOfBar);
-        meterBarbg.lineTo(this.sys.canvas.width, this.sys.game.canvas.height - topOfBar);
-        meterBarbg.lineTo(this.sys.canvas.width, this.sys.game.canvas.height - bottomOfBar);
-        meterBarbg.lineTo(0, this.sys.game.canvas.height - bottomOfBar);
-
-        meterBarbg.closePath();
-        meterBarbg.strokePath();
-        meterBarbg.fillStyle(0x000000, 1);
-        meterBarbg.fill();
-
-
-        ///
-        this.meterBar = this.add.graphics();
-
-        this.meterBar.beginPath();
-
-        this.meterBar.moveTo(0, this.sys.game.canvas.height - topOfBar);
-        this.meterBar.lineTo(this.sys.canvas.width, this.sys.game.canvas.height - topOfBar);
-        this.meterBar.lineTo(this.sys.canvas.width, this.sys.game.canvas.height - bottomOfBar);
-        this.meterBar.lineTo(0, this.sys.game.canvas.height - bottomOfBar);
-
-        this.meterBar.closePath();
-        this.meterBar.strokePath();
-        this.meterBar.fillStyle(0xff0000, 1.0);
-        this.meterBar.fill();
-
-        this.meterBar.scaleX = .1;
-
-
-        this.kitt = this.add.graphics();
-        this.kitt.moveTo(0, this.sys.game.canvas.height - topOfBar);
-        this.kitt.lineTo(20, this.sys.game.canvas.height - topOfBar);
-        this.kitt.lineTo(20, this.sys.game.canvas.height - bottomOfBar);
-        this.kitt.lineTo(0, this.sys.game.canvas.height - bottomOfBar);
-
-        this.kitt.closePath();
-        this.kitt.strokePath();
-        this.kitt.fillStyle(0xffffff, 1.0);
-        this.kitt.fill();
-
-        this.tweens.add({
-            targets: this.kitt,
-            x: this.sys.canvas.width - 10,
-            ease: 'Sine.easeInOut',
-            yoyo: true,
-            duration: 500,
-            repeat: -1
-        });
+       
+        
         this.loadAssets();
     }
 
     loadAssets() {
 
         this.load.on('progress', function (it) {
-            this.meterBar.scaleX = this.load.progress;
+            // this.meterBar.scaleX = this.load.progress;
         }, this);
 
         this.load.on('complete', function () {
-            this.meterBar.fillStyle(0x00A800, 1.0);
-            this.meterBar.fill();
-            this.meterBar.scaleX = 1.0;
+            // this.meterBar.fillStyle(0x00A800, 1.0);
+            // this.meterBar.fill();
+            // this.meterBar.scaleX = 1.0;
             AAFunctions.fade(this, "out", 500, this.goToGameScene, gLogoDisplayLength);
         }, this);
 

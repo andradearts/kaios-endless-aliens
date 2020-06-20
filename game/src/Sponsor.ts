@@ -3,7 +3,7 @@ class SponsorOverlay extends Phaser.Scene {
     adContainer;
     btn;
 
-    bottomPos = kBOTTOM_POSITION_FOR_AD;
+    bottomPos = kBOTTOM_POSITION_FOR_AD*gRetinaOffset;
 
     startyScore;
     startyHighScore;
@@ -56,7 +56,7 @@ class SponsorOverlay extends Phaser.Scene {
         this.startyHighScore = (<MenuOverlay>this.scene.get("MenuOverlay")).highScoreText.y;
 
         // Sponsor Button #####################################################################
-        this.btnSponsor = new Button(this, this.sys.canvas.width - 60, this.sys.canvas.height + 60, 'spriteAtlas', "sponsor.png", this.action_sponsorButton, "sponsor", true).setVisible(true).setOrigin(.5, 1).setVisible(isKaiOS);
+        this.btnSponsor = new Button(this, this.sys.canvas.width - 60*gRetinaOffset, this.sys.canvas.height + 60, 'spriteAtlas', "sponsor.png", this.action_sponsorButton, "sponsor", true).setVisible(true).setOrigin(.5, 1).setVisible(isKaiOS);
 
         if (gRunnngInBrowser) {
             this.btnSponsor.setVisible(false);
@@ -92,8 +92,6 @@ class SponsorOverlay extends Phaser.Scene {
             this.sponsorTag.style.visibility = "visible";
         }
 
-       
-
         gTween = this.tweens.add({
             targets: this.btnSponsor,
             y: this.sys.game.canvas.height + 60,
@@ -101,13 +99,13 @@ class SponsorOverlay extends Phaser.Scene {
             duration: 250
         });
 
-        // MOVE SCORE ================================
-         this.tweens.add({
+        this.tweens.add({
             targets: (<MenuOverlay>this.scene.get("MenuOverlay")).scoreText,
             y: this.startyScore,
             ease: 'Sine.easeIn',
             duration: 250
         });
+
         gTween = this.tweens.add({
             targets: (<MenuOverlay>this.scene.get("MenuOverlay")).highScoreText,
             y: this.startyHighScore,
@@ -186,7 +184,6 @@ class SponsorOverlay extends Phaser.Scene {
             ease: 'Sine.easeOut',
             duration: 500
         });
-       
 
         gTween = this.tweens.add({
             targets: this.btnSponsor,
@@ -195,18 +192,17 @@ class SponsorOverlay extends Phaser.Scene {
             duration: 250
         });
 
-
-
-        // MOVE SCORE ==========================
-         this.tweens.add({
+        this.tweens.add({
             targets: (<MenuOverlay>this.scene.get("MenuOverlay")).scoreText,
-            y: this.startyScore + this.bottomPos,
+            y: this.startyScore + (this.bottomPos),
             ease: 'Sine.easeOut',
             duration: 500
         });
+
+       
         gTween = this.tweens.add({
             targets: (<MenuOverlay>this.scene.get("MenuOverlay")).highScoreText,
-            y: this.startyHighScore + this.bottomPos,
+            y: this.startyHighScore + (this.bottomPos),
             ease: 'Sine.easeOut',
             duration: 500
         });
@@ -216,7 +212,7 @@ class SponsorOverlay extends Phaser.Scene {
         if (_state == 'up') {
             if (!gFullscreenAdShowing) {
                 //this.playBtnSnd();
-                AAKaiAds.theBannerAd.call('click');
+               // AAKaiAds.theBannerAd.call('click');
             }
         }
     }

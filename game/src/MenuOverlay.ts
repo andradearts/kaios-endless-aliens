@@ -392,7 +392,6 @@ class MenuOverlay extends Phaser.Scene {
             case "5":
                 this.btnPlay.pointerUp(null);
                 break;
-
             case "#":
 
                 if (kSHOW_FULLSCREEN_BUTTON) {
@@ -461,7 +460,7 @@ class MenuOverlay extends Phaser.Scene {
 
         // Play Button #######################################################################
         this.btnPlay = new Button(this, 0, 0, 'spriteAtlas', 'btnPlay.png', this.action_BtnPlay, "play", true).setVisible(isVis);
-        numBadge = this.add.image(0, -50, "spriteAtlas", "tag5.png").setVisible(isKaiOS);
+        numBadge = this.add.image(0, -25, "spriteAtlas", "tag5.png").setVisible(isKaiOS);
         this.c_btnPlay = this.add.container(0, 0, [this.btnPlay, numBadge]).setVisible(isVis);
 
 
@@ -473,30 +472,30 @@ class MenuOverlay extends Phaser.Scene {
         }
 
         this.btnSound = new Button(this, 0, 5, 'spriteAtlas', whichButton, this.action_btnSound, "sound", true).setVisible(isVis);
-        numBadge = this.add.image(0, -34, "spriteAtlas", "tag3.png").setVisible(isKaiOS);
+        numBadge = this.add.image(0, -14, "spriteAtlas", "tag3.png").setVisible(isKaiOS);
         this.c_btnSound = this.add.container(this.cameras.main.width - 10, this.cameras.main.height - 10, [this.btnSound, numBadge]).setVisible(isVis);
 
         // Help/Back Button #######################################################################
 
         whichButton = 'btnHelp.png';
         this.btnHelp = new Button(this, 0, 5, 'spriteAtlas', whichButton, this.action_BtnHelpBack, "help", true).setVisible(true);
-        numBadge = this.add.image(0, -34, "spriteAtlas", "tag1.png").setVisible(isKaiOS);
+        numBadge = this.add.image(0, -14, "spriteAtlas", "tag1.png").setVisible(isKaiOS);
         this.c_btnHelp = this.add.container(15, this.cameras.main.height - 10, [this.btnHelp, numBadge]).setVisible(true);
 
         // Settings Button #######################################################################
         whichButton = 'btnSettings.png';
         this.btnSettings = new Button(this, 0, 5, 'spriteAtlas', whichButton, this.action_btnSettings, "settings", true).setVisible(true);
-        numBadge = this.add.image(0, -34, "spriteAtlas", "tag4.png").setVisible(isKaiOS);
+        numBadge = this.add.image(0, -14, "spriteAtlas", "tag4.png").setVisible(isKaiOS);
         this.c_btnSettings = this.add.container(15, this.cameras.main.height - 10, [this.btnSettings, numBadge]).setVisible(kSHOW_SETTINGS_BUTTON);
 
         // More Games Button #######################################################################
         this.btnMoreGames = new Button(this, 0, 0, 'spriteAtlas', 'btnMoreGames.png', this.action_btnMoreGames, "more", true).setVisible(isVis);
-        numBadge = this.add.image(0, -40, "spriteAtlas", "tag2.png").setVisible(isKaiOS);
+        numBadge = this.add.image(0, -20, "spriteAtlas", "tag2.png").setVisible(isKaiOS);
         this.c_btnMoreGames = this.add.container(0, 0, [this.btnMoreGames, numBadge]).setVisible(isVis);
 
         // Fullscreen Button #######################################################################
         this.btnFullscreen = new Button(this, 0, 5, 'spriteAtlas', 'btnFullscreenOn.png', this.action_btnFullscreen, "fullscreen", true).setVisible(isVis);
-        numBadge = this.add.image(0, -34, "spriteAtlas", "tag#.png").setVisible(isKaiOS);
+        numBadge = this.add.image(0, -14, "spriteAtlas", "tag#.png").setVisible(isKaiOS);
         this.c_btnFullScreen = this.add.container(this.cameras.main.width - 10, this.cameras.main.height - 10, [this.btnFullscreen, numBadge]).setVisible(kSHOW_FULLSCREEN_BUTTON);
 
         // Pause Button #######################################################################
@@ -511,13 +510,13 @@ class MenuOverlay extends Phaser.Scene {
         // #######################################################################################
 
         // HELP -- PLAY -- SOUND
-        this.buttonY = (this.cameras.main.height - 90);
-        AAFunctions.displayButtons([this.c_btnHelp, this.c_btnPlay, this.c_btnSound], this.cameras.main, this.buttonY, 60);
+        this.buttonY = (this.cameras.main.height - 45);
+        AAFunctions.displayButtons([this.c_btnHelp, this.c_btnPlay, this.c_btnSound], this.cameras.main, this.buttonY, 30);
 
         // SETTINGS -- MORE GAMES -- FULLSCREEN
-        this.buttonY2 = (this.cameras.main.height - 210);
+        this.buttonY2 = (this.cameras.main.height - 105);
 
-        AAFunctions.displayButtons([this.c_btnSettings, this.c_btnMoreGames, this.c_btnFullScreen], this.cameras.main, this.buttonY2, 0);
+        AAFunctions.displayButtons([this.c_btnSettings, this.c_btnMoreGames, this.c_btnFullScreen], this.cameras.main, this.buttonY2, 10);
 
         this.buttons = [
             this.c_btnSettings, this.c_btnMoreGames, this.c_btnFullScreen,
@@ -538,7 +537,7 @@ class MenuOverlay extends Phaser.Scene {
 
         // Score Text #######################################################################
 
-        let scoreSize = 15 * 2;
+        let scoreSize = 15 * 1.5;
         this.scoreText = this.add.bitmapText(9, 6, 'numbersFont', '0', scoreSize).setDepth(999);
         this.scoreText.setOrigin(0);
         this.scoreText.setTint(0xffffff);
@@ -547,22 +546,19 @@ class MenuOverlay extends Phaser.Scene {
 
         // HighScore Text #######################################################################
 
-        scoreSize = 8 * 2;
-        this.highScoreText = this.add.bitmapText(12, 25 * 2, 'numbersFont', AAHighScores.highScore, scoreSize).setDepth(999);
+        scoreSize = 8 * 1.5;
+        this.highScoreText = this.add.bitmapText(12, 25 * 1.5, 'numbersFont', AAHighScores.highScore, scoreSize).setDepth(999);
         this.highScoreText.setOrigin(0);
-        this.highScoreText.setTint(0xcccccc);
+        // this.highScoreText.setTint(0xcccccc);
         // this.highScoreText.scaleX = .5;
         // t5his.highScoreText.scaleY = .5;
 
         // FPS TEXT #######################################################################
 
-        // if (gSHOWFPS) {
         this.fpsText = this.add.bitmapText(9, 80, 'numbersFont', '0.0', 15).setVisible(false);
         this.fpsText.setTint(0x666666);
-        // }
 
-        // this.debugInfo = this.add.bitmapText(10, 130, 'numbersFont', '0', scoreSize).setDepth
-        (999);
+        // this.debugInfo = this.add.bitmapText(10, 130, 'numbersFont', '0', scoreSize).setDepth(999);
 
         var element = this.add.dom(10, 90).createFromCache('newgameHTML').setOrigin(0, 0);
 
@@ -585,17 +581,11 @@ class MenuOverlay extends Phaser.Scene {
     }
 
 
-
-
     playBtnSnd() {
         if (AAPrefs.playAudio == true)
             this.sfxButton.play();
     }
 
-    // playNavSnd() {
-    //     if (AAPrefs.playAudio == true)
-    //         this.sfxButtonNav.play();
-    // }
 
     showButtons(isGameOver) {
 
@@ -660,16 +650,9 @@ class MenuOverlay extends Phaser.Scene {
             this.fpsText.setText('FPS: ' + (1000 / delta).toFixed(1));
         }
 
-        // let left = Phaser.Input.Keyboard.JustDown(AAControls.cursors.left) || Phaser.Input.Keyboard.JustDown(AAControls.AKey);
-        // if (left){
-        //     console.log('left yo 3');
-        // }
-        // AAControls.poll();
-
         if (!isKaiOS) {
             let left = Phaser.Input.Keyboard.JustDown(AAControls.AKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.left);
             let right = Phaser.Input.Keyboard.JustDown(AAControls.DKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.right);
-
 
             let up = Phaser.Input.Keyboard.JustDown(AAControls.WKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.up);
             let down = Phaser.Input.Keyboard.JustDown(AAControls.SKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.down);
@@ -678,7 +661,6 @@ class MenuOverlay extends Phaser.Scene {
                 this.navigateDirectionToButton(1);
                 AAControls.right = 0;
             } else if (left) {
-                console.log('left yo 4');
                 this.navigateDirectionToButton(-1);
                 AAControls.left = 0;
             }
@@ -705,36 +687,23 @@ class MenuOverlay extends Phaser.Scene {
         //     // this.debugText.text = gGameState.toString();
         // }
     }
-    watchControls() {
-
-
-    }
+   
 
     navigateDirectionToButton(dir) {
 
-        // let nextButton = this.currentActiveButton + dir;
         let nextButton = Phaser.Math.Clamp(this.currentActiveButton + dir, 0, this.buttons.length - 1);
 
         if (this.buttons[nextButton].visible == false) {
-            // if ( nextButton == 2 ) {
             nextButton += dir;
-            // }
         }
         nextButton = Phaser.Math.Clamp(nextButton, 0, this.buttons.length - 1);
         if (this.buttons[nextButton].visible == true) {
             this.buttons[this.currentActiveButton].first.deselect();
-            // this.currentActiveButton = this.currentActiveButton + dir;
-            // this.currentActiveButton = Phaser.Math.Clamp(this.currentActiveButton, 0, this.buttons.length - 1);
+         
             this.buttons[nextButton].first.select(true);
             this.currentActiveButton = nextButton;
 
         }
-
-        // this.buttons[this.currentActiveButton].deselect();
-        // this.currentActiveButton = this.currentActiveButton + dir;
-        // this.currentActiveButton = Phaser.Math.Clamp(this.currentActiveButton, 0, this.buttons.length - 1);
-        // this.buttons[this.currentActiveButton].select(true);
-
 
     }
 

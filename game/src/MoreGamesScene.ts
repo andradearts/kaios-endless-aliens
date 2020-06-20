@@ -42,7 +42,7 @@ class MoreGamesScene extends Phaser.Scene {
 
         var element = this.add.dom(0, 80).createFromCache('moreGamesHTML').setOrigin(0,0);
 
-        this.add.image(this.sys.canvas.width/2, this.sys.canvas.height-150, 'spriteAtlas','kaiStore.png');
+        this.add.image(this.sys.canvas.width/2, this.sys.canvas.height-70, 'spriteAtlas','kaiStore.png');
 
 
         if (gRunnngInBrowser) {

@@ -21,13 +21,14 @@ declare var _paq: any;
 declare var getKaiAd: any;
 
 const kTESTMODE = 1; /* set to 0 for real ads */
+const kBOTTOM_POSITION_FOR_AD = 65;
 const gGameName = "_TEMPLATE_";
 const gGameVersion = "1.0.0";
 const gamePrefsFile = "games.taara._template_.prefs";
 const gameBGColor = 0x333333;
-let gStageWidth = 240 * 2;  // I'm leaving it as a multiple to remind me of org size
-let gStageHeight = 320 * 2;  //228 * 2; //web is 228
-
+let gStageWidth = 240;  // I'm leaving it as a multiple to remind me of org size
+let gStageHeight = 320;  //228 * 2; //web is 228
+let gRetinaOffset = .5;
 let gShowNewGame = 0;
 
 // Display length of Taara games Logo
