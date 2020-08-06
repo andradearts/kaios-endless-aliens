@@ -25,6 +25,12 @@ const kBOTTOM_POSITION_FOR_AD = 65;
 const gGameName = "_TEMPLATE_";
 const gGameVersion = "1.0.0";
 const gamePrefsFile = "games.taara._template_.prefs";
+
+
+let gIsTouchDevice = false;
+gIsTouchDevice = is_touch_device();
+
+
 const gameBGColor = 0x333333;
 let gStageWidth = 240;  // I'm leaving it as a multiple to remind me of org size
 let gStageHeight = 320;  //228 * 2; //web is 228
@@ -159,6 +165,11 @@ function resize() {
 
 }
 
+function is_touch_device() {
+    return !!('ontouchstart' in window || navigator.maxTouchPoints);
+}
+
+
 window.onload = () => {
 
     let config = {
@@ -202,6 +213,10 @@ window.onload = () => {
     }, false);
 
     resize();
+    
+    if (gIsTouchDevice) {
+        document.documentElement.requestFullscreen();
+    }
 
     document.addEventListener('fullscreenchange', (event) => {
         // document.fullscreenElement will point to the element that
