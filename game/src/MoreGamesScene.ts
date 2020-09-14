@@ -40,7 +40,7 @@ class MoreGamesScene extends Phaser.Scene {
         // should be in AAShared in the future!
         // and SHOULD be an html file
 
-        var element = this.add.dom(0, 80).createFromCache('moreGamesHTML').setOrigin(0,0);
+        var element = this.add.dom(0, 10).createFromCache('moreGamesHTML').setOrigin(0,0);
 
         this.add.image(this.sys.canvas.width/2, this.sys.canvas.height-70, 'spriteAtlas','kaiStore.png');
 

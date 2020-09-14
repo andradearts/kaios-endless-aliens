@@ -64,13 +64,17 @@ class PreloadScene extends Phaser.Scene {
         this.load.html('newgameHTML', 'newgame.html');
         
 
-        
+        let touchExt = '-v2';
+        if (kTOUCH === 1){
+            touchExt = '_TP';
+        }
+
         // Spritesheets
         this.load.setPath("assets/images/");
         this.load.atlas(
             "spriteAtlas",
-            "spriteAtlas.png",
-            "spriteAtlas.json",
+            "spriteAtlas"+touchExt+".png",
+            "spriteAtlas"+touchExt+".json",
             null,
             null
         );
@@ -80,7 +84,10 @@ class PreloadScene extends Phaser.Scene {
 
         //Fonts
         this.load.image('numbersFont', 'numbers@2x.png');
-        this.load.bitmapFont('sysFont', 'retroSystem.png', 'retroSystem.fnt', null, null);
+        // this.load.bitmapFont('sysFont', 'retroSystem.png', 'retroSystem.fnt', null, null);
+
+        this.load.bitmapFont('sysFont', '8bitfont_0.png', '8bitfont.fnt', null, null);
+
 
         //Sound Effects
         this.load.setPath("assets/audio/");
@@ -114,33 +121,7 @@ class PreloadScene extends Phaser.Scene {
             op -= op * 0.3;
         }, 50);
 
-        // switch (true) {
-
-        //     // this.sys.game.device.os.chromeOS     // Is running on chromeOS?
-        //     // this.sys.game.device.os.cordova      // Is the game running under Apache Cordova?
-        //     // this.sys.game.device.os.crosswalk    // Is the game running under the Intel Crosswalk XDK?
-        //     // this.sys.game.device.os.ejecta       // Is the game running under Ejecta?
-        //     // this.sys.game.device.os.electron     // Is the game running under GitHub Electron?
-        //     case this.sys.game.device.os.desktop:      // Is running on a desktop?
-        //     case this.sys.game.device.os.android:     // Is running on android?
-        //     case this.sys.game.device.os.iOS:         // Is running on iOS?
-        //     case this.sys.game.device.os.iPad:        // Is running on iPad?
-        //     case this.sys.game.device.os.iPhone:       // Is running on iPhone?
-        //     case this.sys.game.device.os.kindle:      // Is running on an Amazon Kindle?
-        //     case this.sys.game.device.os.linux:     // Is running on linux?
-        //     case this.sys.game.device.os.macOS:    // Is running on macOS?
-        //     case this.sys.game.device.os.webApp:   // Set to true if running as a WebApp, i.e. within a case WebView
-        //     case this.sys.game.device.os.windows:      // Is running on windows?
-        //     case this.sys.game.device.os.windowsPhone: // Is running on a Windows Phone?
-        //     // this.sys.game.device.os.node         // Is the game running under Node.js?
-        //     // this.sys.game.device.os.nodeWebkit   // Is the game running under Node-/Webkit?
-        //     case gRunnngInBrowser:
-        //         this.scene.start('SponsorOverlay');
-        //         break;
-        // }
-
-        // AAKaiAds.displayFullscreenAd();
-        // AAKaiAds.preLoadDisplayAd();
+        
     }
 
 }

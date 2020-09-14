@@ -1,0 +1,4 @@
+TODO:
+
+hide/show no audio icon whne audio is off
+hide reset button at gameover and on menuscene

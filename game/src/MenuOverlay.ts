@@ -6,8 +6,18 @@ class MenuOverlay extends Phaser.Scene {
     // debugText;
     // debugInfo;
 
+    // v2 ================================================================
+
+    tagVOffset = 23;
+    tags = [];
+    buttonBG;
+
+    audioOffImage;
+
+    //end v2 ================================================================
+
     kHideDistance = 350;
-    _SHOWFPS = false;
+    _SHOWFPS = true;
     pauseEnabled = false;
 
     gameoverSprite;
@@ -22,6 +32,8 @@ class MenuOverlay extends Phaser.Scene {
     btnSettings;
     btnMoreGames;
     btnFullscreen;
+    btnResetGame;
+
     //btnSponsor;
 
     //containers for the buttons so I can hold the number badges
@@ -63,22 +75,28 @@ class MenuOverlay extends Phaser.Scene {
         AAPrefs.initGamePrefs(gamePrefsFile);
         AAHighScores.initHighScores();
         // AAKaiAds.displayFullscreenAd();
-        AAKaiAds.preLoadBannerAd();
+        //AAKaiAds.preLoadBannerAd();
+
+        if (!gIsTouchDevice) {
+            AAKaiControls.setUpInputs(this);
+            emitter.on('keydown', this.keydown, this);
+            emitter.on('keyup', this.keyup, this);
+        }
 
     }
 
 
     create() {
 
-        if (isKaiOS) {
-            AAKaiControls.setUpInputs(this);
-            emitter.on('keydown', this.keydown, this);
-            emitter.on('keyup', this.keyup, this);
-        } else {
-            AAControls.setUpInputs(this);
-        }
+
+        // else {
+        //     AAControls.setUpInputs(this);
+        // }
         // this.cursors = this.input.keyboard.createCursorKeys();
 
+        if (kTOUCH == 1) {
+            this.kHideDistance = 400;
+        }
         this.setUpAudio();
         this.setUpUI();
 
@@ -137,6 +155,8 @@ class MenuOverlay extends Phaser.Scene {
             case "5": //play
             case "#": //fullscreen
             case "8": //sponsor
+            case "SoftLeft":
+            case "SoftRight":
                 theKeyEvent.preventDefault();
                 break;
 
@@ -144,9 +164,7 @@ class MenuOverlay extends Phaser.Scene {
     }
 
     keyup(theKeyEvent) {
-        if ((this.transitioning) || (AAFunctions.areButtonsBouncing())) {
-            return;
-        }
+
 
         let theKey = theKeyEvent.key;
         switch (gGameState) {
@@ -170,10 +188,9 @@ class MenuOverlay extends Phaser.Scene {
 
         }
 
-        if (theKeyEvent.key == "SoftRight") {
+        if ((theKeyEvent.key == "SoftRight") || (theKeyEvent.key == "8")) {
             // this.action_sponsorButton("up");
-            (<SponsorOverlay>this.scene.get("SponsorOverlay")).action_sponsorButton("up")
-
+            this.visitSponsor();
         }
 
         if (theKeyEvent.key == "Backspace") {
@@ -187,8 +204,10 @@ class MenuOverlay extends Phaser.Scene {
                     break;
                 case states.kSTATE_GAMEOVER:
                 case states.kSTATE_PLAYING:
-                    this.showButton(this.c_btnHelp, this.buttonY, this.c_btnHelp.x);
-                    this.resetByBackSpace();
+                    this.showResetButton(false);
+                    this.playBtnSnd();
+                    AAKaiAnalytics.sendEvent("quitgame");
+                    this.backToMenu("GameScene");
                     theKeyEvent.preventDefault();
                     break;
 
@@ -204,6 +223,8 @@ class MenuOverlay extends Phaser.Scene {
             case "5": //play
             case "#": //fullscreen
             case "8": //sponsor
+            case "SoftRight":
+            case "SoftLeft":
                 theKeyEvent.preventDefault();
                 break;
 
@@ -214,90 +235,44 @@ class MenuOverlay extends Phaser.Scene {
         this.sfxButton = this.sound.add('button');
     }
 
-    resetByBackSpace() {
-        this.playBtnSnd();
-        AAKaiAnalytics.sendEvent("quitgame");
-        this.resetToMenu();
-    }
-
     //Set the game to it's initial state by initializing all the variables
-    reset() {
+    playGame() {
 
         AAKaiAnalytics.sendEvent("play");
         this.gameoverSprite.setVisible(false);
-        this.hideAllButtons();
+
         if (this.pauseEnabled) {
             this.btnPause.setVisible(true);
         }
-        let restartFromAd = false;
-        this.scene.get("MenuScene").scene.start("GameScene", { restartFromAd });
-        (<SponsorOverlay>this.scene.get("SponsorOverlay")).hideBanner();
+
+        this.hideNumberTags(this.tags);
+        this.hideAllButtons(() => {
+            this.hideButtonBG(() => {
+                this.scene.get("MenuScene").scene.start("GameScene");
+            });
+        });
     }
 
     resetFromGame() {
         AAKaiAnalytics.sendEvent("back-paused");
-        this.resetToMenu();
+        // this.resetToMenu();
+        this.showResetButton(false);
         this.scene.stop('GameScene');
-    }
-
-    resetFromHelpBackButton(_theScene) {
-        if ((this.transitioning) || (AAFunctions.areButtonsBouncing())) {
-            return;
-        }
-        this.playBtnSnd();
-
-        gGameState = states.kSTATE_MENU;
-        this.hideTopPlaySoundButtons(this.buttonY);
-
-        this.hideTopRowOfButtons(this.buttonY2);
-
-        this.btnHelp.setTexture('spriteAtlas', 'btnHelp.png');
-        AAFunctions.tweenBounce(this, this.c_btnHelp);
-
-        if (false == this.scoreText.visible) {
-            this.scoreText.setVisible(true);
-            this.highScoreText.setVisible(true);
-        }
-        (<SponsorOverlay>this.scene.get("SponsorOverlay")).showBanner();
-
-        this.scene.get(_theScene).scene.start("MenuScene");
-        AAKaiAnalytics.sendEvent("back-help");
-
-    }
-    resetToMenu() {
-        if (this.transitioning) {
-            return;
-        }
-        gGameState = states.kSTATE_MENU;
-
-        //hide the game over sprite
-        this.gameoverSprite.setVisible(false);
-
-        AAFunctions.tweenBounce(this, this.c_btnHelp);
-        this.btnHelp.setTexture('spriteAtlas', 'btnHelp.png');
-
-        this.hideTopPlaySoundButtons(this.buttonY);
-
-        this.hideTopRowOfButtons(this.buttonY2);
-
-        if (this.pauseEnabled) {
-            this.btnPause.setVisible(false);
-            this.pauseImage.setVisible(false);
-        }
-
-        // this.btnPause.setVisible(false);
-        this.scene.get("GameScene").scene.start("MenuScene");
-        (<SponsorOverlay>this.scene.get("SponsorOverlay")).showBanner();
+        this.backToMenu("GameScene");
     }
 
     gameover() {
 
         gGameState = states.kSTATE_GAMEOVER;
 
+
+        // Make sure the correct texture for hte back button is being used.
         this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
 
-        //Show the reset button
-        this.showButtons(true);
+        this.showButtonBG(() => {
+            this.showNumberTags(this.tags);
+            this.showSpecificButtons(this.buttons, () => { });
+        });
 
         // Hide the pause button
         if (this.pauseEnabled) {
@@ -305,26 +280,24 @@ class MenuOverlay extends Phaser.Scene {
         }
 
         // show the gameover image
-        // I don't need to store it since I'm just restarting the scene
-
         this.gameoverSprite.setVisible(true);
         AAFunctions.tweenBounce(this, this.gameoverSprite);
 
         this.singlePress = true;
 
-        (<SponsorOverlay>this.scene.get("SponsorOverlay")).showBanner();
 
     }
+
     checkForPause(theKey) {
         if (this.pauseEnabled) {
-            if (!this.areButtonsTweening()) {
-                // if (Phaser.Input.Keyboard.JustDown(this.pauseKey)) {
-                if (theKey == "*") {
-                    this.singlePress = true;
-                    this.action_btnPause("up");
-                }
+
+            // if (Phaser.Input.Keyboard.JustDown(this.pauseKey)) {
+            if (theKey == "*") {
+                this.singlePress = true;
+                this.action_btnPause("up");
             }
         }
+
     }
 
 
@@ -335,27 +308,29 @@ class MenuOverlay extends Phaser.Scene {
 
             switch (gGameState) {
                 case states.kSTATE_HELP:
-                    this.resetFromHelpBackButton("HelpScene");
+                    this.backToMenu("HelpScene");
                 case states.kSTATE_MOREGAMES:
-                    this.resetFromHelpBackButton("MoreGamesScene");
+                    this.backToMenu("MoreGamesScene");
                     break;
                 case states.kSTATE_SETTINGS:
-                    this.resetFromHelpBackButton("SettingsScene");
+                    this.backToMenu("SettingsScene");
                     break;
             }
 
             this.singlePress = true;
         }
 
-        if (theKey == "*") {
-            this.singlePress = true;
-            this._SHOWFPS = !this._SHOWFPS
-            this.fpsText.visible = !this.fpsText.visible
+        // Display the FPS eater egg
+        if (kTOUCH == 0) {
+            if (theKey == "*") {
+                this.singlePress = true;
+                this._SHOWFPS = !this._SHOWFPS
+                this.fpsText.visible = !this.fpsText.visible
+            }
         }
     }
 
     checkPauseControls(theKey) {
-
         if (theKey == "1") {
             this.btnHelp.pointerUp(null);
         }
@@ -367,6 +342,7 @@ class MenuOverlay extends Phaser.Scene {
 
         switch (theKey) {
             case "8":
+            case "SoftRight":
                 this.visitSponsor();
                 break;
             case "2":
@@ -384,9 +360,9 @@ class MenuOverlay extends Phaser.Scene {
                 // }
                 break;
             case "4":
-                if (kSHOW_SETTINGS_BUTTON) {
-                    this.btnSettings.pointerUp(null);
-                }
+                // if (kSHOW_SETTINGS_BUTTON) {
+                this.btnSettings.pointerUp(null);
+                // }
                 break;
             case "Enter":
             case "5":
@@ -395,7 +371,6 @@ class MenuOverlay extends Phaser.Scene {
             case "#":
 
                 if (kSHOW_FULLSCREEN_BUTTON) {
-
                     this.action_btnFullscreen("up");
                 }
 
@@ -425,28 +400,28 @@ class MenuOverlay extends Phaser.Scene {
         }
     }
 
-    showButton(who, ly, lx) {
-        var scaleSpeed = 150;
+    // showButton(who, ly, lx) {
+    //     var scaleSpeed = 250;
 
-        // reset the scales of the button to 1.0 to avoid weird scaling issues
-        who.scaleX = 1.0;
-        who.scaleY = 1.0;
+    //     // reset the scales of the button to 1.0 to avoid weird scaling issues
+    //     who.scaleX = 1.0;
+    //     who.scaleY = 1.0;
 
-        let _y = ly;
-        let _x = lx;
+    //     let _y = ly;
+    //     let _x = lx;
 
-        let theEase = 'BounceInOut'
+    //     let theEase = 'BounceInOut'
 
 
-        let xthis = this;
-        this.buttonTween = this.tweens.add({
-            targets: who,
-            y: { value: _y, duration: scaleSpeed, ease: theEase },
-            x: { value: _x, duration: scaleSpeed, ease: theEase },
-            // scaleX: { value: .25, duration: scaleSpeed / 1.5, ease: 'BounceInOut', yoyo: true },
-            // scaleY: { value: 2.5, duration: scaleSpeed / 1.5, ease: 'BounceInOut', yoyo: true },
-        });
-    }
+    //     let xthis = this;
+    //     this.buttonTween = this.tweens.add({
+    //         targets: who,
+    //         y: { value: _y, duration: scaleSpeed, ease: theEase },
+    //         x: { value: _x, duration: scaleSpeed, ease: theEase },
+    //         // scaleX: { value: .25, duration: scaleSpeed / 1.5, ease: 'BounceInOut', yoyo: true },
+    //         // scaleY: { value: 2.5, duration: scaleSpeed / 1.5, ease: 'BounceInOut', yoyo: true },
+    //     });
+    // }
 
     // **************************************************************************
     // SET UP THE UI
@@ -454,54 +429,101 @@ class MenuOverlay extends Phaser.Scene {
 
     setUpUI() {
 
+        this.buttonY = 276;
+
+        // Set up background art for buttons
+        //v2 alpha is a png
+        //v2 final should be a grc made here
+
+        //this.buttonBG = this.add.image(120, this.buttonY, 'spriteAtlas', 'btnBG.png');
+        // this.buttonBG = this.make.graphics({x: 0, y: 0, add: false});
+        this.buttonBG = this.add.graphics();
+        this.buttonBG.lineStyle(3, 0x5C5822, 1);
+        this.buttonBG.fillStyle(0xFBED62, 1);
+
+        //  32px radius on the corners
+        this.buttonBG.fillStyle(0x5C5822, 1);
+        this.buttonBG.fillRoundedRect(4, 250, 232, 52, 23);
+        this.buttonBG.fillStyle(0xFBED62, 1);
+        this.buttonBG.fillRoundedRect(7, 253, 226, 46, 20);
+
+        this.buttonBG.alpha = .63;
 
         let isVis = true;
         let numBadge;
 
         // Play Button #######################################################################
         this.btnPlay = new Button(this, 0, 0, 'spriteAtlas', 'btnPlay.png', this.action_BtnPlay, "play", true).setVisible(isVis);
-        numBadge = this.add.image(0, -25, "spriteAtlas", "tag5.png").setVisible(isKaiOS);
-        this.c_btnPlay = this.add.container(0, 0, [this.btnPlay, numBadge]).setVisible(isVis);
+        // if (kTOUCH == 0) {
 
+        //     this.c_btnPlay = this.add.container(0, 0, [this.btnPlay, numBadge]).setVisible(isVis);
+        // }
+        // else {
+        //     this.c_btnPlay = this.add.container(0, 0, [this.btnPlay]).setVisible(isVis);
+        // }
 
         // Sound Button #######################################################################
 
         let whichButton = 'btnSoundOff.png';
-        if (AAPrefs.playAudio) {
-            whichButton = 'btnSoundOn.png';
-        }
+        // if (AAPrefs.playAudio) {
+        //     whichButton = 'btnSoundOn.png';
+        // }
 
-        this.btnSound = new Button(this, 0, 5, 'spriteAtlas', whichButton, this.action_btnSound, "sound", true).setVisible(isVis);
-        numBadge = this.add.image(0, -14, "spriteAtlas", "tag3.png").setVisible(isKaiOS);
-        this.c_btnSound = this.add.container(this.cameras.main.width - 10, this.cameras.main.height - 10, [this.btnSound, numBadge]).setVisible(isVis);
+        this.btnSound = new Button(this, 0, 5, 'spriteAtlas', 'btnSoundOn.png', this.action_btnSound, "sound", true).setVisible(isVis);
+
+
+        // if (kTOUCH == 0) {
+        //     numBadge = this.add.image(0, -14, "spriteAtlas", "tag3.png").setVisible(gIsTouchDevice);
+        //     this.c_btnSound = this.add.container(this.cameras.main.width - 10, this.cameras.main.height - 10, [this.btnSound, numBadge]).setVisible(isVis);
+        // } else {
+        //     this.c_btnSound = this.add.container(this.cameras.main.width - 10, positionVert, [this.btnSound]).setVisible(isVis);
+        // }
 
         // Help/Back Button #######################################################################
 
         whichButton = 'btnHelp.png';
         this.btnHelp = new Button(this, 0, 5, 'spriteAtlas', whichButton, this.action_BtnHelpBack, "help", true).setVisible(true);
-        numBadge = this.add.image(0, -14, "spriteAtlas", "tag1.png").setVisible(isKaiOS);
-        this.c_btnHelp = this.add.container(15, this.cameras.main.height - 10, [this.btnHelp, numBadge]).setVisible(true);
-
+        // if (kTOUCH == 0) {
+        //     numBadge = this.add.image(0, -14, "spriteAtlas", "tag1.png").setVisible(gIsTouchDevice);
+        //     this.c_btnHelp = this.add.container(15, this.cameras.main.height - 10, [this.btnHelp, numBadge]).setVisible(true);
+        // } else {
+        //     this.c_btnHelp = this.add.container(15, positionVert, [this.btnHelp]).setVisible(true);
+        // }
         // Settings Button #######################################################################
         whichButton = 'btnSettings.png';
         this.btnSettings = new Button(this, 0, 5, 'spriteAtlas', whichButton, this.action_btnSettings, "settings", true).setVisible(true);
-        numBadge = this.add.image(0, -14, "spriteAtlas", "tag4.png").setVisible(isKaiOS);
-        this.c_btnSettings = this.add.container(15, this.cameras.main.height - 10, [this.btnSettings, numBadge]).setVisible(kSHOW_SETTINGS_BUTTON);
-
+        // if (kTOUCH == 1) {
+        //     numBadge = this.add.image(0, -14, "spriteAtlas", "tag4.png").setVisible(gIsTouchDevice);
+        //     this.c_btnSettings = this.add.container(15, this.cameras.main.height - 10, [this.btnSettings, numBadge]).setVisible(kSHOW_SETTINGS_BUTTON);
+        // } else {
+        //     this.c_btnSettings = this.add.container(15, positionVert, [this.btnSettings]).setVisible(kSHOW_SETTINGS_BUTTON);
+        // }
         // More Games Button #######################################################################
         this.btnMoreGames = new Button(this, 0, 0, 'spriteAtlas', 'btnMoreGames.png', this.action_btnMoreGames, "more", true).setVisible(isVis);
-        numBadge = this.add.image(0, -20, "spriteAtlas", "tag2.png").setVisible(isKaiOS);
-        this.c_btnMoreGames = this.add.container(0, 0, [this.btnMoreGames, numBadge]).setVisible(isVis);
+        // if (kTOUCH == 0) {
+        //     numBadge = this.add.image(0, -20, "spriteAtlas", "tag2.png").setVisible(gIsTouchDevice);
+        //     this.c_btnMoreGames = this.add.container(0, 0, [this.btnMoreGames, numBadge]).setVisible(isVis);
+        // } else {
+        //     this.c_btnMoreGames = this.add.container(0, positionVert, [this.btnMoreGames]).setVisible(isVis);
+        // }
+
+        // Reset Button #######################################################################
+        this.btnResetGame = new Button(this, 40, this.cameras.main.height + 25, 'spriteAtlas', 'btnResetGame.png', this.action_btnResetGame, "resetgame", true);
+        //.setVisible(true);
+
 
         // Fullscreen Button #######################################################################
-        this.btnFullscreen = new Button(this, 0, 5, 'spriteAtlas', 'btnFullscreenOn.png', this.action_btnFullscreen, "fullscreen", true).setVisible(isVis);
-        numBadge = this.add.image(0, -14, "spriteAtlas", "tag#.png").setVisible(isKaiOS);
-        this.c_btnFullScreen = this.add.container(this.cameras.main.width - 10, this.cameras.main.height - 10, [this.btnFullscreen, numBadge]).setVisible(kSHOW_FULLSCREEN_BUTTON);
-
+        // this.btnFullscreen = new Button(this, 0, 5, 'spriteAtlas', 'btnFullscreenOn.png', this.action_btnFullscreen, "fullscreen", true).setVisible(isVis);
+        // if (kTOUCH == 0) {
+        //     numBadge = this.add.image(0, -14, "spriteAtlas", "tag#.png").setVisible(gIsTouchDevice);
+        //     this.c_btnFullScreen = this.add.container(this.cameras.main.width - 10, this.cameras.main.height - 10, [this.btnFullscreen, numBadge]).setVisible(kSHOW_FULLSCREEN_BUTTON);
+        // } else {
+        //     this.c_btnFullScreen = this.add.container(this.cameras.main.width - 10, this.cameras.main.height - 10, [this.btnFullscreen]).setVisible(kSHOW_FULLSCREEN_BUTTON);
+        // }
         // Pause Button #######################################################################
 
-        whichButton = 'btnPause.png';
-        this.btnPause = new Button(this, this.cameras.main.width - 35, 20, 'spriteAtlas', whichButton, this.action_btnPause, "pause", true).setVisible(false);
+        // whichButton = 'btnPause.png';
+        // this.btnPause = new Button(this, this.cameras.main.width - 35, 20, 'spriteAtlas', whichButton, this.action_btnPause, "pause", true).setVisible(false);
 
         // // Sponsor Button #####################################################################
         // this.btnSponsor = new Button(this, this.sys.canvas.width - 60, this.sys.canvas.height, 'spriteAtlas', "sponsor.png", this.action_sponsorButton, "sponsor", true).setVisible(true).setOrigin(.5, 1);
@@ -510,18 +532,50 @@ class MenuOverlay extends Phaser.Scene {
         // #######################################################################################
 
         // HELP -- PLAY -- SOUND
-        this.buttonY = (this.cameras.main.height - 45);
-        AAFunctions.displayButtons([this.c_btnHelp, this.c_btnPlay, this.c_btnSound], this.cameras.main, this.buttonY, 30);
+        let buttonOffset = 45;
+        if (kTOUCH == 1) {
+            buttonOffset *= 4;
+        }
+        //(this.cameras.main.height - buttonOffset);
+
+
+        if (kSHOW_SETTINGS_BUTTON) {
+            AAFunctions.displayButtons([this.btnHelp, this.btnMoreGames, this.btnPlay, this.btnSound, this.btnSettings], this.cameras.main, this.buttonY, -25);
+        } else {
+            AAFunctions.displayButtons([this.btnHelp, this.btnMoreGames, this.btnPlay, this.btnSound], this.cameras.main, this.buttonY, -25);
+        }
+
+        this.tags = [
+            this.add.image(this.btnHelp.x, this.btnHelp.y - this.tagVOffset, "spriteAtlas", "tag1.png").setVisible(!gIsTouchDevice),
+            this.add.image(this.btnMoreGames.x, this.btnMoreGames.y - this.tagVOffset, "spriteAtlas", "tag2.png").setVisible(!gIsTouchDevice),
+            this.add.image(this.btnPlay.x, this.btnPlay.y - this.tagVOffset, "spriteAtlas", "tag5.png").setVisible(!gIsTouchDevice),
+            this.add.image(this.btnSound.x, this.btnSound.y - this.tagVOffset, "spriteAtlas", "tag3.png").setVisible(!gIsTouchDevice)
+            // this.add.image(this.btnSettings.x, this.btnSettings.y - this.tagVOffset, "spriteAtlas", "tag4.png").setVisible(!gIsTouchDevice)
+        ];
+
+        //Settings Button is a special case.  Some games do have a settings buttons
+        if (kSHOW_SETTINGS_BUTTON) {
+            let settBtnTag = this.add.image(this.btnSettings.x, this.btnSettings.y - this.tagVOffset, "spriteAtlas", "tag4.png");
+            settBtnTag.setVisible(kSHOW_SETTINGS_BUTTON || !gIsTouchDevice);
+            this.tags.push(settBtnTag);
+
+        }
+
+        this.audioOffImage = this.add.image(this.btnSound.x, this.btnSound.y, 'spriteAtlas', 'btnSoundOff.png').setVisible(!AAPrefs.playAudio);
 
         // SETTINGS -- MORE GAMES -- FULLSCREEN
-        this.buttonY2 = (this.cameras.main.height - 105);
+        if (kTOUCH == 1) {
+            this.buttonY2 = (this.cameras.main.height - 105 * 3);
+        } else {
+            this.buttonY2 = (this.cameras.main.height - 105);
+        }
 
-        AAFunctions.displayButtons([this.c_btnSettings, this.c_btnMoreGames, this.c_btnFullScreen], this.cameras.main, this.buttonY2, 10);
 
-        this.buttons = [
-            this.c_btnSettings, this.c_btnMoreGames, this.c_btnFullScreen,
-            this.c_btnHelp, this.c_btnPlay, this.c_btnSound
-        ];
+         if (kSHOW_SETTINGS_BUTTON) {
+            this.buttons = [this.btnHelp, this.btnMoreGames, this.btnPlay, this.btnSound, this.btnSettings];
+        } else {
+            this.buttons = [this.btnHelp, this.btnMoreGames, this.btnPlay, this.btnSound];
+        }
 
         // Pause Graphic #######################################################################
 
@@ -533,21 +587,34 @@ class MenuOverlay extends Phaser.Scene {
 
         // Number Font #######################################################################
 
-        this.makeTheNumbersFont();
+        //this.makeTheNumbersFont();
 
         // Score Text #######################################################################
 
-        let scoreSize = 15 * 1.5;
-        this.scoreText = this.add.bitmapText(9, 6, 'numbersFont', '0', scoreSize).setDepth(999);
+        let scoreSize = 32;//15 * 1.5;
+
+        if (kTOUCH == 1) {
+            scoreSize = 32 * 2;//15 * 3;
+        }
+        this.scoreText = this.add.bitmapText(9, 6, 'sysFont', '0', scoreSize).setDepth(999);
+        //this.add.bitmapText(9, 6, 'numbersFont', '0', scoreSize).setDepth(999);
         this.scoreText.setOrigin(0);
         this.scoreText.setTint(0xffffff);
+        this.scoreText.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
         // this.scoreText.scaleX = .5;
         // this.scoreText.scaleY = .5;
 
         // HighScore Text #######################################################################
 
-        scoreSize = 8 * 1.5;
-        this.highScoreText = this.add.bitmapText(12, 25 * 1.5, 'numbersFont', AAHighScores.highScore, scoreSize).setDepth(999);
+        scoreSize = 16;//8 * 1.5;
+        let touchOffset = 1.5;
+        if (kTOUCH == 1) {
+            scoreSize = 16 * 3;//8 * 3;
+            touchOffset = 3;
+        }
+        this.highScoreText = this.add.bitmapText(9, 25 * touchOffset, 'sysFont', AAHighScores.highScore, scoreSize).setDepth(999);
+
+        // this.add.bitmapText(12, 25 * touchOffset, 'numbersFont', AAHighScores.highScore, scoreSize).setDepth(999);
         this.highScoreText.setOrigin(0);
         // this.highScoreText.setTint(0xcccccc);
         // this.highScoreText.scaleX = .5;
@@ -555,7 +622,8 @@ class MenuOverlay extends Phaser.Scene {
 
         // FPS TEXT #######################################################################
 
-        this.fpsText = this.add.bitmapText(9, 80, 'numbersFont', '0.0', 15).setVisible(false);
+        this.fpsText = this.add.bitmapText(9, this.game.canvas.height / 2, 'sysFont', '0.0', 16).setVisible(this._SHOWFPS);
+        this.fpsText.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
         this.fpsText.setTint(0x666666);
 
         // this.debugInfo = this.add.bitmapText(10, 130, 'numbersFont', '0', scoreSize).setDepth(999);
@@ -564,71 +632,26 @@ class MenuOverlay extends Phaser.Scene {
 
     }
 
-    makeTheNumbersFont() {
-        let config = {
-            image: 'numbersFont',
-            width: 40,
-            height: 40,
-            offset: { x: 0 },
-            chars: '0123456789.',
-            charsPerRow: 11
-        };
+    // makeTheNumbersFont() {
+    //     let config = {
+    //         image: 'numbersFont',
+    //         width: 40,
+    //         height: 40,
+    //         offset: { x: 0 },
+    //         chars: '0123456789.',
+    //         charsPerRow: 11
+    //     };
 
-        // I have to put the <any> here because the typescript defs have an error
-        // somewhere that won't let me use the param unless I add <any>
-        let it = Phaser.GameObjects.RetroFont.Parse(this, <any>config);
-        this.cache.bitmapFont.add('numbersFont', it);
-    }
+    //     // I have to put the <any> here because the typescript defs have an error
+    //     // somewhere that won't let me use the param unless I add <any>
+    //     let it = Phaser.GameObjects.RetroFont.Parse(this, <any>config);
+    //     this.cache.bitmapFont.add('numbersFont', it);
+    // }
 
 
     playBtnSnd() {
         if (AAPrefs.playAudio == true)
             this.sfxButton.play();
-    }
-
-
-    showButtons(isGameOver) {
-
-        if (!this.areButtonsTweening()) {
-            if (isGameOver) {
-                this.showButton(this.c_btnSound, this.buttonY, this.c_btnSound.x);
-                this.showButton(this.c_btnHelp, this.buttonY, this.c_btnHelp.x);
-            }
-
-
-            this.showButton(this.c_btnPlay, this.buttonY, this.c_btnPlay.x);
-            // Hilight and select the button to make the keyboard work
-            //this.btnPlay.select(false);
-        }
-
-
-    }
-
-    areButtonsTweening() {
-        let isATweeing = false;
-        if (this.buttonTween != null) {
-            isATweeing = this.buttonTween.isPlaying();
-        }
-
-        if (gTween != null) {
-            isATweeing = gTween.isPlaying();
-        }
-
-        return isATweeing;
-    }
-
-    hideAllButtons() {
-        if (!this.areButtonsTweening()) {
-
-            let where = this.sys.game.canvas.height + 150;
-
-            this.hideTopPlaySoundButtons(this.buttonY + where);
-
-            this.showButton(this.c_btnHelp, this.buttonY + where, this.c_btnHelp.x);
-
-            this.hideTopRowOfButtons(this.buttonY2 + where);
-
-        }
     }
 
     // I some times won't need with either full screen or the settings button.
@@ -647,38 +670,42 @@ class MenuOverlay extends Phaser.Scene {
 
     update(time, delta) {
         if (this._SHOWFPS) {
-            this.fpsText.setText('FPS: ' + (1000 / delta).toFixed(1));
+            this.fpsText.setText((1000 / delta).toFixed(1));
         }
 
-        if (!isKaiOS) {
-            let left = Phaser.Input.Keyboard.JustDown(AAControls.AKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.left);
-            let right = Phaser.Input.Keyboard.JustDown(AAControls.DKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.right);
-
-            let up = Phaser.Input.Keyboard.JustDown(AAControls.WKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.up);
-            let down = Phaser.Input.Keyboard.JustDown(AAControls.SKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.down);
-
-            if (right) {
-                this.navigateDirectionToButton(1);
-                AAControls.right = 0;
-            } else if (left) {
-                this.navigateDirectionToButton(-1);
-                AAControls.left = 0;
-            }
-
-            if (down) {
-                this.navigateDirectionToButton(3);
-                AAControls.right = 0;
-            } else if (up) {
-                this.navigateDirectionToButton(-3);
-                AAControls.left = 0;
-            }
-
-            let click = Phaser.Input.Keyboard.JustDown(AAControls.spacebar) || Phaser.Input.Keyboard.JustDown(AAControls.returnKey);
-            if (click) {
-                this.buttons[this.currentActiveButton].first.pointerUp(null);
-            }
-
+        //Yup...this ia a hack but ti works
+        if (!AAPrefs.playAudio) {
+            this.audioOffImage.y = this.btnSound.y;
         }
+        // if (!gIsTouchDevice) {
+        //     let left = Phaser.Input.Keyboard.JustDown(AAControls.AKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.left);
+        //     let right = Phaser.Input.Keyboard.JustDown(AAControls.DKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.right);
+
+        //     let up = Phaser.Input.Keyboard.JustDown(AAControls.WKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.up);
+        //     let down = Phaser.Input.Keyboard.JustDown(AAControls.SKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.down);
+
+        //     if (right) {
+        //         this.navigateDirectionToButton(1);
+        //         AAControls.right = 0;
+        //     } else if (left) {
+        //         this.navigateDirectionToButton(-1);
+        //         AAControls.left = 0;
+        //     }
+
+        //     if (down) {
+        //         this.navigateDirectionToButton(3);
+        //         AAControls.right = 0;
+        //     } else if (up) {
+        //         this.navigateDirectionToButton(-3);
+        //         AAControls.left = 0;
+        //     }
+
+        //     let click = Phaser.Input.Keyboard.JustDown(AAControls.spacebar) || Phaser.Input.Keyboard.JustDown(AAControls.returnKey);
+        //     if (click) {
+        //         this.buttons[this.currentActiveButton].first.pointerUp(null);
+        //     }
+
+        // }
         // if (this.debugInfo) {
         //     this.debugInfo.setText([
         //         'GameData.rockcount: ' + GameData.rockCount
@@ -687,7 +714,7 @@ class MenuOverlay extends Phaser.Scene {
         //     // this.debugText.text = gGameState.toString();
         // }
     }
-   
+
 
     navigateDirectionToButton(dir) {
 
@@ -699,7 +726,7 @@ class MenuOverlay extends Phaser.Scene {
         nextButton = Phaser.Math.Clamp(nextButton, 0, this.buttons.length - 1);
         if (this.buttons[nextButton].visible == true) {
             this.buttons[this.currentActiveButton].first.deselect();
-         
+
             this.buttons[nextButton].first.select(true);
             this.currentActiveButton = nextButton;
 
@@ -798,20 +825,26 @@ class MenuOverlay extends Phaser.Scene {
 
     disablePause() {
         this.pauseEnabled = false
-        this.btnPause.setVisible(false);
+       // this.btnPause.setVisible(false);
     }
 
-    hideTopPlaySoundButtons(_y) {
-        this.showButton(this.c_btnSound, _y, this.c_btnSound.x);
-        this.showButton(this.c_btnPlay, _y, this.c_btnPlay.x);
-    }
+    // hideTopPlaySoundButtons(_y) {
 
-    hideTopRowOfButtons(_y) {
-        this.showButton(this.c_btnSettings, _y, this.c_btnSettings.x);
-        this.showButton(this.c_btnMoreGames, _y, this.c_btnMoreGames.x);
-        this.showButton(this.c_btnFullScreen, _y, this.c_btnFullScreen.x);
+    //     this.showButton(this.c_btnSound, _y, this.c_btnSound.x);
+    //     setTimeout(() => {
+    //         this.showButton(this.c_btnPlay, _y, this.c_btnPlay.x);
+    //     }, 50);
+    // }
 
-    }
+    // hideTopRowOfButtons(_y) {
+    //     this.showButton(this.c_btnSettings, _y, this.c_btnSettings.x);
+    //     setTimeout(() => {
+    //         this.showButton(this.c_btnMoreGames, _y, this.c_btnMoreGames.x);
+    //     }, 50);
+    //     setTimeout(() => {
+    //         this.showButton(this.c_btnFullScreen, _y, this.c_btnFullScreen.x);
+    //     }, 100);
+    // }
 
 
     // **************************************************************************
@@ -820,9 +853,7 @@ class MenuOverlay extends Phaser.Scene {
     // Button CALLBACKS
     // **************************************************************************
     action_BtnPlay(state) {
-        if (this.areButtonsTweening()) {
-            return;
-        }
+
         if (state == 'up') {
             this.playBtnSnd();
 
@@ -831,18 +862,19 @@ class MenuOverlay extends Phaser.Scene {
                 case states.kSTATE_PAUSED:
                     this.resetFromGame();
                     break;
-                case states.kSTATE_GAMEOVER:
-                    this.reset();
-                    break;
-                case states.kSTATE_HELP:
-                    this.resetFromHelpBackButton("HelpScene");
-                    break;
-                case states.kSTATE_MENU:
-                    this.reset();
 
+                case states.kSTATE_MENU:
+                case states.kSTATE_GAMEOVER:
+                    this.playGame();
                     break;
+
+                case states.kSTATE_HELP:
+                    this.backToMenu("HelpScene");
+                    break;
+
+
                 default:
-                    this.reset();
+                    this.playGame();
                     break
             }
 
@@ -850,9 +882,7 @@ class MenuOverlay extends Phaser.Scene {
     }
 
     action_btnSound(_state) {
-        if (this.areButtonsTweening()) {
-            return;
-        }
+
         if (_state == 'up') {
             this.playBtnSnd();
 
@@ -860,22 +890,22 @@ class MenuOverlay extends Phaser.Scene {
 
             if (AAPrefs.playAudio == true) {
                 // If we playAudio we flip the frame of the button to show the ON state when up and the OFF state when pressed         
-                this.btnSound.setFrames('btnSoundOn.png', 'btnSoundOff.png', 'btnSoundOn.png');
+                //this.btnSound.setFrames('btnSoundOn.png', 'btnSoundOff.png', 'btnSoundOn.png');
                 AAKaiAnalytics.sendEvent("soundOn");
             } else {
                 // This will display the the OFF state when up and the ON state when pressed
-                this.btnSound.setFrames('btnSoundOff.png', 'btnSoundOn.png', 'btnSoundOff.png');//, 'btn_sound_off.png');
+                // this.btnSound.setFrames('btnSoundOff.png', 'btnSoundOn.png', 'btnSoundOff.png');//, 'btn_sound_off.png');
                 AAKaiAnalytics.sendEvent("soundOff");
             }
-            AAFunctions.tweenBounce(this, this.c_btnSound);
+            this.audioOffImage.setVisible(!AAPrefs.playAudio);
+
+            AAFunctions.tweenBounce(this, this.btnSound);
 
         }
     }
 
     action_btnPause(_state) {
-        if (this.areButtonsTweening()) {
-            return;
-        }
+
         if (_state == 'up') {
             this.playBtnSnd();
 
@@ -885,22 +915,22 @@ class MenuOverlay extends Phaser.Scene {
 
                 gGameState = states.kSTATE_PAUSED;
 
-                this.showButton(this.c_btnHelp, this.buttonY, this.c_btnHelp.x);
-                this.showButton(this.c_btnSound, this.buttonY, this.c_btnSound.x);
+                // this.showButton(this.c_btnHelp, this.buttonY, this.c_btnHelp.x);
+                // this.showButton(this.c_btnSound, this.buttonY, this.c_btnSound.x);
 
                 this.pauseImage.setVisible(true);
                 AAFunctions.tweenBounce(this, this.pauseImage);
-                (<SponsorOverlay>this.scene.get("SponsorOverlay")).showBanner();
+                // (<SponsorOverlay>this.scene.get("SponsorOverlay")).showBanner();
                 game.scene.pause("GameScene");
                 AAKaiAnalytics.sendEvent("pause");
 
             } else if (gGameState == states.kSTATE_PAUSED) {
 
                 gGameState = states.kSTATE_PLAYING;
-                this.showButton(this.c_btnHelp, this.buttonY + this.kHideDistance, this.c_btnHelp.x);
-                this.showButton(this.c_btnSound, this.buttonY + this.kHideDistance, this.c_btnSound.x);
+                // this.showButton(this.c_btnHelp, this.buttonY + this.kHideDistance, this.c_btnHelp.x);
+                // this.showButton(this.c_btnSound, this.buttonY + this.kHideDistance, this.c_btnSound.x);
                 this.pauseImage.setVisible(false);
-                (<SponsorOverlay>this.scene.get("SponsorOverlay")).hideBanner();
+                // (<SponsorOverlay>this.scene.get("SponsorOverlay")).hideBanner();
                 game.scene.resume("GameScene");
                 AAKaiAnalytics.sendEvent("resume");
             }
@@ -908,9 +938,7 @@ class MenuOverlay extends Phaser.Scene {
     }
 
     action_BtnHelpBack(_state) {
-        if (this.areButtonsTweening()) {
-            return;
-        }
+
         if (_state == 'up') {
             this.playBtnSnd();
 
@@ -918,49 +946,62 @@ class MenuOverlay extends Phaser.Scene {
             //  It's just easier this way.
             this.gameoverSprite.setVisible(false);
 
+
+
             switch (gGameState) {
                 case states.kSTATE_MENU:
                     this.scene.get("MenuScene").scene.start("HelpScene");
                     gGameState = states.kSTATE_HELP;
 
-                    this.hideTopPlaySoundButtons(this.buttonY + this.kHideDistance);
 
-                    this.hideTopRowOfButtons(this.buttonY2 + this.kHideDistance);
+                    this.hideNumberTags(this.tags);
+                    this.hideAllButtons(() => {
+                        this.hideButtonBG(() => {
+                            this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
+                            this.showButtonBG(() => {
+                                this.showNumberTags(this.tags[0]);
+                                this.showSpecificButtons([this.btnHelp], () => { });
+                            });
+                        });
+                    });
 
-                    this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
-                    (<SponsorOverlay>this.scene.get("SponsorOverlay")).hideBanner(); AAFunctions.tweenBounce(this, this.c_btnHelp);
+                    (<SponsorOverlay>this.scene.get("SponsorOverlay")).hideBanner();
                     AAKaiAnalytics.sendEvent("help");
                     break;
 
                 case states.kSTATE_GAMEOVER:
 
-                    this.btnHelp.setTexture('spriteAtlas', 'btnHelp.png');
+                    this.hideNumberTags(this.tags);
+                    this.hideAllButtons(() => {
+                        this.hideButtonBG(() => {
+                            this.btnHelp.setTexture('spriteAtlas', 'btnHelp.png');
+                            this.showButtonBG(() => {
+                                this.scene.get("GameScene").scene.start("MenuScene");
+                                gGameState = states.kSTATE_MENU;
+                                this.showNumberTags(this.tags);
+                                this.showSpecificButtons(this.buttons, () => { });
+                            });
+                        });
+                    });
 
-                    AAFunctions.tweenBounce(this, this.c_btnPlay);
-                    AAFunctions.tweenBounce(this, this.c_btnHelp);
-
-                    this.hideTopRowOfButtons(this.buttonY2);
-
-                    this.scene.get("GameScene").scene.start("MenuScene");
-                    gGameState = states.kSTATE_MENU;
                     AAKaiAnalytics.sendEvent("back-gameover");
                     break;
 
                 case states.kSTATE_MOREGAMES:
-                    this.resetFromHelpBackButton("MoreGamesScene");
-                    break;
+                    this.backToMenu("MoreGamesScene");
                 case states.kSTATE_SETTINGS:
-                    this.resetFromHelpBackButton("SettingsScene");
+                    this.backToMenu("SettingsScene");
                     break;
-
                 case states.kSTATE_PAUSED:
                 case states.kSTATE_HELP:
-                    this.action_BtnPlay("up");
+                    this.backToMenu("HelpScene");
                     break;
             }
             this.scene.bringToTop();
         }
     }
+
+
 
     action_btnFullscreen(_state) {
         if (kSHOW_FULLSCREEN_BUTTON) {
@@ -980,57 +1021,210 @@ class MenuOverlay extends Phaser.Scene {
     }
 
     action_btnSettings(_state) {
-        if (gGameState == states.kSTATE_MENU) {
-            if (_state == 'up') {
-                this.playBtnSnd();
+        // if (gGameState == states.kSTATE_MENU) {
+        if (_state == 'up') {
+            this.playBtnSnd();
 
-                this.scene.get("MenuScene").scene.start("SettingsScene");
-                gGameState = states.kSTATE_SETTINGS;
+            this.scene.get("MenuScene").scene.start("SettingsScene");
+            gGameState = states.kSTATE_SETTINGS;
 
-                this.hideTopPlaySoundButtons(this.buttonY + this.kHideDistance);
-                this.hideTopRowOfButtons(this.buttonY2 + this.kHideDistance);
+            this.hideNumberTags(this.tags);
+            this.hideAllButtons(() => {
+                this.hideButtonBG(() => {
+                    this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
+                    this.showButtonBG(() => {
+                        this.showNumberTags(this.tags[0]);
+                        this.showSpecificButtons([this.btnHelp], () => { });
+                    });
+                });
+            });
 
-                this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
-                (<SponsorOverlay>this.scene.get("SponsorOverlay")).hideBanner(); AAFunctions.tweenBounce(this, this.c_btnHelp);
-                AAKaiAnalytics.sendEvent("settings");
+            (<SponsorOverlay>this.scene.get("SponsorOverlay")).hideBanner();
+            AAKaiAnalytics.sendEvent("settings");
 
-            }
         }
+        // }
     }
     action_btnMoreGames(_state) {
+        if (_state == 'up') {
+            this.playBtnSnd();
+
+            this.scene.get("MenuScene").scene.start("MoreGamesScene");
+            gGameState = states.kSTATE_MOREGAMES;
+
+            this.hideNumberTags(this.tags);
+            this.hideAllButtons(() => {
+                this.hideButtonBG(() => {
+                    this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
+                    this.showButtonBG(() => {
+                        this.showNumberTags(this.tags[0]);
+                        this.showSpecificButtons([this.btnHelp], () => { });
+                    });
+                });
+            });
+
+            (<SponsorOverlay>this.scene.get("SponsorOverlay")).hideBanner();
+            AAKaiAnalytics.sendEvent("moregames");
+
+        }
+    }
+
+    //V2 ==================================================
+
+    action_btnResetGame(_state) {
         if (gGameState == states.kSTATE_MENU) {
             if (_state == 'up') {
                 this.playBtnSnd();
-
-                this.scene.get("MenuScene").scene.start("MoreGamesScene");
-                gGameState = states.kSTATE_MOREGAMES;
-
-                this.hideTopPlaySoundButtons(this.buttonY + this.kHideDistance);
-                this.hideTopRowOfButtons(this.buttonY2 + this.kHideDistance);
-
-
-                this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
-                (<SponsorOverlay>this.scene.get("SponsorOverlay")).hideBanner(); AAFunctions.tweenBounce(this, this.c_btnHelp);
-                AAKaiAnalytics.sendEvent("moregames");
-
+                this.gameover();
             }
         }
     }
 
-    
-    // action_sponsorButton(_state) {
-    //     if (_state == 'up') {
+    showResetButton(how) {
+        //this.btnResetGame.setVisible(how);
+        let bY = this.cameras.main.height - 5;
+        if (how === false) {
+            bY = this.cameras.main.height + 25;
+        }
+        // this.btnResetGame.setVisible(true);
+        this.tweens.add({
+            targets: this.btnResetGame,
+            y: bY,
+            duration: 200,
+            ease: 'Sine.easeInOut',
+        })
+    }
 
-    //         // If the fullscreen ad is showing then do not accidently
-    //         // click on the banner ad since that ad could be different
-    //         // and it's just plain wrong and will cause user confusion
-    //         if (!gAdShowing) {
-    //             this.playBtnSnd();
-    //             AAKaiAds.theBannerAd.call('click');
-    //         }
-    //     }
-    // }
+    backToMenu(fromWhere) {
+        this.hideNumberTags(this.tags[0]);
 
+        this.hideSpecificButtons([this.btnHelp], () => {
+            this.hideButtonBG(() => {
+                this.scene.get(fromWhere).scene.start("MenuScene");
+
+                // hide the reset button
+
+
+                this.btnHelp.setTexture('spriteAtlas', 'btnHelp.png');
+
+                if (this.pauseEnabled) {
+                    this.btnPause.setVisible(false);
+                    this.pauseImage.setVisible(false);
+                }
+                //hide the game over sprite
+                this.gameoverSprite.setVisible(false);
+
+                this.showButtonBG(() => {
+                    this.showNumberTags(this.tags);
+                    this.showSpecificButtons(this.buttons, () => {
+                        gGameState = states.kSTATE_MENU;
+
+                        if (false == this.scoreText.visible) {
+                            this.scoreText.setVisible(true);
+                            this.highScoreText.setVisible(true);
+                        }
+                        (<SponsorOverlay>this.scene.get("SponsorOverlay")).showBanner();
+                    });
+
+                });
+            });
+        });
+    }
+
+    hideNumberTags(theTags) {
+        this.tweens.add({
+            targets: theTags,
+            y: this.game.canvas.height + 20,
+            duration: 200,
+            ease: 'Sine.easeInOut',
+            delay: (<any>this.tweens).stagger(50)
+        });
+    }
+
+    showNumberTags(theTags) {
+        this.tweens.add({
+            targets: theTags,
+            y: this.buttonY - this.tagVOffset,
+            duration: 200,
+            ease: 'Sine.easeInOut',
+            delay: (<any>this.tweens).stagger(50)
+        });
+    }
+    hideScores(how) {
+        // BOWLING SPECIFIC 
+        this.scoreText.visible = how;
+        this.highScoreText.visible = how;
+    }
+    hideAllButtons(theCallback) {
+
+        this.showResetButton(false);
+        // if (AAPrefs.playAudio){
+        //     this.audioOffImage.setVisible(false);
+        // }
+        this.tweens.add({
+            targets: this.buttons,
+            y: this.game.canvas.height + 50,
+            duration: 200,
+            ease: 'Sine.easeInOut',
+            delay: (<any>this.tweens).stagger(5),
+            onComplete: () => {
+                //this.showSpecificButtons(showList);
+                theCallback();
+            }
+        });
+    }
+
+    hideButtonBG(theCallback) {
+
+        this.tweens.add({
+            targets: this.buttonBG,
+            x: -this.game.canvas.width - 50,
+            duration: 100,
+            ease: 'Sine.easeInOut',
+            onComplete: () => { theCallback(); }
+        });
+    }
+
+    showButtonBG(theCallback) {
+        this.tweens.add({
+            targets: this.buttonBG,
+            x: 0,//this.game.canvas.width / 2,
+            duration: 100,
+            ease: 'Sine.easeInOut',
+            onComplete: () => {
+                theCallback();
+            },
+            callbackScope: this
+        });
+    }
+
+
+    hideSpecificButtons(theButtons, theFunction) {
+        this.tweens.add({
+            targets: theButtons,
+            y: this.game.canvas.height + 50,
+            duration: 200,
+            ease: 'Sine.easeInOut',
+            delay: (<any>this.tweens).stagger(50),
+            onComplete: () => {
+                theFunction(theFunction);
+            }
+        });
+    }
+
+    showSpecificButtons(theButtons, theCallback) {
+        this.tweens.add({
+            targets: theButtons,
+            y: this.buttonY,
+            duration: 200,
+            ease: 'Sine.easeInOut',
+            delay: (<any>this.tweens).stagger(50),
+            onComplete: () => {
+                theCallback();
+            }
+        });
+
+    }
 }//end scene
 
 

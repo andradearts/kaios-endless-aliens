@@ -327,7 +327,7 @@ var MoreGamesScene = /** @class */ (function (_super) {
         // add the icons
         // should be in AAShared in the future!
         // and SHOULD be an html file
-        var element = this.add.dom(0, 80).createFromCache('moreGamesHTML').setOrigin(0, 0);
+        var element = this.add.dom(0, 10).createFromCache('moreGamesHTML').setOrigin(0, 0);
         this.add.image(this.sys.canvas.width / 2, this.sys.canvas.height - 70, 'spriteAtlas', 'kaiStore.png');
         if (gRunnngInBrowser) {
             //display link to website taara.games
@@ -405,13 +405,18 @@ var PreloadScene = /** @class */ (function (_super) {
         this.load.setPath("assets/html/");
         this.load.html('moreGamesHTML', 'moregames.html');
         this.load.html('newgameHTML', 'newgame.html');
+        var touchExt = '-v2';
+        if (kTOUCH === 1) {
+            touchExt = '_TP';
+        }
         // Spritesheets
         this.load.setPath("assets/images/");
-        this.load.atlas("spriteAtlas", "spriteAtlas.png", "spriteAtlas.json", null, null);
+        this.load.atlas("spriteAtlas", "spriteAtlas" + touchExt + ".png", "spriteAtlas" + touchExt + ".json", null, null);
         // this.load.image('coverart', 'coverart.png');
         //Fonts
         this.load.image('numbersFont', 'numbers@2x.png');
-        this.load.bitmapFont('sysFont', 'retroSystem.png', 'retroSystem.fnt', null, null);
+        // this.load.bitmapFont('sysFont', 'retroSystem.png', 'retroSystem.fnt', null, null);
+        this.load.bitmapFont('sysFont', '8bitfont_0.png', '8bitfont.fnt', null, null);
         //Sound Effects
         this.load.setPath("assets/audio/");
         var ext = '.ogg';
@@ -436,31 +441,6 @@ var PreloadScene = /** @class */ (function (_super) {
             element.style.filter = 'alpha(opacity=' + op * 100 + ")";
             op -= op * 0.3;
         }, 50);
-        // switch (true) {
-        //     // this.sys.game.device.os.chromeOS     // Is running on chromeOS?
-        //     // this.sys.game.device.os.cordova      // Is the game running under Apache Cordova?
-        //     // this.sys.game.device.os.crosswalk    // Is the game running under the Intel Crosswalk XDK?
-        //     // this.sys.game.device.os.ejecta       // Is the game running under Ejecta?
-        //     // this.sys.game.device.os.electron     // Is the game running under GitHub Electron?
-        //     case this.sys.game.device.os.desktop:      // Is running on a desktop?
-        //     case this.sys.game.device.os.android:     // Is running on android?
-        //     case this.sys.game.device.os.iOS:         // Is running on iOS?
-        //     case this.sys.game.device.os.iPad:        // Is running on iPad?
-        //     case this.sys.game.device.os.iPhone:       // Is running on iPhone?
-        //     case this.sys.game.device.os.kindle:      // Is running on an Amazon Kindle?
-        //     case this.sys.game.device.os.linux:     // Is running on linux?
-        //     case this.sys.game.device.os.macOS:    // Is running on macOS?
-        //     case this.sys.game.device.os.webApp:   // Set to true if running as a WebApp, i.e. within a case WebView
-        //     case this.sys.game.device.os.windows:      // Is running on windows?
-        //     case this.sys.game.device.os.windowsPhone: // Is running on a Windows Phone?
-        //     // this.sys.game.device.os.node         // Is the game running under Node.js?
-        //     // this.sys.game.device.os.nodeWebkit   // Is the game running under Node-/Webkit?
-        //     case gRunnngInBrowser:
-        //         this.scene.start('SponsorOverlay');
-        //         break;
-        // }
-        // AAKaiAds.displayFullscreenAd();
-        // AAKaiAds.preLoadDisplayAd();
     };
     return PreloadScene;
 }(Phaser.Scene));
@@ -470,8 +450,12 @@ var MenuOverlay = /** @class */ (function (_super) {
         var _this = _super.call(this, { key: 'MenuOverlay' }) || this;
         // debugText;
         // debugInfo;
+        // v2 ================================================================
+        _this.tagVOffset = 23;
+        _this.tags = [];
+        //end v2 ================================================================
         _this.kHideDistance = 350;
-        _this._SHOWFPS = false;
+        _this._SHOWFPS = true;
         _this.pauseEnabled = false;
         _this.currentActiveButton = 4; // start on the play button
         return _this;
@@ -481,18 +465,21 @@ var MenuOverlay = /** @class */ (function (_super) {
         AAPrefs.initGamePrefs(gamePrefsFile);
         AAHighScores.initHighScores();
         // AAKaiAds.displayFullscreenAd();
-        AAKaiAds.preLoadBannerAd();
-    };
-    MenuOverlay.prototype.create = function () {
-        if (isKaiOS) {
+        //AAKaiAds.preLoadBannerAd();
+        if (!gIsTouchDevice) {
             AAKaiControls.setUpInputs(this);
             emitter.on('keydown', this.keydown, this);
             emitter.on('keyup', this.keyup, this);
         }
-        else {
-            AAControls.setUpInputs(this);
-        }
+    };
+    MenuOverlay.prototype.create = function () {
+        // else {
+        //     AAControls.setUpInputs(this);
+        // }
         // this.cursors = this.input.keyboard.createCursorKeys();
+        if (kTOUCH == 1) {
+            this.kHideDistance = 400;
+        }
         this.setUpAudio();
         this.setUpUI();
         gGameState = states.kSTATE_MENU;
@@ -537,14 +524,13 @@ var MenuOverlay = /** @class */ (function (_super) {
             case "5": //play
             case "#": //fullscreen
             case "8": //sponsor
+            case "SoftLeft":
+            case "SoftRight":
                 theKeyEvent.preventDefault();
                 break;
         }
     };
     MenuOverlay.prototype.keyup = function (theKeyEvent) {
-        if ((this.transitioning) || (AAFunctions.areButtonsBouncing())) {
-            return;
-        }
         var theKey = theKeyEvent.key;
         switch (gGameState) {
             case states.kSTATE_MENU:
@@ -564,9 +550,9 @@ var MenuOverlay = /** @class */ (function (_super) {
                 this.checkHelpControls(theKey);
                 break;
         }
-        if (theKeyEvent.key == "SoftRight") {
+        if ((theKeyEvent.key == "SoftRight") || (theKeyEvent.key == "8")) {
             // this.action_sponsorButton("up");
-            this.scene.get("SponsorOverlay").action_sponsorButton("up");
+            this.visitSponsor();
         }
         if (theKeyEvent.key == "Backspace") {
             switch (gGameState) {
@@ -578,8 +564,10 @@ var MenuOverlay = /** @class */ (function (_super) {
                     break;
                 case states.kSTATE_GAMEOVER:
                 case states.kSTATE_PLAYING:
-                    this.showButton(this.c_btnHelp, this.buttonY, this.c_btnHelp.x);
-                    this.resetByBackSpace();
+                    this.showResetButton(false);
+                    this.playBtnSnd();
+                    AAKaiAnalytics.sendEvent("quitgame");
+                    this.backToMenu("GameScene");
                     theKeyEvent.preventDefault();
                     break;
             }
@@ -592,6 +580,8 @@ var MenuOverlay = /** @class */ (function (_super) {
             case "5": //play
             case "#": //fullscreen
             case "8": //sponsor
+            case "SoftRight":
+            case "SoftLeft":
                 theKeyEvent.preventDefault();
                 break;
         }
@@ -599,89 +589,52 @@ var MenuOverlay = /** @class */ (function (_super) {
     MenuOverlay.prototype.setUpAudio = function () {
         this.sfxButton = this.sound.add('button');
     };
-    MenuOverlay.prototype.resetByBackSpace = function () {
-        this.playBtnSnd();
-        AAKaiAnalytics.sendEvent("quitgame");
-        this.resetToMenu();
-    };
     //Set the game to it's initial state by initializing all the variables
-    MenuOverlay.prototype.reset = function () {
+    MenuOverlay.prototype.playGame = function () {
+        var _this = this;
         AAKaiAnalytics.sendEvent("play");
         this.gameoverSprite.setVisible(false);
-        this.hideAllButtons();
         if (this.pauseEnabled) {
             this.btnPause.setVisible(true);
         }
-        var restartFromAd = false;
-        this.scene.get("MenuScene").scene.start("GameScene", { restartFromAd: restartFromAd });
-        this.scene.get("SponsorOverlay").hideBanner();
+        this.hideNumberTags(this.tags);
+        this.hideAllButtons(function () {
+            _this.hideButtonBG(function () {
+                _this.scene.get("MenuScene").scene.start("GameScene");
+            });
+        });
     };
     MenuOverlay.prototype.resetFromGame = function () {
         AAKaiAnalytics.sendEvent("back-paused");
-        this.resetToMenu();
+        // this.resetToMenu();
+        this.showResetButton(false);
         this.scene.stop('GameScene');
-    };
-    MenuOverlay.prototype.resetFromHelpBackButton = function (_theScene) {
-        if ((this.transitioning) || (AAFunctions.areButtonsBouncing())) {
-            return;
-        }
-        this.playBtnSnd();
-        gGameState = states.kSTATE_MENU;
-        this.hideTopPlaySoundButtons(this.buttonY);
-        this.hideTopRowOfButtons(this.buttonY2);
-        this.btnHelp.setTexture('spriteAtlas', 'btnHelp.png');
-        AAFunctions.tweenBounce(this, this.c_btnHelp);
-        if (false == this.scoreText.visible) {
-            this.scoreText.setVisible(true);
-            this.highScoreText.setVisible(true);
-        }
-        this.scene.get("SponsorOverlay").showBanner();
-        this.scene.get(_theScene).scene.start("MenuScene");
-        AAKaiAnalytics.sendEvent("back-help");
-    };
-    MenuOverlay.prototype.resetToMenu = function () {
-        if (this.transitioning) {
-            return;
-        }
-        gGameState = states.kSTATE_MENU;
-        //hide the game over sprite
-        this.gameoverSprite.setVisible(false);
-        AAFunctions.tweenBounce(this, this.c_btnHelp);
-        this.btnHelp.setTexture('spriteAtlas', 'btnHelp.png');
-        this.hideTopPlaySoundButtons(this.buttonY);
-        this.hideTopRowOfButtons(this.buttonY2);
-        if (this.pauseEnabled) {
-            this.btnPause.setVisible(false);
-            this.pauseImage.setVisible(false);
-        }
-        // this.btnPause.setVisible(false);
-        this.scene.get("GameScene").scene.start("MenuScene");
-        this.scene.get("SponsorOverlay").showBanner();
+        this.backToMenu("GameScene");
     };
     MenuOverlay.prototype.gameover = function () {
+        var _this = this;
         gGameState = states.kSTATE_GAMEOVER;
+        // Make sure the correct texture for hte back button is being used.
         this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
-        //Show the reset button
-        this.showButtons(true);
+        this.showButtonBG(function () {
+            _this.showNumberTags(_this.tags);
+            _this.showSpecificButtons(_this.buttons, function () { });
+        });
         // Hide the pause button
         if (this.pauseEnabled) {
             this.btnPause.setVisible(false);
         }
         // show the gameover image
-        // I don't need to store it since I'm just restarting the scene
         this.gameoverSprite.setVisible(true);
         AAFunctions.tweenBounce(this, this.gameoverSprite);
         this.singlePress = true;
-        this.scene.get("SponsorOverlay").showBanner();
     };
     MenuOverlay.prototype.checkForPause = function (theKey) {
         if (this.pauseEnabled) {
-            if (!this.areButtonsTweening()) {
-                // if (Phaser.Input.Keyboard.JustDown(this.pauseKey)) {
-                if (theKey == "*") {
-                    this.singlePress = true;
-                    this.action_btnPause("up");
-                }
+            // if (Phaser.Input.Keyboard.JustDown(this.pauseKey)) {
+            if (theKey == "*") {
+                this.singlePress = true;
+                this.action_btnPause("up");
             }
         }
     };
@@ -691,20 +644,23 @@ var MenuOverlay = /** @class */ (function (_super) {
         if (theKey == "1") {
             switch (gGameState) {
                 case states.kSTATE_HELP:
-                    this.resetFromHelpBackButton("HelpScene");
+                    this.backToMenu("HelpScene");
                 case states.kSTATE_MOREGAMES:
-                    this.resetFromHelpBackButton("MoreGamesScene");
+                    this.backToMenu("MoreGamesScene");
                     break;
                 case states.kSTATE_SETTINGS:
-                    this.resetFromHelpBackButton("SettingsScene");
+                    this.backToMenu("SettingsScene");
                     break;
             }
             this.singlePress = true;
         }
-        if (theKey == "*") {
-            this.singlePress = true;
-            this._SHOWFPS = !this._SHOWFPS;
-            this.fpsText.visible = !this.fpsText.visible;
+        // Display the FPS eater egg
+        if (kTOUCH == 0) {
+            if (theKey == "*") {
+                this.singlePress = true;
+                this._SHOWFPS = !this._SHOWFPS;
+                this.fpsText.visible = !this.fpsText.visible;
+            }
         }
     };
     MenuOverlay.prototype.checkPauseControls = function (theKey) {
@@ -719,6 +675,7 @@ var MenuOverlay = /** @class */ (function (_super) {
         ;
         switch (theKey) {
             case "8":
+            case "SoftRight":
                 this.visitSponsor();
                 break;
             case "2":
@@ -735,9 +692,9 @@ var MenuOverlay = /** @class */ (function (_super) {
                 // }
                 break;
             case "4":
-                if (kSHOW_SETTINGS_BUTTON) {
-                    this.btnSettings.pointerUp(null);
-                }
+                // if (kSHOW_SETTINGS_BUTTON) {
+                this.btnSettings.pointerUp(null);
+                // }
                 break;
             case "Enter":
             case "5":
@@ -769,146 +726,202 @@ var MenuOverlay = /** @class */ (function (_super) {
                 break;
         }
     };
-    MenuOverlay.prototype.showButton = function (who, ly, lx) {
-        var scaleSpeed = 150;
-        // reset the scales of the button to 1.0 to avoid weird scaling issues
-        who.scaleX = 1.0;
-        who.scaleY = 1.0;
-        var _y = ly;
-        var _x = lx;
-        var theEase = 'BounceInOut';
-        var xthis = this;
-        this.buttonTween = this.tweens.add({
-            targets: who,
-            y: { value: _y, duration: scaleSpeed, ease: theEase },
-            x: { value: _x, duration: scaleSpeed, ease: theEase },
-        });
-    };
+    // showButton(who, ly, lx) {
+    //     var scaleSpeed = 250;
+    //     // reset the scales of the button to 1.0 to avoid weird scaling issues
+    //     who.scaleX = 1.0;
+    //     who.scaleY = 1.0;
+    //     let _y = ly;
+    //     let _x = lx;
+    //     let theEase = 'BounceInOut'
+    //     let xthis = this;
+    //     this.buttonTween = this.tweens.add({
+    //         targets: who,
+    //         y: { value: _y, duration: scaleSpeed, ease: theEase },
+    //         x: { value: _x, duration: scaleSpeed, ease: theEase },
+    //         // scaleX: { value: .25, duration: scaleSpeed / 1.5, ease: 'BounceInOut', yoyo: true },
+    //         // scaleY: { value: 2.5, duration: scaleSpeed / 1.5, ease: 'BounceInOut', yoyo: true },
+    //     });
+    // }
     // **************************************************************************
     // SET UP THE UI
     // **************************************************************************
     MenuOverlay.prototype.setUpUI = function () {
+        this.buttonY = 276;
+        // Set up background art for buttons
+        //v2 alpha is a png
+        //v2 final should be a grc made here
+        //this.buttonBG = this.add.image(120, this.buttonY, 'spriteAtlas', 'btnBG.png');
+        // this.buttonBG = this.make.graphics({x: 0, y: 0, add: false});
+        this.buttonBG = this.add.graphics();
+        this.buttonBG.lineStyle(3, 0x5C5822, 1);
+        this.buttonBG.fillStyle(0xFBED62, 1);
+        //  32px radius on the corners
+        this.buttonBG.fillStyle(0x5C5822, 1);
+        this.buttonBG.fillRoundedRect(4, 250, 232, 52, 23);
+        this.buttonBG.fillStyle(0xFBED62, 1);
+        this.buttonBG.fillRoundedRect(7, 253, 226, 46, 20);
+        this.buttonBG.alpha = .63;
         var isVis = true;
         var numBadge;
         // Play Button #######################################################################
         this.btnPlay = new Button(this, 0, 0, 'spriteAtlas', 'btnPlay.png', this.action_BtnPlay, "play", true).setVisible(isVis);
-        numBadge = this.add.image(0, -25, "spriteAtlas", "tag5.png").setVisible(isKaiOS);
-        this.c_btnPlay = this.add.container(0, 0, [this.btnPlay, numBadge]).setVisible(isVis);
+        // if (kTOUCH == 0) {
+        //     this.c_btnPlay = this.add.container(0, 0, [this.btnPlay, numBadge]).setVisible(isVis);
+        // }
+        // else {
+        //     this.c_btnPlay = this.add.container(0, 0, [this.btnPlay]).setVisible(isVis);
+        // }
         // Sound Button #######################################################################
         var whichButton = 'btnSoundOff.png';
-        if (AAPrefs.playAudio) {
-            whichButton = 'btnSoundOn.png';
-        }
-        this.btnSound = new Button(this, 0, 5, 'spriteAtlas', whichButton, this.action_btnSound, "sound", true).setVisible(isVis);
-        numBadge = this.add.image(0, -14, "spriteAtlas", "tag3.png").setVisible(isKaiOS);
-        this.c_btnSound = this.add.container(this.cameras.main.width - 10, this.cameras.main.height - 10, [this.btnSound, numBadge]).setVisible(isVis);
+        // if (AAPrefs.playAudio) {
+        //     whichButton = 'btnSoundOn.png';
+        // }
+        this.btnSound = new Button(this, 0, 5, 'spriteAtlas', 'btnSoundOn.png', this.action_btnSound, "sound", true).setVisible(isVis);
+        // if (kTOUCH == 0) {
+        //     numBadge = this.add.image(0, -14, "spriteAtlas", "tag3.png").setVisible(gIsTouchDevice);
+        //     this.c_btnSound = this.add.container(this.cameras.main.width - 10, this.cameras.main.height - 10, [this.btnSound, numBadge]).setVisible(isVis);
+        // } else {
+        //     this.c_btnSound = this.add.container(this.cameras.main.width - 10, positionVert, [this.btnSound]).setVisible(isVis);
+        // }
         // Help/Back Button #######################################################################
         whichButton = 'btnHelp.png';
         this.btnHelp = new Button(this, 0, 5, 'spriteAtlas', whichButton, this.action_BtnHelpBack, "help", true).setVisible(true);
-        numBadge = this.add.image(0, -14, "spriteAtlas", "tag1.png").setVisible(isKaiOS);
-        this.c_btnHelp = this.add.container(15, this.cameras.main.height - 10, [this.btnHelp, numBadge]).setVisible(true);
+        // if (kTOUCH == 0) {
+        //     numBadge = this.add.image(0, -14, "spriteAtlas", "tag1.png").setVisible(gIsTouchDevice);
+        //     this.c_btnHelp = this.add.container(15, this.cameras.main.height - 10, [this.btnHelp, numBadge]).setVisible(true);
+        // } else {
+        //     this.c_btnHelp = this.add.container(15, positionVert, [this.btnHelp]).setVisible(true);
+        // }
         // Settings Button #######################################################################
         whichButton = 'btnSettings.png';
         this.btnSettings = new Button(this, 0, 5, 'spriteAtlas', whichButton, this.action_btnSettings, "settings", true).setVisible(true);
-        numBadge = this.add.image(0, -14, "spriteAtlas", "tag4.png").setVisible(isKaiOS);
-        this.c_btnSettings = this.add.container(15, this.cameras.main.height - 10, [this.btnSettings, numBadge]).setVisible(kSHOW_SETTINGS_BUTTON);
+        // if (kTOUCH == 1) {
+        //     numBadge = this.add.image(0, -14, "spriteAtlas", "tag4.png").setVisible(gIsTouchDevice);
+        //     this.c_btnSettings = this.add.container(15, this.cameras.main.height - 10, [this.btnSettings, numBadge]).setVisible(kSHOW_SETTINGS_BUTTON);
+        // } else {
+        //     this.c_btnSettings = this.add.container(15, positionVert, [this.btnSettings]).setVisible(kSHOW_SETTINGS_BUTTON);
+        // }
         // More Games Button #######################################################################
         this.btnMoreGames = new Button(this, 0, 0, 'spriteAtlas', 'btnMoreGames.png', this.action_btnMoreGames, "more", true).setVisible(isVis);
-        numBadge = this.add.image(0, -20, "spriteAtlas", "tag2.png").setVisible(isKaiOS);
-        this.c_btnMoreGames = this.add.container(0, 0, [this.btnMoreGames, numBadge]).setVisible(isVis);
+        // if (kTOUCH == 0) {
+        //     numBadge = this.add.image(0, -20, "spriteAtlas", "tag2.png").setVisible(gIsTouchDevice);
+        //     this.c_btnMoreGames = this.add.container(0, 0, [this.btnMoreGames, numBadge]).setVisible(isVis);
+        // } else {
+        //     this.c_btnMoreGames = this.add.container(0, positionVert, [this.btnMoreGames]).setVisible(isVis);
+        // }
+        // Reset Button #######################################################################
+        this.btnResetGame = new Button(this, 40, this.cameras.main.height + 25, 'spriteAtlas', 'btnResetGame.png', this.action_btnResetGame, "resetgame", true);
+        //.setVisible(true);
         // Fullscreen Button #######################################################################
-        this.btnFullscreen = new Button(this, 0, 5, 'spriteAtlas', 'btnFullscreenOn.png', this.action_btnFullscreen, "fullscreen", true).setVisible(isVis);
-        numBadge = this.add.image(0, -14, "spriteAtlas", "tag#.png").setVisible(isKaiOS);
-        this.c_btnFullScreen = this.add.container(this.cameras.main.width - 10, this.cameras.main.height - 10, [this.btnFullscreen, numBadge]).setVisible(kSHOW_FULLSCREEN_BUTTON);
+        // this.btnFullscreen = new Button(this, 0, 5, 'spriteAtlas', 'btnFullscreenOn.png', this.action_btnFullscreen, "fullscreen", true).setVisible(isVis);
+        // if (kTOUCH == 0) {
+        //     numBadge = this.add.image(0, -14, "spriteAtlas", "tag#.png").setVisible(gIsTouchDevice);
+        //     this.c_btnFullScreen = this.add.container(this.cameras.main.width - 10, this.cameras.main.height - 10, [this.btnFullscreen, numBadge]).setVisible(kSHOW_FULLSCREEN_BUTTON);
+        // } else {
+        //     this.c_btnFullScreen = this.add.container(this.cameras.main.width - 10, this.cameras.main.height - 10, [this.btnFullscreen]).setVisible(kSHOW_FULLSCREEN_BUTTON);
+        // }
         // Pause Button #######################################################################
-        whichButton = 'btnPause.png';
-        this.btnPause = new Button(this, this.cameras.main.width - 35, 20, 'spriteAtlas', whichButton, this.action_btnPause, "pause", true).setVisible(false);
+        // whichButton = 'btnPause.png';
+        // this.btnPause = new Button(this, this.cameras.main.width - 35, 20, 'spriteAtlas', whichButton, this.action_btnPause, "pause", true).setVisible(false);
         // // Sponsor Button #####################################################################
         // this.btnSponsor = new Button(this, this.sys.canvas.width - 60, this.sys.canvas.height, 'spriteAtlas', "sponsor.png", this.action_sponsorButton, "sponsor", true).setVisible(true).setOrigin(.5, 1);
         // DISPLAY BUTTONS #######################################################################
         // #######################################################################################
         // HELP -- PLAY -- SOUND
-        this.buttonY = (this.cameras.main.height - 45);
-        AAFunctions.displayButtons([this.c_btnHelp, this.c_btnPlay, this.c_btnSound], this.cameras.main, this.buttonY, 30);
-        // SETTINGS -- MORE GAMES -- FULLSCREEN
-        this.buttonY2 = (this.cameras.main.height - 105);
-        AAFunctions.displayButtons([this.c_btnSettings, this.c_btnMoreGames, this.c_btnFullScreen], this.cameras.main, this.buttonY2, 10);
-        this.buttons = [
-            this.c_btnSettings, this.c_btnMoreGames, this.c_btnFullScreen,
-            this.c_btnHelp, this.c_btnPlay, this.c_btnSound
+        var buttonOffset = 45;
+        if (kTOUCH == 1) {
+            buttonOffset *= 4;
+        }
+        //(this.cameras.main.height - buttonOffset);
+        if (kSHOW_SETTINGS_BUTTON) {
+            AAFunctions.displayButtons([this.btnHelp, this.btnMoreGames, this.btnPlay, this.btnSound, this.btnSettings], this.cameras.main, this.buttonY, -25);
+        }
+        else {
+            AAFunctions.displayButtons([this.btnHelp, this.btnMoreGames, this.btnPlay, this.btnSound], this.cameras.main, this.buttonY, -25);
+        }
+        this.tags = [
+            this.add.image(this.btnHelp.x, this.btnHelp.y - this.tagVOffset, "spriteAtlas", "tag1.png").setVisible(!gIsTouchDevice),
+            this.add.image(this.btnMoreGames.x, this.btnMoreGames.y - this.tagVOffset, "spriteAtlas", "tag2.png").setVisible(!gIsTouchDevice),
+            this.add.image(this.btnPlay.x, this.btnPlay.y - this.tagVOffset, "spriteAtlas", "tag5.png").setVisible(!gIsTouchDevice),
+            this.add.image(this.btnSound.x, this.btnSound.y - this.tagVOffset, "spriteAtlas", "tag3.png").setVisible(!gIsTouchDevice)
+            // this.add.image(this.btnSettings.x, this.btnSettings.y - this.tagVOffset, "spriteAtlas", "tag4.png").setVisible(!gIsTouchDevice)
         ];
+        //Settings Button is a special case.  Some games do have a settings buttons
+        if (kSHOW_SETTINGS_BUTTON) {
+            var settBtnTag = this.add.image(this.btnSettings.x, this.btnSettings.y - this.tagVOffset, "spriteAtlas", "tag4.png");
+            settBtnTag.setVisible(kSHOW_SETTINGS_BUTTON || !gIsTouchDevice);
+            this.tags.push(settBtnTag);
+        }
+        this.audioOffImage = this.add.image(this.btnSound.x, this.btnSound.y, 'spriteAtlas', 'btnSoundOff.png').setVisible(!AAPrefs.playAudio);
+        // SETTINGS -- MORE GAMES -- FULLSCREEN
+        if (kTOUCH == 1) {
+            this.buttonY2 = (this.cameras.main.height - 105 * 3);
+        }
+        else {
+            this.buttonY2 = (this.cameras.main.height - 105);
+        }
+        if (kSHOW_SETTINGS_BUTTON) {
+            this.buttons = [this.btnHelp, this.btnMoreGames, this.btnPlay, this.btnSound, this.btnSettings];
+        }
+        else {
+            this.buttons = [this.btnHelp, this.btnMoreGames, this.btnPlay, this.btnSound];
+        }
         // Pause Graphic #######################################################################
         this.createPauseGrc();
         // GameOver Sprite #######################################################################
         this.gameoverSprite = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2.5, 'spriteAtlas', 'gameover.png').setVisible(false);
         // Number Font #######################################################################
-        this.makeTheNumbersFont();
+        //this.makeTheNumbersFont();
         // Score Text #######################################################################
-        var scoreSize = 15 * 1.5;
-        this.scoreText = this.add.bitmapText(9, 6, 'numbersFont', '0', scoreSize).setDepth(999);
+        var scoreSize = 32; //15 * 1.5;
+        if (kTOUCH == 1) {
+            scoreSize = 32 * 2; //15 * 3;
+        }
+        this.scoreText = this.add.bitmapText(9, 6, 'sysFont', '0', scoreSize).setDepth(999);
+        //this.add.bitmapText(9, 6, 'numbersFont', '0', scoreSize).setDepth(999);
         this.scoreText.setOrigin(0);
         this.scoreText.setTint(0xffffff);
+        this.scoreText.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
         // this.scoreText.scaleX = .5;
         // this.scoreText.scaleY = .5;
         // HighScore Text #######################################################################
-        scoreSize = 8 * 1.5;
-        this.highScoreText = this.add.bitmapText(12, 25 * 1.5, 'numbersFont', AAHighScores.highScore, scoreSize).setDepth(999);
+        scoreSize = 16; //8 * 1.5;
+        var touchOffset = 1.5;
+        if (kTOUCH == 1) {
+            scoreSize = 16 * 3; //8 * 3;
+            touchOffset = 3;
+        }
+        this.highScoreText = this.add.bitmapText(9, 25 * touchOffset, 'sysFont', AAHighScores.highScore, scoreSize).setDepth(999);
+        // this.add.bitmapText(12, 25 * touchOffset, 'numbersFont', AAHighScores.highScore, scoreSize).setDepth(999);
         this.highScoreText.setOrigin(0);
         // this.highScoreText.setTint(0xcccccc);
         // this.highScoreText.scaleX = .5;
         // t5his.highScoreText.scaleY = .5;
         // FPS TEXT #######################################################################
-        this.fpsText = this.add.bitmapText(9, 80, 'numbersFont', '0.0', 15).setVisible(false);
+        this.fpsText = this.add.bitmapText(9, this.game.canvas.height / 2, 'sysFont', '0.0', 16).setVisible(this._SHOWFPS);
+        this.fpsText.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
         this.fpsText.setTint(0x666666);
         // this.debugInfo = this.add.bitmapText(10, 130, 'numbersFont', '0', scoreSize).setDepth(999);
         var element = this.add.dom(10, 90).createFromCache('newgameHTML').setOrigin(0, 0);
     };
-    MenuOverlay.prototype.makeTheNumbersFont = function () {
-        var config = {
-            image: 'numbersFont',
-            width: 40,
-            height: 40,
-            offset: { x: 0 },
-            chars: '0123456789.',
-            charsPerRow: 11
-        };
-        // I have to put the <any> here because the typescript defs have an error
-        // somewhere that won't let me use the param unless I add <any>
-        var it = Phaser.GameObjects.RetroFont.Parse(this, config);
-        this.cache.bitmapFont.add('numbersFont', it);
-    };
+    // makeTheNumbersFont() {
+    //     let config = {
+    //         image: 'numbersFont',
+    //         width: 40,
+    //         height: 40,
+    //         offset: { x: 0 },
+    //         chars: '0123456789.',
+    //         charsPerRow: 11
+    //     };
+    //     // I have to put the <any> here because the typescript defs have an error
+    //     // somewhere that won't let me use the param unless I add <any>
+    //     let it = Phaser.GameObjects.RetroFont.Parse(this, <any>config);
+    //     this.cache.bitmapFont.add('numbersFont', it);
+    // }
     MenuOverlay.prototype.playBtnSnd = function () {
         if (AAPrefs.playAudio == true)
             this.sfxButton.play();
-    };
-    MenuOverlay.prototype.showButtons = function (isGameOver) {
-        if (!this.areButtonsTweening()) {
-            if (isGameOver) {
-                this.showButton(this.c_btnSound, this.buttonY, this.c_btnSound.x);
-                this.showButton(this.c_btnHelp, this.buttonY, this.c_btnHelp.x);
-            }
-            this.showButton(this.c_btnPlay, this.buttonY, this.c_btnPlay.x);
-            // Hilight and select the button to make the keyboard work
-            //this.btnPlay.select(false);
-        }
-    };
-    MenuOverlay.prototype.areButtonsTweening = function () {
-        var isATweeing = false;
-        if (this.buttonTween != null) {
-            isATweeing = this.buttonTween.isPlaying();
-        }
-        if (gTween != null) {
-            isATweeing = gTween.isPlaying();
-        }
-        return isATweeing;
-    };
-    MenuOverlay.prototype.hideAllButtons = function () {
-        if (!this.areButtonsTweening()) {
-            var where = this.sys.game.canvas.height + 150;
-            this.hideTopPlaySoundButtons(this.buttonY + where);
-            this.showButton(this.c_btnHelp, this.buttonY + where, this.c_btnHelp.x);
-            this.hideTopRowOfButtons(this.buttonY2 + where);
-        }
     };
     // I some times won't need with either full screen or the settings button.
     // ALWAYS show HELP - PLAY - SOUND - MOREGAMES
@@ -925,34 +938,36 @@ var MenuOverlay = /** @class */ (function (_super) {
     };
     MenuOverlay.prototype.update = function (time, delta) {
         if (this._SHOWFPS) {
-            this.fpsText.setText('FPS: ' + (1000 / delta).toFixed(1));
+            this.fpsText.setText((1000 / delta).toFixed(1));
         }
-        if (!isKaiOS) {
-            var left = Phaser.Input.Keyboard.JustDown(AAControls.AKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.left);
-            var right = Phaser.Input.Keyboard.JustDown(AAControls.DKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.right);
-            var up = Phaser.Input.Keyboard.JustDown(AAControls.WKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.up);
-            var down = Phaser.Input.Keyboard.JustDown(AAControls.SKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.down);
-            if (right) {
-                this.navigateDirectionToButton(1);
-                AAControls.right = 0;
-            }
-            else if (left) {
-                this.navigateDirectionToButton(-1);
-                AAControls.left = 0;
-            }
-            if (down) {
-                this.navigateDirectionToButton(3);
-                AAControls.right = 0;
-            }
-            else if (up) {
-                this.navigateDirectionToButton(-3);
-                AAControls.left = 0;
-            }
-            var click = Phaser.Input.Keyboard.JustDown(AAControls.spacebar) || Phaser.Input.Keyboard.JustDown(AAControls.returnKey);
-            if (click) {
-                this.buttons[this.currentActiveButton].first.pointerUp(null);
-            }
+        //Yup...this ia a hack but ti works
+        if (!AAPrefs.playAudio) {
+            this.audioOffImage.y = this.btnSound.y;
         }
+        // if (!gIsTouchDevice) {
+        //     let left = Phaser.Input.Keyboard.JustDown(AAControls.AKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.left);
+        //     let right = Phaser.Input.Keyboard.JustDown(AAControls.DKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.right);
+        //     let up = Phaser.Input.Keyboard.JustDown(AAControls.WKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.up);
+        //     let down = Phaser.Input.Keyboard.JustDown(AAControls.SKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.down);
+        //     if (right) {
+        //         this.navigateDirectionToButton(1);
+        //         AAControls.right = 0;
+        //     } else if (left) {
+        //         this.navigateDirectionToButton(-1);
+        //         AAControls.left = 0;
+        //     }
+        //     if (down) {
+        //         this.navigateDirectionToButton(3);
+        //         AAControls.right = 0;
+        //     } else if (up) {
+        //         this.navigateDirectionToButton(-3);
+        //         AAControls.left = 0;
+        //     }
+        //     let click = Phaser.Input.Keyboard.JustDown(AAControls.spacebar) || Phaser.Input.Keyboard.JustDown(AAControls.returnKey);
+        //     if (click) {
+        //         this.buttons[this.currentActiveButton].first.pointerUp(null);
+        //     }
+        // }
         // if (this.debugInfo) {
         //     this.debugInfo.setText([
         //         'GameData.rockcount: ' + GameData.rockCount
@@ -1040,99 +1055,93 @@ var MenuOverlay = /** @class */ (function (_super) {
     };
     MenuOverlay.prototype.disablePause = function () {
         this.pauseEnabled = false;
-        this.btnPause.setVisible(false);
+        // this.btnPause.setVisible(false);
     };
-    MenuOverlay.prototype.hideTopPlaySoundButtons = function (_y) {
-        this.showButton(this.c_btnSound, _y, this.c_btnSound.x);
-        this.showButton(this.c_btnPlay, _y, this.c_btnPlay.x);
-    };
-    MenuOverlay.prototype.hideTopRowOfButtons = function (_y) {
-        this.showButton(this.c_btnSettings, _y, this.c_btnSettings.x);
-        this.showButton(this.c_btnMoreGames, _y, this.c_btnMoreGames.x);
-        this.showButton(this.c_btnFullScreen, _y, this.c_btnFullScreen.x);
-    };
+    // hideTopPlaySoundButtons(_y) {
+    //     this.showButton(this.c_btnSound, _y, this.c_btnSound.x);
+    //     setTimeout(() => {
+    //         this.showButton(this.c_btnPlay, _y, this.c_btnPlay.x);
+    //     }, 50);
+    // }
+    // hideTopRowOfButtons(_y) {
+    //     this.showButton(this.c_btnSettings, _y, this.c_btnSettings.x);
+    //     setTimeout(() => {
+    //         this.showButton(this.c_btnMoreGames, _y, this.c_btnMoreGames.x);
+    //     }, 50);
+    //     setTimeout(() => {
+    //         this.showButton(this.c_btnFullScreen, _y, this.c_btnFullScreen.x);
+    //     }, 100);
+    // }
     // **************************************************************************
     // **************************************************************************
     // **************************************************************************
     // Button CALLBACKS
     // **************************************************************************
     MenuOverlay.prototype.action_BtnPlay = function (state) {
-        if (this.areButtonsTweening()) {
-            return;
-        }
         if (state == 'up') {
             this.playBtnSnd();
             switch (gGameState) {
                 case states.kSTATE_PAUSED:
                     this.resetFromGame();
                     break;
+                case states.kSTATE_MENU:
                 case states.kSTATE_GAMEOVER:
-                    this.reset();
+                    this.playGame();
                     break;
                 case states.kSTATE_HELP:
-                    this.resetFromHelpBackButton("HelpScene");
-                    break;
-                case states.kSTATE_MENU:
-                    this.reset();
+                    this.backToMenu("HelpScene");
                     break;
                 default:
-                    this.reset();
+                    this.playGame();
                     break;
             }
         }
     };
     MenuOverlay.prototype.action_btnSound = function (_state) {
-        if (this.areButtonsTweening()) {
-            return;
-        }
         if (_state == 'up') {
             this.playBtnSnd();
             AAPrefs.toggleAudio();
             if (AAPrefs.playAudio == true) {
                 // If we playAudio we flip the frame of the button to show the ON state when up and the OFF state when pressed         
-                this.btnSound.setFrames('btnSoundOn.png', 'btnSoundOff.png', 'btnSoundOn.png');
+                //this.btnSound.setFrames('btnSoundOn.png', 'btnSoundOff.png', 'btnSoundOn.png');
                 AAKaiAnalytics.sendEvent("soundOn");
             }
             else {
                 // This will display the the OFF state when up and the ON state when pressed
-                this.btnSound.setFrames('btnSoundOff.png', 'btnSoundOn.png', 'btnSoundOff.png'); //, 'btn_sound_off.png');
+                // this.btnSound.setFrames('btnSoundOff.png', 'btnSoundOn.png', 'btnSoundOff.png');//, 'btn_sound_off.png');
                 AAKaiAnalytics.sendEvent("soundOff");
             }
-            AAFunctions.tweenBounce(this, this.c_btnSound);
+            this.audioOffImage.setVisible(!AAPrefs.playAudio);
+            AAFunctions.tweenBounce(this, this.btnSound);
         }
     };
     MenuOverlay.prototype.action_btnPause = function (_state) {
-        if (this.areButtonsTweening()) {
-            return;
-        }
         if (_state == 'up') {
             this.playBtnSnd();
             if (gGameState == states.kSTATE_PLAYING) {
                 this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
                 gGameState = states.kSTATE_PAUSED;
-                this.showButton(this.c_btnHelp, this.buttonY, this.c_btnHelp.x);
-                this.showButton(this.c_btnSound, this.buttonY, this.c_btnSound.x);
+                // this.showButton(this.c_btnHelp, this.buttonY, this.c_btnHelp.x);
+                // this.showButton(this.c_btnSound, this.buttonY, this.c_btnSound.x);
                 this.pauseImage.setVisible(true);
                 AAFunctions.tweenBounce(this, this.pauseImage);
-                this.scene.get("SponsorOverlay").showBanner();
+                // (<SponsorOverlay>this.scene.get("SponsorOverlay")).showBanner();
                 game.scene.pause("GameScene");
                 AAKaiAnalytics.sendEvent("pause");
             }
             else if (gGameState == states.kSTATE_PAUSED) {
                 gGameState = states.kSTATE_PLAYING;
-                this.showButton(this.c_btnHelp, this.buttonY + this.kHideDistance, this.c_btnHelp.x);
-                this.showButton(this.c_btnSound, this.buttonY + this.kHideDistance, this.c_btnSound.x);
+                // this.showButton(this.c_btnHelp, this.buttonY + this.kHideDistance, this.c_btnHelp.x);
+                // this.showButton(this.c_btnSound, this.buttonY + this.kHideDistance, this.c_btnSound.x);
                 this.pauseImage.setVisible(false);
-                this.scene.get("SponsorOverlay").hideBanner();
+                // (<SponsorOverlay>this.scene.get("SponsorOverlay")).hideBanner();
                 game.scene.resume("GameScene");
                 AAKaiAnalytics.sendEvent("resume");
             }
         }
     };
     MenuOverlay.prototype.action_BtnHelpBack = function (_state) {
-        if (this.areButtonsTweening()) {
-            return;
-        }
+        var _this = this;
         if (_state == 'up') {
             this.playBtnSnd();
             // Just make sure that the gameover sprite is hidden in case this is called from a gameover()
@@ -1142,31 +1151,42 @@ var MenuOverlay = /** @class */ (function (_super) {
                 case states.kSTATE_MENU:
                     this.scene.get("MenuScene").scene.start("HelpScene");
                     gGameState = states.kSTATE_HELP;
-                    this.hideTopPlaySoundButtons(this.buttonY + this.kHideDistance);
-                    this.hideTopRowOfButtons(this.buttonY2 + this.kHideDistance);
-                    this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
+                    this.hideNumberTags(this.tags);
+                    this.hideAllButtons(function () {
+                        _this.hideButtonBG(function () {
+                            _this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
+                            _this.showButtonBG(function () {
+                                _this.showNumberTags(_this.tags[0]);
+                                _this.showSpecificButtons([_this.btnHelp], function () { });
+                            });
+                        });
+                    });
                     this.scene.get("SponsorOverlay").hideBanner();
-                    AAFunctions.tweenBounce(this, this.c_btnHelp);
                     AAKaiAnalytics.sendEvent("help");
                     break;
                 case states.kSTATE_GAMEOVER:
-                    this.btnHelp.setTexture('spriteAtlas', 'btnHelp.png');
-                    AAFunctions.tweenBounce(this, this.c_btnPlay);
-                    AAFunctions.tweenBounce(this, this.c_btnHelp);
-                    this.hideTopRowOfButtons(this.buttonY2);
-                    this.scene.get("GameScene").scene.start("MenuScene");
-                    gGameState = states.kSTATE_MENU;
+                    this.hideNumberTags(this.tags);
+                    this.hideAllButtons(function () {
+                        _this.hideButtonBG(function () {
+                            _this.btnHelp.setTexture('spriteAtlas', 'btnHelp.png');
+                            _this.showButtonBG(function () {
+                                _this.scene.get("GameScene").scene.start("MenuScene");
+                                gGameState = states.kSTATE_MENU;
+                                _this.showNumberTags(_this.tags);
+                                _this.showSpecificButtons(_this.buttons, function () { });
+                            });
+                        });
+                    });
                     AAKaiAnalytics.sendEvent("back-gameover");
                     break;
                 case states.kSTATE_MOREGAMES:
-                    this.resetFromHelpBackButton("MoreGamesScene");
-                    break;
+                    this.backToMenu("MoreGamesScene");
                 case states.kSTATE_SETTINGS:
-                    this.resetFromHelpBackButton("SettingsScene");
+                    this.backToMenu("SettingsScene");
                     break;
                 case states.kSTATE_PAUSED:
                 case states.kSTATE_HELP:
-                    this.action_BtnPlay("up");
+                    this.backToMenu("HelpScene");
                     break;
             }
             this.scene.bringToTop();
@@ -1190,34 +1210,182 @@ var MenuOverlay = /** @class */ (function (_super) {
         }
     };
     MenuOverlay.prototype.action_btnSettings = function (_state) {
+        var _this = this;
+        // if (gGameState == states.kSTATE_MENU) {
+        if (_state == 'up') {
+            this.playBtnSnd();
+            this.scene.get("MenuScene").scene.start("SettingsScene");
+            gGameState = states.kSTATE_SETTINGS;
+            this.hideNumberTags(this.tags);
+            this.hideAllButtons(function () {
+                _this.hideButtonBG(function () {
+                    _this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
+                    _this.showButtonBG(function () {
+                        _this.showNumberTags(_this.tags[0]);
+                        _this.showSpecificButtons([_this.btnHelp], function () { });
+                    });
+                });
+            });
+            this.scene.get("SponsorOverlay").hideBanner();
+            AAKaiAnalytics.sendEvent("settings");
+        }
+        // }
+    };
+    MenuOverlay.prototype.action_btnMoreGames = function (_state) {
+        var _this = this;
+        if (_state == 'up') {
+            this.playBtnSnd();
+            this.scene.get("MenuScene").scene.start("MoreGamesScene");
+            gGameState = states.kSTATE_MOREGAMES;
+            this.hideNumberTags(this.tags);
+            this.hideAllButtons(function () {
+                _this.hideButtonBG(function () {
+                    _this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
+                    _this.showButtonBG(function () {
+                        _this.showNumberTags(_this.tags[0]);
+                        _this.showSpecificButtons([_this.btnHelp], function () { });
+                    });
+                });
+            });
+            this.scene.get("SponsorOverlay").hideBanner();
+            AAKaiAnalytics.sendEvent("moregames");
+        }
+    };
+    //V2 ==================================================
+    MenuOverlay.prototype.action_btnResetGame = function (_state) {
         if (gGameState == states.kSTATE_MENU) {
             if (_state == 'up') {
                 this.playBtnSnd();
-                this.scene.get("MenuScene").scene.start("SettingsScene");
-                gGameState = states.kSTATE_SETTINGS;
-                this.hideTopPlaySoundButtons(this.buttonY + this.kHideDistance);
-                this.hideTopRowOfButtons(this.buttonY2 + this.kHideDistance);
-                this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
-                this.scene.get("SponsorOverlay").hideBanner();
-                AAFunctions.tweenBounce(this, this.c_btnHelp);
-                AAKaiAnalytics.sendEvent("settings");
+                this.gameover();
             }
         }
     };
-    MenuOverlay.prototype.action_btnMoreGames = function (_state) {
-        if (gGameState == states.kSTATE_MENU) {
-            if (_state == 'up') {
-                this.playBtnSnd();
-                this.scene.get("MenuScene").scene.start("MoreGamesScene");
-                gGameState = states.kSTATE_MOREGAMES;
-                this.hideTopPlaySoundButtons(this.buttonY + this.kHideDistance);
-                this.hideTopRowOfButtons(this.buttonY2 + this.kHideDistance);
-                this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
-                this.scene.get("SponsorOverlay").hideBanner();
-                AAFunctions.tweenBounce(this, this.c_btnHelp);
-                AAKaiAnalytics.sendEvent("moregames");
-            }
+    MenuOverlay.prototype.showResetButton = function (how) {
+        //this.btnResetGame.setVisible(how);
+        var bY = this.cameras.main.height - 5;
+        if (how === false) {
+            bY = this.cameras.main.height + 25;
         }
+        // this.btnResetGame.setVisible(true);
+        this.tweens.add({
+            targets: this.btnResetGame,
+            y: bY,
+            duration: 200,
+            ease: 'Sine.easeInOut',
+        });
+    };
+    MenuOverlay.prototype.backToMenu = function (fromWhere) {
+        var _this = this;
+        this.hideNumberTags(this.tags[0]);
+        this.hideSpecificButtons([this.btnHelp], function () {
+            _this.hideButtonBG(function () {
+                _this.scene.get(fromWhere).scene.start("MenuScene");
+                // hide the reset button
+                _this.btnHelp.setTexture('spriteAtlas', 'btnHelp.png');
+                if (_this.pauseEnabled) {
+                    _this.btnPause.setVisible(false);
+                    _this.pauseImage.setVisible(false);
+                }
+                //hide the game over sprite
+                _this.gameoverSprite.setVisible(false);
+                _this.showButtonBG(function () {
+                    _this.showNumberTags(_this.tags);
+                    _this.showSpecificButtons(_this.buttons, function () {
+                        gGameState = states.kSTATE_MENU;
+                        if (false == _this.scoreText.visible) {
+                            _this.scoreText.setVisible(true);
+                            _this.highScoreText.setVisible(true);
+                        }
+                        _this.scene.get("SponsorOverlay").showBanner();
+                    });
+                });
+            });
+        });
+    };
+    MenuOverlay.prototype.hideNumberTags = function (theTags) {
+        this.tweens.add({
+            targets: theTags,
+            y: this.game.canvas.height + 20,
+            duration: 200,
+            ease: 'Sine.easeInOut',
+            delay: this.tweens.stagger(50)
+        });
+    };
+    MenuOverlay.prototype.showNumberTags = function (theTags) {
+        this.tweens.add({
+            targets: theTags,
+            y: this.buttonY - this.tagVOffset,
+            duration: 200,
+            ease: 'Sine.easeInOut',
+            delay: this.tweens.stagger(50)
+        });
+    };
+    MenuOverlay.prototype.hideScores = function (how) {
+        // BOWLING SPECIFIC 
+        this.scoreText.visible = how;
+        this.highScoreText.visible = how;
+    };
+    MenuOverlay.prototype.hideAllButtons = function (theCallback) {
+        this.showResetButton(false);
+        // if (AAPrefs.playAudio){
+        //     this.audioOffImage.setVisible(false);
+        // }
+        this.tweens.add({
+            targets: this.buttons,
+            y: this.game.canvas.height + 50,
+            duration: 200,
+            ease: 'Sine.easeInOut',
+            delay: this.tweens.stagger(5),
+            onComplete: function () {
+                //this.showSpecificButtons(showList);
+                theCallback();
+            }
+        });
+    };
+    MenuOverlay.prototype.hideButtonBG = function (theCallback) {
+        this.tweens.add({
+            targets: this.buttonBG,
+            x: -this.game.canvas.width - 50,
+            duration: 100,
+            ease: 'Sine.easeInOut',
+            onComplete: function () { theCallback(); }
+        });
+    };
+    MenuOverlay.prototype.showButtonBG = function (theCallback) {
+        this.tweens.add({
+            targets: this.buttonBG,
+            x: 0,
+            duration: 100,
+            ease: 'Sine.easeInOut',
+            onComplete: function () {
+                theCallback();
+            },
+            callbackScope: this
+        });
+    };
+    MenuOverlay.prototype.hideSpecificButtons = function (theButtons, theFunction) {
+        this.tweens.add({
+            targets: theButtons,
+            y: this.game.canvas.height + 50,
+            duration: 200,
+            ease: 'Sine.easeInOut',
+            delay: this.tweens.stagger(50),
+            onComplete: function () {
+                theFunction(theFunction);
+            }
+        });
+    };
+    MenuOverlay.prototype.showSpecificButtons = function (theButtons, theCallback) {
+        this.tweens.add({
+            targets: theButtons,
+            y: this.buttonY,
+            duration: 200,
+            ease: 'Sine.easeInOut',
+            delay: this.tweens.stagger(50),
+            onComplete: function () {
+                theCallback();
+            }
+        });
     };
     return MenuOverlay;
 }(Phaser.Scene)); //end scene
@@ -1233,7 +1401,13 @@ var MenuScene = /** @class */ (function (_super) {
     MenuScene.prototype.create = function () {
         this.scene.sendToBack();
         var element = this.add.dom(10, 140).createFromCache('newgameHTML').setOrigin(0, 0);
-        this.add.text(12, this.sys.canvas.height - 17, gGameVersion);
+        var vy = this.sys.canvas.height - 17;
+        var vx = 12;
+        if (kTOUCH == 1) {
+            vy = 8;
+            vx = this.game.canvas.width - 60;
+        }
+        this.add.bitmapText(vx, vy, 'sysFont', gGameVersion, 12).setDepth(999);
     };
     return MenuScene;
 }(Phaser.Scene));
@@ -1249,6 +1423,11 @@ var HelpScene = /** @class */ (function (_super) {
         var mo = this.scene.get('MenuOverlay');
         mo.scoreText.setVisible(false);
         mo.highScoreText.setVisible(false);
+        //    setTimeout(()=>{
+        //       // (<MenuOverlay>mo).showButtonBG();
+        //       // (<MenuOverlay>mo).btnHelp.setTexture('spriteAtlas', 'btnBack.png');
+        //       // (<MenuOverlay>mo).showSpecificButtons([(<MenuOverlay>mo).btnHelp]);
+        //     },200);
         this.add.image(0, 0, 'spriteAtlas', 'help_en.png').setOrigin(0, 0);
     };
     return HelpScene;
@@ -1263,9 +1442,9 @@ var SponsorOverlay = /** @class */ (function (_super) {
     SponsorOverlay.prototype.preload = function () {
     };
     SponsorOverlay.prototype.create = function () {
-        if (kUSESPONSOR == false) {
-            return;
-        }
+        // if (kUSESPONSOR == false) {
+        //     return;
+        // }
         this.events.removeListener('hideAd');
         this.events.removeListener('showAd');
         emitter.on('hideAd', this.hideBanner, this);
@@ -1278,8 +1457,12 @@ var SponsorOverlay = /** @class */ (function (_super) {
         // NOTE: 3/30/20
         // commented out the sponsor code to play with KaiAds
         // commented out setInteractive() and pointerUp
-        this.btn = this.add.image(this.sys.canvas.width - 50, this.bottomPos, "spriteAtlas", "tag8.png").setVisible(false); //isKaiOS);
-        this.adContainer = this.add.container(0, -this.bottomPos, [adFrame, this.btn]).setVisible(true).setVisible(false);
+        this.btn = this.add.image(this.sys.canvas.width - 25, this.bottomPos, "spriteAtlas", "tag8.png").setVisible(!gIsTouchDevice); //false);
+        var where = -this.bottomPos;
+        if (kTOUCH == 1) {
+            where = 950;
+        }
+        this.adContainer = this.add.container(0, where, [adFrame, this.btn]).setVisible(true).setVisible(false);
         ;
         // adFrame.setInteractive();
         // let xthis = this;
@@ -1289,56 +1472,73 @@ var SponsorOverlay = /** @class */ (function (_super) {
         this.startyScore = this.scene.get("MenuOverlay").scoreText.y;
         this.startyHighScore = this.scene.get("MenuOverlay").highScoreText.y;
         // Sponsor Button #####################################################################
-        this.btnSponsor = new Button(this, this.sys.canvas.width - 60 * gRetinaOffset, this.sys.canvas.height + 60, 'spriteAtlas', "sponsor.png", this.action_sponsorButton, "sponsor", true).setVisible(true).setOrigin(.5, 1).setVisible(isKaiOS);
-        if (gRunnngInBrowser) {
-            this.btnSponsor.setVisible(false);
+        if (kTOUCH == 0) {
+            this.btnSponsor = new Button(this, this.sys.canvas.width - 80 * gRetinaOffset, this.sys.canvas.height + 60, 'spriteAtlas', "btnSponsor.png", this.action_sponsorButton, "sponsor", true).setVisible(true).setOrigin(.5, 1).setVisible(isKaiOS);
+            if ((gRunnngInBrowser) || (kTOUCH == 1)) {
+                this.btnSponsor.setVisible(false);
+            }
         }
         // this.showBanner();
         this.scene.bringToTop();
-        if (!isKaiOS) {
-            this.showBanner();
-        }
+        //if (isKaiOS) {
+        //    this.showBanner();
+        //}
     };
     SponsorOverlay.prototype.hideBanner = function () {
         // this.adContainer.setVisible(false);
-        if (kUSESPONSOR == false) {
-            return;
+        // if (kUSESPONSOR == false) {
+        //     return;
+        // }
+        if (kTOUCH == 0) {
+            //works
+            //this.domad.style.visibility = "hidden";
+            this.tweens.add({
+                targets: [this.adContainer, this.btn],
+                y: -110,
+                ease: 'Sine.easeIn',
+                onUpdate: function () {
+                    this.domad.style.top = this.adContainer.y + "px";
+                },
+                callbackScope: this,
+                duration: 250
+            });
+            if (!gIsTouchDevice) { //(isKaiOS) {
+                this.sponsorTag.style.visibility = "visible";
+            }
+            gTween = this.tweens.add({
+                targets: this.btnSponsor,
+                y: this.sys.game.canvas.height + 60,
+                ease: 'Sine.easeIn',
+                duration: 250
+            });
+            // this.tweens.add({
+            //     targets: (<MenuOverlay>this.scene.get("MenuOverlay")).scoreText,
+            //     y: this.startyScore,
+            //     ease: 'Sine.easeIn',
+            //     duration: 250
+            // });
+            // gTween = this.tweens.add({
+            //     targets: (<MenuOverlay>this.scene.get("MenuOverlay")).highScoreText,
+            //     y: this.startyHighScore,
+            //     ease: 'Sine.easeIn',
+            //     duration: 250
+            // });
         }
-        //works
-        //this.domad.style.visibility = "hidden";
-        this.tweens.add({
-            targets: [this.adContainer, this.btn],
-            y: -110,
-            ease: 'Sine.easeIn',
-            onUpdate: function () {
-                this.domad.style.top = this.adContainer.y + "px";
-            },
-            callbackScope: this,
-            duration: 250
-        });
-        if (isKaiOS) {
-            this.sponsorTag.style.visibility = "visible";
+        else {
+            this.tweens.add({
+                targets: [this.adContainer, this.btn],
+                y: 950,
+                ease: 'Sine.easeIn',
+                onUpdate: function () {
+                    this.domad.style.top = this.adContainer.y + "px";
+                },
+                callbackScope: this,
+                duration: 250
+            });
         }
-        gTween = this.tweens.add({
-            targets: this.btnSponsor,
-            y: this.sys.game.canvas.height + 60,
-            ease: 'Sine.easeIn',
-            duration: 250
-        });
-        this.tweens.add({
-            targets: this.scene.get("MenuOverlay").scoreText,
-            y: this.startyScore,
-            ease: 'Sine.easeIn',
-            duration: 250
-        });
-        gTween = this.tweens.add({
-            targets: this.scene.get("MenuOverlay").highScoreText,
-            y: this.startyHighScore,
-            ease: 'Sine.easeIn',
-            duration: 250
-        });
     };
     SponsorOverlay.prototype.showBanner = function () {
+        // console.log('show banner yo');
         this.scene.bringToTop();
         //works
         //this.domad.style.visibility = "visible";
@@ -1349,11 +1549,11 @@ var SponsorOverlay = /** @class */ (function (_super) {
         // } else {
         //     return;
         // }
-        if (isKaiOS) {
+        if (!gIsTouchDevice) { //(isKaiOS) {
             this.sponsorTag.style.visibility = "visible";
         }
         switch (true) {
-            case (gGameState == states.kSTATE_PLAYING):
+            // case (gGameState == states.kSTATE_PLAYING):
             case (gGameState == states.kSTATE_SETTINGS):
             case (gGameState == states.kSTATE_HELP):
             case (gGameState == states.kSTATE_MOREGAMES):
@@ -1374,55 +1574,69 @@ var SponsorOverlay = /** @class */ (function (_super) {
         // if (gGameState == states.kSTATE_MOREGAMES) {
         //     return;
         // }
-        if (kUSESPONSOR == false) {
-            return;
-        }
-        if (gAdShowingBanner == false) {
-            return;
-        }
+        // if (kUSESPONSOR == false) {
+        //     return;
+        // }
+        // if (gAdShowingBanner == false) {
+        //     return;
+        // }
         // let newX = (window.innerWidth /2)-120 ; //150; 150 is for non kaios
         // this.domad.style.left = newX + "px";
-        // this.adContainer.setVisible(true);
-        this.tweens.add({
-            targets: [this.adContainer, this.btn],
-            y: 0,
-            ease: 'Sine.easeOut',
-            onUpdate: function () {
-                this.domad.style.top = this.adContainer.y + "px";
-            },
-            callbackScope: this,
-            duration: 500
-        });
-        this.tweens.add({
-            targets: this.btn,
-            y: this.bottomPos,
-            ease: 'Sine.easeOut',
-            duration: 500
-        });
-        gTween = this.tweens.add({
-            targets: this.btnSponsor,
-            y: this.sys.game.canvas.height,
-            ease: 'Sine.easeOut',
-            duration: 250
-        });
-        this.tweens.add({
-            targets: this.scene.get("MenuOverlay").scoreText,
-            y: this.startyScore + (this.bottomPos),
-            ease: 'Sine.easeOut',
-            duration: 500
-        });
-        gTween = this.tweens.add({
-            targets: this.scene.get("MenuOverlay").highScoreText,
-            y: this.startyHighScore + (this.bottomPos),
-            ease: 'Sine.easeOut',
-            duration: 500
-        });
+        if (kTOUCH == 0) {
+            // this.adContainer.setVisible(true);
+            this.tweens.add({
+                targets: [this.adContainer, this.btn],
+                y: 0,
+                ease: 'Sine.easeOut',
+                onUpdate: function () {
+                    this.domad.style.top = this.adContainer.y + "px";
+                },
+                callbackScope: this,
+                duration: 500
+            });
+            this.tweens.add({
+                targets: this.btn,
+                y: this.bottomPos,
+                ease: 'Sine.easeOut',
+                duration: 500
+            });
+            gTween = this.tweens.add({
+                targets: this.btnSponsor,
+                y: this.sys.game.canvas.height + 2,
+                ease: 'Sine.easeOut',
+                duration: 250
+            });
+            // this.tweens.add({
+            //     targets: (<MenuOverlay>this.scene.get("MenuOverlay")).scoreText,
+            //     y: this.startyScore + (this.bottomPos),
+            //     ease: 'Sine.easeOut',
+            //     duration: 500
+            // });
+            // gTween = this.tweens.add({
+            //     targets: (<MenuOverlay>this.scene.get("MenuOverlay")).highScoreText,
+            //     y: this.startyHighScore + (this.bottomPos),
+            //     ease: 'Sine.easeOut',
+            //     duration: 500
+            // });
+        }
+        else {
+            this.tweens.add({
+                targets: [this.adContainer, this.btn],
+                y: 900,
+                ease: 'Sine.easeOut',
+                onUpdate: function () {
+                    this.domad.style.top = this.adContainer.y + "px";
+                },
+                callbackScope: this,
+                duration: 500
+            });
+        }
     };
     SponsorOverlay.prototype.action_sponsorButton = function (_state) {
         if (_state == 'up') {
             if (!gFullscreenAdShowing) {
                 //this.playBtnSnd();
-                // AAKaiAds.theBannerAd.call('click');
+                AAKaiAds.theBannerAd.call('click');
             }
         }
     };
@@ -1448,6 +1662,7 @@ var GameScene = /** @class */ (function (_super) {
         // this.removeAllListeners();
         // this.events.on('startgame', this.startGame, this);
         this.scene.bringToTop("MenuOverlay");
+        this.setUpUI();
         this.startGame();
     };
     // removeAllListeners() {
@@ -1482,17 +1697,13 @@ var GameScene = /** @class */ (function (_super) {
         //     this.sfxEndGame.play();
         window.navigator.vibrate(300);
         this.cameras.main.shake(150);
-        if (++this.jumps % 3 == 0) {
-            // Display Fullscreen!
-            AAKaiAds.displayFullscreenAd();
-            AAKaiAds.preLoadFullscreenAd();
-        }
     };
     GameScene.prototype.setUpSprites = function () {
     };
     GameScene.prototype.setUpAudio = function () {
     };
     GameScene.prototype.setUpUI = function () {
+        this.scene.get('MenuOverlay').showResetButton(true);
     };
     return GameScene;
 }(Phaser.Scene));
@@ -1651,205 +1862,46 @@ var gFullscreenAdShowing = false;
 var gAdShowingBanner = false;
 var AAKaiAds;
 (function (AAKaiAds) {
-    // display ad when app is loaded
     AAKaiAds.err = 0;
-    // export function getFullscreenAd() {
-    //     getKaiAd({
-    //         publisher: '60580691-026e-426e-8dac-a3b92289a352',
-    //         app: gGameName,
-    //         test: kTESTMODE,
-    //         onerror: err => console.error('Custom catch:', err),
-    //         onready: ad => {
-    //             // Ad is ready to be displayed
-    //             // calling 'display' will display the ad
-    //             ad.call('display')
-    //         }
-    //     })
-    // }
-    function preLoadFullscreenAd() {
-        if (!isKaiOS) {
-            return;
-        }
-        var _this = this;
-        // start off without an error
-        this.err = 0;
-        if (getKaiAd) {
-            // display ad
-            getKaiAd({
-                publisher: '60580691-026e-426e-8dac-a3b92289a352',
-                app: gGameName,
-                test: kTESTMODE,
-                timeout: 1000 * 90,
-                /* error codes */
-                /* https://www.kaiads.com/publishers/sdk.html#error */
-                onerror: function (err) {
-                    _this.err = err;
-                    // console.warn("kaiads error: %d", err);
-                    gFullscreenAdShowing = false;
-                },
-                onready: function (ad) {
-                    _this.theAdFullscreen = ad;
-                    // console.warn("kaiads onready: " + ad);
-                    // ad.call('display');
-                    ad.on('close', function () {
-                        gFullscreenAdShowing = false;
-                        // setTimeout(function () {
-                        //     // ad.call('display');
-                        //     gFullscreenAdShowing = false;
-                        // }, 500); /* delayed to avoid button click on current scene */
-                    });
-                    // Kept here for reference ------------------------------------
-                    ad.on('click', function () {
-                        AAKaiAnalytics.sendSpecial("kaiads_fullscreen", "click");
-                    });
-                    ad.on('display', function () {
-                        gFullscreenAdShowing = true;
-                        // document.getElementById('kaiosad').style.visibility = "hidden";
-                        // if (isKaiOS) {
-                        //     document.getElementById('tag').style.visibility = "hidden";
-                        // }
-                        AAKaiAnalytics.sendSpecial("kaiads_fullscreen", "display");
-                    });
-                    // _this)
-                }
-            });
-        }
-    }
-    AAKaiAds.preLoadFullscreenAd = preLoadFullscreenAd;
-    function killFullscreenAd() {
-        if (!isKaiOS) {
-            return;
-        }
-        this.theAdFullscreen = null;
-    }
-    AAKaiAds.killFullscreenAd = killFullscreenAd;
-    function getError() {
-        if (!isKaiOS) {
-            return;
-        }
-        var error = 0;
-        // If the add was never inited or unable to get called I have my own error code
-        // Otherwise I return 0 or the error returned by the KaiAds sdk.
-        if ((this.theAdFullscreen == null) || (this.theAdFullscreen == undefined)) {
-            error = -1;
-        }
-        else {
-            // errors are positive numbers in the sdk.  
-            // so anything greater than zero is an error
-            if (this.err > 0) {
-                error = this.err;
-            }
-        }
-        return error;
-    }
-    AAKaiAds.getError = getError;
-    function clickActiveAd() {
-        if (gFullscreenAdShowing == false) {
-            //     this.theAdFullscreen.call('click');
-            // }else{
-            this.theBannerAd.call('click');
-        }
-    }
-    AAKaiAds.clickActiveAd = clickActiveAd;
-    function clickAd() {
-        if (!isKaiOS) {
-            return;
-        }
-        this.theAdFullscreen.call('click');
-    }
-    AAKaiAds.clickAd = clickAd;
-    function displayBannerAd() {
-        //kaisponsor
-        if (!isKaiOS) {
-            return;
-        }
-    }
-    AAKaiAds.displayBannerAd = displayBannerAd;
-    function displayFullscreenAd() {
-        if (!isKaiOS) {
-            return;
-        }
-        // If the ad isn't ready theAd will be undefinded 
-        // so I need to check to make sure it's valid
-        if (this.theAdFullscreen) {
-            if (this.err == 0) { // continue only if there isn't an error
-                // gFullscreenAdShowing = true;
-                this.theAdFullscreen.call('display');
-            }
-        }
-    }
-    AAKaiAds.displayFullscreenAd = displayFullscreenAd;
-    // BANNER ADS
     function preLoadBannerAd() {
-        if (!isKaiOS) {
-            return;
-        }
         var _this = this;
-        // start off without an error
-        this.err = 0;
-        if (getKaiAd) {
-            // display ad
-            getKaiAd({
-                publisher: '60580691-026e-426e-8dac-a3b92289a352',
-                app: gGameName,
-                test: kTESTMODE,
-                timeout: 1000 * 90,
-                // 36 or 54 height
-                //36 ALWAYS tiems out and displays 23 in green
-                h: 36,
-                w: 216,
-                container: document.getElementById('sponsorad'),
-                /* error codes */
-                /* https://www.kaiads.com/publishers/sdk.html#error */
-                onerror: function (err) {
-                    _this.err = err;
-                    //AAKaiAnalytics.sendSpecial("kaisponsor", "error");
-                    // console.warn('KaiAds error catch:', _this.err);
-                    // if (isKaiOS) {
-                    //     document.getElementById('tagNum').style.visibility = "hidden";
-                    // }
-                    gAdShowingBanner = false;
-                    emitter.emit('hideAd');
-                },
-                onready: function (ad) {
-                    _this.theBannerAd = ad;
-                    // console.error('onready:', ad);
-                    ad.call('display', {
-                        // In KaiOS the app developer is responsible
-                        // for user navigation, and can provide
-                        // navigational className and/or a tabindex
-                        tabindex: 0,
-                        // if the application is using
-                        // a classname to navigate
-                        // this classname will be applied
-                        // to the container
-                        navClass: 'sponsor',
-                        // display style will be applied
-                        // to the container block or inline-block
-                        display: 'block',
-                    });
-                    ad.on('close', function () {
-                        // check if was fullscreen before ad clicked.
-                        setTimeout(function () {
-                            emitter.emit('bannerAdClosed');
-                        }, 500); /* delayed to avoid button click on current scene */
-                    });
-                    // Kept here for reference ------------------------------------
-                    ad.on('click', function () {
-                        AAKaiAnalytics.sendSpecial("kaiadsbanner", "click");
-                    });
-                    ad.on('display', function () {
-                        // if (!gFullscreenAdShowing) {
-                        // console.error('display:', ad);
-                        gAdShowingBanner = true;
-                        emitter.emit('showAd');
-                        AAKaiAnalytics.sendSpecial("kaiadsbanner", "display");
-                        // }
-                    });
-                    // _this)
-                }
-            });
-        }
+        getKaiAd({
+            publisher: '60580691-026e-426e-8dac-a3b92289a352',
+            app: gGameName,
+            test: kTESTMODE,
+            timeout: 1000 * 90,
+            // 36 or 54 height
+            // 36 ALWAYS items out and displays 23 in green
+            h: 36,
+            w: 216,
+            container: document.getElementById('sponsorad'),
+            // Max supported size is 240x264
+            onerror: function (err) {
+                _this.err = err;
+                emitter.emit('hideAd');
+            },
+            onready: function (ad) {
+                _this.theBannerAd = ad;
+                // Ad is ready to be displayed
+                // calling 'display' will display the ad
+                ad.call('display', {
+                    // In KaiOS the app developer is responsible
+                    // for user navigation, and can provide
+                    // navigational className and/or a tabindex
+                    tabindex: 0,
+                    // if the application is using
+                    // a classname to navigate
+                    // this classname will be applied
+                    // to the container
+                    navClass: 'items',
+                    // display style will be applied
+                    // to the container block or inline-block
+                    display: 'block',
+                });
+                emitter.emit('showAd');
+                // (<SponsorOverlay>this.scene.get("SponsorOverlay")).showBanner();
+            }
+        });
     }
     AAKaiAds.preLoadBannerAd = preLoadBannerAd;
 })(AAKaiAds || (AAKaiAds = {}));
@@ -2436,13 +2488,23 @@ var AAKaiAnalytics;
 /// <reference path='../../../AAShared/AAHighScores.ts'/>
 /// <reference path='../../../AAShared/AAKaiAnalytics.ts'/>
 var kTESTMODE = 1; /* set to 0 for real ads */
+var kTOUCH = 0;
 var kBOTTOM_POSITION_FOR_AD = 65;
 var gGameName = "_TEMPLATE_";
 var gGameVersion = "1.0.0";
-var gamePrefsFile = "games.taara._template_.prefs";
+var gamePrefsFile = "games.taara." + gGameName + ".prefs";
+// IF TESTING ON PC THEN IT"S ALWAYS TRUE!!!
+var gIsTouchDevice = false;
+// gIsTouchDevice = is_touch_device();
 var gameBGColor = 0x333333;
 var gStageWidth = 240; // I'm leaving it as a multiple to remind me of org size
 var gStageHeight = 320; //228 * 2; //web is 228
+// If I'm on a touch device I want to stage to be larger
+// This will be the default touch screen size even for a larger device.
+if (kTOUCH == 1) {
+    gStageWidth = 480;
+    gStageHeight = 960;
+}
 var gRetinaOffset = .5;
 var gShowNewGame = 0;
 // Display length of Taara games Logo
@@ -2544,6 +2606,9 @@ function resize() {
     game.canvas.style.height = gStageHeight + 'px';
     // }
 }
+function is_touch_device() {
+    return !!('ontouchstart' in window || navigator.maxTouchPoints);
+}
 window.onload = function () {
     var config = {
         type: Phaser.WEBGL,
@@ -2555,7 +2620,8 @@ window.onload = function () {
         url: 'https://taaragames.com/',
         version: gGameVersion,
         autoFocus: true,
-        autoRound: false,
+        autoRound: true,
+        pixelArt: false,
         powerPreference: 'high-performance',
         dom: {
             createContainer: true
@@ -2582,6 +2648,10 @@ window.onload = function () {
         resize();
     }, false);
     resize();
+    if ((gIsTouchDevice) && (isKaiOS)) {
+        document.documentElement.requestFullscreen();
+        navigator.mozAudioChannelManager.volumeControlChannel = 'normal';
+    }
     document.addEventListener('fullscreenchange', function (event) {
         // document.fullscreenElement will point to the element that
         // is in fullscreen mode if there is one. If there isn't one,

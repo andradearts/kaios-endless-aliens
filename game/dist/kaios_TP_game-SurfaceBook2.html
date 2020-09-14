@@ -2,7 +2,14 @@
 <html lang="en">
 
 <head>
-    <title>Soap Bubbles</title>
+    <title>__TEMPLATE__</title>
+    <meta name="description" content="Game Name: Game description.  Free Games for KaiOS, JioPhone, Android and iOS.">
+
+    <meta name="keywords"
+        content=" games,game,KaiOS,kaios games,JioPhone,JioPhone games,html5,pwa,iso,android,web,web game, free web game, jio phone, jio games, jio phone games">
+
+    <meta name="author" content="Taara.Games">
+
     <meta charset="UTF-8">
     <meta name="viewport"
         content="initial-scale=1,maximum-scale=1, user-scalable=no, minimum-scale=1, width=device-width, height=device-height">
@@ -13,7 +20,10 @@
 		* @author Mark Andrade http://andradearts.com/ @MarkAndrade
 		 */
 		/** @license
-			Soap Bubbles 1.0.0
+            __TEMPLATE__ 1.0.0
+
+            TP Game Template HTML
+            
 			More info at http://taara.games
 
 			Copyright (c) 2020 Andrade Arts 
@@ -28,9 +38,11 @@
             It's written in typescript using the fantastic Phaser 3.22 library
             created by Richard Davey, Photon Storm Ltd.
 
-            I post updates and how tos about my games on my blog https://andradearts.com
+            I sometimes post updates and how tos about my games on my blog https://andradearts.com
             and on twitter @AndradeArts.
 
+            https://labs.taara.games
+            
             Thanks for playing the game.  You rock!
 
 			--
@@ -49,16 +61,13 @@
 		*/
     -->
 
-    <meta name="description" content="Game Name: Game description.  Free Games for KaiOS, JioPhone, Android and iOS.">
-    <meta name="keywords"
-        content=" games,game,KaiOS,kaios games,JioPhone,JioPhone games,html5,pwa,iso,android,web,web game, free web game, jio phone, jio games, jio phone games">
-    <meta name="author" content="Taara.Games">
+
 
 
     <meta name="theme-color" content="#000000" />
 
 
-    <meta name="apple-mobile-web-app-title" content="Soap Bubbles">
+    <meta name="apple-mobile-web-app-title" content="__TEMPLATE__">
 
 
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -71,12 +80,14 @@
     <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/icon16.png">
 
     <script src="assets/kaiads.min.js"></script>
-    <!-- <script src="https://static.kaiads.com/ads-sdk/ads-sdk.v3.min.js"></script> -->
 
     <!-- NOTE: Custom build of Phaser!! -->
-    <script src="./assets/phaser322-custom.min.js"></script>
+    <!-- <script src="./assets/phaser322-custom.min.js"></script> -->
+    <script src="./assets/phaser324.min.js"></script>
 
     <link rel='manifest' href='manifest.webapp'>
+
+
     <style>
         * {
             padding: 0;
@@ -85,9 +96,11 @@
 
         :root {
             /* ad heights 54px or 36px */
-            --ad-height: 36px;
-            --ad-width: 216px;
-            --ad-height-offest: -36px;
+            --ad-height: 54px;
+            --ad-width: 320px;
+            --ad-height-offest: -54px;
+            --game-max-width: 480px;
+            --top-ad-pos: 950px;
         }
 
 
@@ -113,7 +126,8 @@
             top: 0;
             height: 100%;
             width: 100%;
-            max-width: 240px;
+            max-width: 480px;
+            /* 240px; */
             z-index: 1;
         }
 
@@ -142,11 +156,14 @@
             margin: 0 auto;
             margin-bottom: var(--ad-height-offest) !important;
             z-index: 9999;
-            top: var(--ad-height-offest);
+            top: var(--top-ad-pos);
+            /* var(--ad-height-offest); */
+            background-color: brown;
 
         }
 
         /* Tag is the number associated with activating the ad */
+        /* This is only available on KaiOS SFP */
         .tagNum {
             position: absolute;
             z-index: 99999;
@@ -156,71 +173,36 @@
             visibility: hidden;
         }
 
+        /* ========================================================================= */
+        /* ========================================================================= */
+
         /* SPINNER */
         .spinner {
-            /* display: flex;
-            justify-content: center; */
-            /* align-items: center; */
-            /* margin: 0 auto !important; */
             width: 100vh;
-            text-align: center; 
+            text-align: center;
         }
 
         .lds-heart {
-            /* display: inline-block; */
-            /* margin-top: 50%; */
             position: absolute;
             width: 100%;
             height: 100vh;
-            /* transform: rotate(45deg); */
-            /* transform-origin: 40px 40px; */
             z-index: 1;
-            
         }
 
         .lds-heart div {
-            /* top: 32px;
-            left: 32px; */
             position: absolute;
             display: flex;
             justify-content: center;
             align-items: center;
-            
-            /* width: 32px;
-            height: 32px; */
-            /* background: rgb(235, 5, 5); */
-            /* background-color: transparent;
-            background-image: url("./assets/images/taara-logo-solo.png");
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: contain; */
             width: 100vw;
             height: 100vh;
             animation: lds-heart 1.2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
         }
-        .lds-heart img{
+
+        .lds-heart img {
             width: 80%;
-            
-        }
-        /* .lds-heart div:after,
-        .lds-heart div:before {
-            content: " ";
-            position: absolute;
-            display: block;
-            width: 32px;
-            height: 32px;
-            background: rgb(235, 5, 5);
         }
 
-        .lds-heart div:before {
-            left: -24px;
-            border-radius: 50% 0 0 50%;
-        }
-
-        .lds-heart div:after {
-            top: -24px;
-            border-radius: 50% 50% 0 0;
-        } */
         @keyframes lds-heart {
             0% {
                 transform: scale(0.95);
@@ -254,11 +236,8 @@
     <noscript>
         <p>Javascript must be enabled to play games on this site!</p>
     </noscript>
-    <!-- <div class="spinner">
-        <div class="lds-heart">
-            <div></div>
-        </div>
-    </div> -->
+
+
     <div id="gameStage">
         <div class="spinner">
             <div class="lds-heart">
@@ -267,7 +246,7 @@
         </div>
         <div class="centerad">
             <div class="sponsorbanner" id='sponsorad'>
-                <div class="tagNum" id="tag"><img src="./assets/images/tag8_small.png" alt=""></div>
+                <div class="tagNum" id="tag"><img src="./assets/images/tag8.png" alt=""></div>
             </div>
         </div>
     </div>

@@ -9,7 +9,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Launch Chrome against localhost",
-            "url": "http://127.0.0.1:5555/game/dist/kaios_game.html",
+            "url": "http://127.0.0.1:5555/game/dist/kaios_SFP_game.html",
             "webRoot": "${workspaceFolder}",
             "disableNetworkCache":true,
             "runtimeArgs" :["--aggressive-cache-discard","--disable-application-cache", "--auto-open-devtools-for-tabs"]

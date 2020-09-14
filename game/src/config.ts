@@ -16,24 +16,35 @@
 /// <reference path='../../../AAShared/AAHighScores.ts'/>
 /// <reference path='../../../AAShared/AAKaiAnalytics.ts'/>
 
-// This is needed so I can use the KaiAds SDK
-declare var _paq: any;
+// This is needed so I can use the KaiAds SDK and not get complier errors
 declare var getKaiAd: any;
 
 const kTESTMODE = 1; /* set to 0 for real ads */
+let kTOUCH:Number = 0;
+
 const kBOTTOM_POSITION_FOR_AD = 65;
+
 const gGameName = "_TEMPLATE_";
 const gGameVersion = "1.0.0";
-const gamePrefsFile = "games.taara._template_.prefs";
+const gamePrefsFile = "games.taara."+gGameName+".prefs";
 
 
+// IF TESTING ON PC THEN IT"S ALWAYS TRUE!!!
 let gIsTouchDevice = false;
-gIsTouchDevice = is_touch_device();
-
+// gIsTouchDevice = is_touch_device();
 
 const gameBGColor = 0x333333;
+
 let gStageWidth = 240;  // I'm leaving it as a multiple to remind me of org size
 let gStageHeight = 320;  //228 * 2; //web is 228
+
+// If I'm on a touch device I want to stage to be larger
+// This will be the default touch screen size even for a larger device.
+if (kTOUCH == 1){
+    gStageWidth = 480;
+    gStageHeight = 960;
+}
+
 let gRetinaOffset = .5;
 let gShowNewGame = 0;
 
@@ -182,7 +193,8 @@ window.onload = () => {
         url: 'https://taaragames.com/',
         version: gGameVersion,
         autoFocus: true,
-        autoRound: false,
+        autoRound: true,
+        pixelArt: false,
         powerPreference: 'high-performance',
         dom: {
             createContainer: true
@@ -214,8 +226,9 @@ window.onload = () => {
 
     resize();
     
-    if (gIsTouchDevice) {
+    if ((gIsTouchDevice) && (isKaiOS)) {
         document.documentElement.requestFullscreen();
+        (<any>navigator).mozAudioChannelManager.volumeControlChannel = 'normal';
     }
 
     document.addEventListener('fullscreenchange', (event) => {
@@ -232,7 +245,5 @@ window.onload = () => {
 
         }
     });
-
-
 
 };

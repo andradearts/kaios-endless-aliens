@@ -16,8 +16,15 @@ class MenuScene extends Phaser.Scene {
     create() {
         this.scene.sendToBack();
         var element = this.add.dom(10, 140).createFromCache('newgameHTML').setOrigin(0, 0);
-        this.add.text(12, this.sys.canvas.height - 17, gGameVersion);
+
+        let vy = this.sys.canvas.height - 17;
+        let vx = 12;
+        if (kTOUCH == 1) {
+            vy = 8;
+            vx = this.game.canvas.width-60;
+        }
+        this.add.bitmapText(vx, vy, 'sysFont', gGameVersion, 12).setDepth(999);
     }
 
-    
+
 }

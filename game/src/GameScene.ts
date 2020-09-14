@@ -28,6 +28,8 @@ class GameScene extends Phaser.Scene {
         // this.events.on('startgame', this.startGame, this);
         this.scene.bringToTop("MenuOverlay");
 
+        this.setUpUI();
+        
         this.startGame();
         
     }
@@ -78,11 +80,6 @@ class GameScene extends Phaser.Scene {
         this.cameras.main.shake(150);
 
 
-        if (++this.jumps % 3 == 0) {
-            // Display Fullscreen!
-            AAKaiAds.displayFullscreenAd();
-            AAKaiAds.preLoadFullscreenAd();
-        }
        
     }
 
@@ -94,6 +91,6 @@ class GameScene extends Phaser.Scene {
 
     }
     setUpUI() {
-
+        (<MenuOverlay>this.scene.get('MenuOverlay')).showResetButton(true);
     }
 }
