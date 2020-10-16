@@ -13,17 +13,9 @@ class HelpScene extends Phaser.Scene {
 
        let mo = this.scene.get('MenuOverlay');
 
-       (<MenuOverlay>mo).scoreText.setVisible(false);
-       (<MenuOverlay>mo).highScoreText.setVisible(false);
+       (<MenuOverlay>mo).hideScores(true);
 
-    //    setTimeout(()=>{
-    //       // (<MenuOverlay>mo).showButtonBG();
-    //       // (<MenuOverlay>mo).btnHelp.setTexture('spriteAtlas', 'btnBack.png');
-    //       // (<MenuOverlay>mo).showSpecificButtons([(<MenuOverlay>mo).btnHelp]);
-    //     },200);
-      
-
-       this.add.image(0,0,'spriteAtlas','help_en.png').setOrigin(0,0);
+       this.add.image(0,0,kSPRITE_ATLAS,kIMG_HELP).setOrigin(0,0);
 
     }
 

@@ -11,6 +11,76 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+// CHANGE BEFORE PUBLISHING * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+var kTESTMODE = 1; /* set to 0 for real ads */
+var gGameName = "_TEMPLATE_";
+var gGameVersion = "1.0.0";
+//used for arcade debug and console.logs()
+var kDEBUG = false;
+var gSHOW_FPS = false; // this can be dynamically set
+// END CHANGE * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// ******************************************************************************
+// ******************************************************************************
+// ******************************************************************************
+// ******************************************************************************
+var manifest;
+// TOUCH DEVICE ===================================
+var kTOUCH = 0;
+// orginaly used for custom sponsor ads.  Kept here just in case I do use it in the future
+var kUSESPONSOR = true;
+// used to move the score down when ads are displayed
+var kBOTTOM_POSITION_FOR_AD = 45;
+// STAGE OPTIONS ==================================
+var gameBGColor = 0x333333;
+var gStageWidth = 240; // I'm leaving it as a multiple to remind me of org size
+var gStageHeight = 320; //228 * 2; //web is 228
+// If I'm on a touch device I want to stage to be larger
+// This will be the default touch screen size even for a larger device.
+if (kTOUCH == 1) {
+    gStageWidth = 480;
+    gStageHeight = 960;
+}
+// LOGO ============================================
+// How long to stay on the Taara games Logo loading scene
+var gLogoDisplayLength = 2000;
+var gamePrefsFile = "games.taara." + gGameName + ".prefs";
+// MAIN ATLAS
+var kSPRITE_ATLAS = 'spriteAtlas';
+// BUTTONS
+var kBTN_BACK = 'btnBack.png';
+var kBTN_PLAY = 'btnPlay.png';
+var kBTN_SOUND_OFF = 'btnSoundOff.png';
+var kBTN_SOUND_ON = 'btnSoundOn.png';
+var kBTN_HELP = 'btnHelp.png';
+var kBTN_SETTINGS = 'btnSettings.png';
+var kBTN_MORE_GAMES = 'btnMoreGames.png';
+var kBTN_RESET_GAME = 'btnResetGame.png';
+var kBTN_FULLSCREEN_ON = 'btnFullscreenOn.png';
+var kBTN_FULLSCREEN_OFF = 'btnFullscreenOff.png';
+var kBTN_SPONSOR = 'btnSponsor.png';
+// TAGS
+var kTAG_1 = 'tag1.png';
+var kTAG_2 = 'tag2.png';
+var kTAG_3 = 'tag3.png';
+var kTAG_4 = 'tag4.png';
+var kTAG_5 = 'tag5.png';
+var kTAG_6 = 'tag6.png';
+var kTAG_7 = 'tag7.png';
+var kTAG_8 = 'tag8.png';
+var kTAG_9 = 'tag9.png';
+var kTAG_0 = 'tag0.png';
+var kTAG_HASH = 'tag#.png';
+var kTAG_STAR = 'tag*.png';
+// UI SPRITES
+var kIMG_GAMEOVER = 'gameover.png';
+var kIMG_HELP = 'help.png';
+var kIMG_SETTINGS = 'help.png';
+var kIMG_KAISTORE = 'kaiStore.png';
+var debug_log;
+if (kDEBUG)
+    debug_log = console.log.bind(window.console);
+else
+    debug_log = function () { };
 // / <reference path='../phaser.d.ts'/>
 // / <reference path='./shaders/OutlinePipeline.ts'/>
 var Button = /** @class */ (function (_super) {
@@ -182,104 +252,6 @@ var Button = /** @class */ (function (_super) {
     };
     return Button;
 }(Phaser.GameObjects.Sprite)); //end class
-var PieMeter = /** @class */ (function (_super) {
-    __extends(PieMeter, _super);
-    // _scene:  the scene you want to display the meter in
-    // _x, _y:  the position to display the meter
-    // _radi:   the fadius of the meter
-    // _dir:    the direction of the meter.  Value is either 1 or 0
-    // _flip:   flips the meter horizontially and is used in conjunction with the _dir
-    function PieMeter(_scene, _x, _y, _radi, _dir, _flip, _endValue) {
-        var _this = _super.call(this, _scene, { x: _x, y: _y }) || this;
-        _this.pieProgress = 0;
-        _this.direction = 0;
-        _this.color = 0x000000;
-        _this.opacity = .5;
-        _this.angle = 0;
-        _this.alpha = .75;
-        _this.scaleY = _flip;
-        _this.setActive(true);
-        _this.myRadius = _radi;
-        _this.direction = _dir;
-        _this.endValue = _endValue;
-        _scene.add.existing(_this);
-        return _this;
-    }
-    PieMeter.prototype.setColor = function (_color, _opacity) {
-        this.color = _color;
-        this.opacity = _opacity;
-    };
-    // constructor(_scene, _x: number, _y: number, _radi) {
-    //     super(_scene, { x: _x, y: _y });
-    //     // if error mode sure phaser.d.ts has Partial<GraphicsStyles> of graphicsOptions
-    //     this.angle = 0;
-    //     this.alpha = .15;
-    //     this.scaleY = -1;
-    //     this.setActive(true);
-    //     this.myRadius = _radi;
-    //     _scene.add.existing(this);
-    // }
-    PieMeter.prototype.drawPieStatic = function (amount) {
-        if (this.visible == false)
-            this.visible = true;
-        this.pieProgress = amount;
-        this.clear();
-        this.fillStyle(this.color, this.opacity);
-        var radius = this.myRadius;
-        this.angle = -90;
-        this.slice(0, 0, radius, Phaser.Math.DegToRad(0), Phaser.Math.DegToRad(360 * this.pieProgress), true);
-        this.fillPath();
-        return this.pieProgress;
-    };
-    //return number bt 0 and 1.0
-    PieMeter.prototype.getValue = function () {
-        return this.pieProgress / 360.0;
-    };
-    // should be bt 0 and 1.0
-    PieMeter.prototype.setValue = function (howMuch) {
-        this.pieProgress = howMuch * 360.0;
-    };
-    PieMeter.prototype.drawPie = function (howMuch, increase) {
-        if (this.visible == false)
-            this.visible = true;
-        if ((increase == true) || (increase == null)) {
-            this.pieProgress += howMuch;
-        }
-        else {
-            this.pieProgress = howMuch;
-        }
-        this.clear();
-        this.fillStyle(this.color, this.opacity);
-        var radius = this.myRadius;
-        this.angle = -90;
-        this.slice(0, 0, radius, Phaser.Math.DegToRad(0), Phaser.Math.DegToRad(this.pieProgress), true);
-        this.fillPath();
-        return this.pieProgress / 360.0;
-        // }
-    };
-    PieMeter.prototype.drawPie2 = function (howMuch) {
-        if (this.visible == false)
-            this.visible = true;
-        this.clear();
-        this.fillStyle(this.color, this.opacity);
-        var radius = this.myRadius;
-        // Rotate to make 0 as 12 o'clock
-        this.angle = -90;
-        this.pieProgress = (360 / this.endValue * howMuch);
-        if (this.direction == 0) {
-            this.slice(0, 0, radius, 0, Phaser.Math.DegToRad(this.pieProgress), true);
-        }
-        else {
-            this.slice(0, 0, radius, Phaser.Math.DegToRad(this.pieProgress), 0, true);
-        }
-        this.fillPath();
-    };
-    PieMeter.prototype.reset = function () {
-        this.pieProgress = 0;
-        // this.visible = false;
-    };
-    return PieMeter;
-}(Phaser.GameObjects.Graphics));
 var BootScene = /** @class */ (function (_super) {
     __extends(BootScene, _super);
     function BootScene() {
@@ -288,8 +260,6 @@ var BootScene = /** @class */ (function (_super) {
     BootScene.prototype.preload = function () {
         this.load.setPath('assets/images/');
         this.load.image('logo', 'taara-logo.png');
-        // this.load.image('preloadBar', 'progressBar.png', null);
-        // this.load.image('preloadBarMask', 'progressBarMask.png', null);
         this.load.on('complete', function () {
             this.scene.start('PreloadScene');
         }, this);
@@ -321,14 +291,12 @@ var MoreGamesScene = /** @class */ (function (_super) {
         graphics.fillStyle(0x00000, .75);
         graphics.fill();
         var mo = this.scene.get('MenuOverlay');
-        mo.scoreText.setVisible(false);
-        mo.highScoreText.setVisible(false);
-        //this.add.image(0,0,'spriteAtlas','moreGames.png').setOrigin(0,0);
+        mo.hideScores(true);
         // add the icons
         // should be in AAShared in the future!
         // and SHOULD be an html file
         var element = this.add.dom(0, 10).createFromCache('moreGamesHTML').setOrigin(0, 0);
-        this.add.image(this.sys.canvas.width / 2, this.sys.canvas.height - 70, 'spriteAtlas', 'kaiStore.png');
+        this.add.image(this.sys.canvas.width / 2, this.sys.canvas.height - 70, kSPRITE_ATLAS, kIMG_KAISTORE);
         if (gRunnngInBrowser) {
             //display link to website taara.games
         }
@@ -355,9 +323,8 @@ var SettingsScene = /** @class */ (function (_super) {
     SettingsScene.prototype.create = function () {
         gGameState = states.kSTATE_SETTINGS;
         var mo = this.scene.get('MenuOverlay');
-        mo.scoreText.setVisible(false);
-        mo.highScoreText.setVisible(false);
-        this.add.image(0, 0, 'spriteAtlas', 'help_en.png').setOrigin(0, 0);
+        mo.hideScores(true);
+        this.add.image(0, 0, kSPRITE_ATLAS, kIMG_SETTINGS).setOrigin(0, 0);
     };
     return SettingsScene;
 }(Phaser.Scene));
@@ -390,22 +357,11 @@ var PreloadScene = /** @class */ (function (_super) {
             AAFunctions.fade(this, "out", 500, this.goToGameScene, gLogoDisplayLength);
         }, this);
         // *** LOAD ASSETS ***
-        // ========================================================================
-        // 3/30/20
-        // commented this out as I'm trying out banner kaios ads
-        // ========================================================================
-        // let d = '?' + new Date().getTime();
-        // this.load.text('sponsorURL', 'https://taara.games/sponsor.txt' + d);
-        // this.load.image('sponsor', 'https://taara.games/sponsor.png' + d);
-        // this.load.setPath("assets/");
-        // let it:Phaser.Types.Loader.XHRSettingsObject = Phaser.Loader.XHRSettings();
-        // it.header = "Access-Control-Allow-Origin: *";
-        // it.headerValue = "Access-Control-Allow-Origin: *";
-        //this.load.script('analytics', 'https://www.google-analytics.com/analytics.js');
+        this.load.json('manifest', 'manifest.webapp');
         this.load.setPath("assets/html/");
         this.load.html('moreGamesHTML', 'moregames.html');
         this.load.html('newgameHTML', 'newgame.html');
-        var touchExt = '-v2';
+        var touchExt = '';
         if (kTOUCH === 1) {
             touchExt = '_TP';
         }
@@ -413,10 +369,6 @@ var PreloadScene = /** @class */ (function (_super) {
         this.load.setPath("assets/images/");
         this.load.atlas("spriteAtlas", "spriteAtlas" + touchExt + ".png", "spriteAtlas" + touchExt + ".json", null, null);
         // this.load.image('coverart', 'coverart.png');
-        //Fonts
-        this.load.image('numbersFont', 'numbers@2x.png');
-        // this.load.bitmapFont('sysFont', 'retroSystem.png', 'retroSystem.fnt', null, null);
-        this.load.bitmapFont('sysFont', '8bitfont_0.png', '8bitfont.fnt', null, null);
         //Sound Effects
         this.load.setPath("assets/audio/");
         var ext = '.ogg';
@@ -425,22 +377,10 @@ var PreloadScene = /** @class */ (function (_super) {
         // this.load.audio("buttonNav", "chime-triad" + ext);
     };
     PreloadScene.prototype.goToGameScene = function (a, c, b, d) {
+        initGame();
         this.scene.start('MenuScene');
         this.scene.start('MenuOverlay');
         this.scene.start('SponsorOverlay');
-        var element = document.getElementsByClassName('spinner')[0];
-        var op = 1; // initial opacity
-        var timer = setInterval(function () {
-            if (op <= 0.1) {
-                clearInterval(timer);
-                // (<any>element).style.opacity = 0;
-                // (<any>element).style.display = 'none';
-                element.remove();
-            }
-            element.style.opacity = op;
-            element.style.filter = 'alpha(opacity=' + op * 100 + ")";
-            op -= op * 0.3;
-        }, 50);
     };
     return PreloadScene;
 }(Phaser.Scene));
@@ -454,18 +394,18 @@ var MenuOverlay = /** @class */ (function (_super) {
         _this.tagVOffset = 23;
         _this.tags = [];
         //end v2 ================================================================
-        _this.kHideDistance = 350;
-        _this._SHOWFPS = true;
+        //kHideDistance = 350;
         _this.pauseEnabled = false;
         _this.currentActiveButton = 4; // start on the play button
+        _this.tweeners = 0;
+        _this.fpsMeterCount = 0;
+        _this.fpsMeterMOD = 60;
         return _this;
     }
     MenuOverlay.prototype.preload = function () {
         // Get the Prefs & high score
         AAPrefs.initGamePrefs(gamePrefsFile);
         AAHighScores.initHighScores();
-        // AAKaiAds.displayFullscreenAd();
-        //AAKaiAds.preLoadBannerAd();
         if (!gIsTouchDevice) {
             AAKaiControls.setUpInputs(this);
             emitter.on('keydown', this.keydown, this);
@@ -473,13 +413,6 @@ var MenuOverlay = /** @class */ (function (_super) {
         }
     };
     MenuOverlay.prototype.create = function () {
-        // else {
-        //     AAControls.setUpInputs(this);
-        // }
-        // this.cursors = this.input.keyboard.createCursorKeys();
-        if (kTOUCH == 1) {
-            this.kHideDistance = 400;
-        }
         this.setUpAudio();
         this.setUpUI();
         gGameState = states.kSTATE_MENU;
@@ -490,6 +423,7 @@ var MenuOverlay = /** @class */ (function (_super) {
         // IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // THIS IS CALLED FROM THE FIREFOX UI WHEN A USER CLICKS "EXIT"
         emitter.on('fullscreen', this.action_btnFullscreen, this);
+        this.tweeners = 0;
         // var txt = [
         //     "window innerHeight: " + window.innerHeight + " ",
         //     "window innerWidth: " + window.innerWidth + " ",
@@ -509,6 +443,9 @@ var MenuOverlay = /** @class */ (function (_super) {
     };
     MenuOverlay.prototype.keydown = function (theKeyEvent) {
         if ((this.transitioning) || (AAFunctions.areButtonsBouncing())) {
+            return;
+        }
+        if (this.tweeners != 0) {
             return;
         }
         if (gGameState != states.kSTATE_MENU) {
@@ -531,6 +468,9 @@ var MenuOverlay = /** @class */ (function (_super) {
         }
     };
     MenuOverlay.prototype.keyup = function (theKeyEvent) {
+        if (this.tweeners != 0) {
+            return;
+        }
         var theKey = theKeyEvent.key;
         switch (gGameState) {
             case states.kSTATE_MENU:
@@ -615,7 +555,7 @@ var MenuOverlay = /** @class */ (function (_super) {
         var _this = this;
         gGameState = states.kSTATE_GAMEOVER;
         // Make sure the correct texture for hte back button is being used.
-        this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
+        this.btnHelp.setTexture(kSPRITE_ATLAS, kBTN_BACK);
         this.showButtonBG(function () {
             _this.showNumberTags(_this.tags);
             _this.showSpecificButtons(_this.buttons, function () { });
@@ -658,8 +598,13 @@ var MenuOverlay = /** @class */ (function (_super) {
         if (kTOUCH == 0) {
             if (theKey == "*") {
                 this.singlePress = true;
-                this._SHOWFPS = !this._SHOWFPS;
-                this.fpsText.visible = !this.fpsText.visible;
+                gSHOW_FPS = !gSHOW_FPS;
+                if (gSHOW_FPS) {
+                    this.fpsMeter.style.display = "block";
+                }
+                else {
+                    this.fpsMeter.style.display = "none";
+                }
             }
         }
     };
@@ -692,9 +637,9 @@ var MenuOverlay = /** @class */ (function (_super) {
                 // }
                 break;
             case "4":
-                // if (kSHOW_SETTINGS_BUTTON) {
-                this.btnSettings.pointerUp(null);
-                // }
+                if (kSHOW_SETTINGS_BUTTON) {
+                    this.btnSettings.pointerUp(null);
+                }
                 break;
             case "Enter":
             case "5":
@@ -726,33 +671,12 @@ var MenuOverlay = /** @class */ (function (_super) {
                 break;
         }
     };
-    // showButton(who, ly, lx) {
-    //     var scaleSpeed = 250;
-    //     // reset the scales of the button to 1.0 to avoid weird scaling issues
-    //     who.scaleX = 1.0;
-    //     who.scaleY = 1.0;
-    //     let _y = ly;
-    //     let _x = lx;
-    //     let theEase = 'BounceInOut'
-    //     let xthis = this;
-    //     this.buttonTween = this.tweens.add({
-    //         targets: who,
-    //         y: { value: _y, duration: scaleSpeed, ease: theEase },
-    //         x: { value: _x, duration: scaleSpeed, ease: theEase },
-    //         // scaleX: { value: .25, duration: scaleSpeed / 1.5, ease: 'BounceInOut', yoyo: true },
-    //         // scaleY: { value: 2.5, duration: scaleSpeed / 1.5, ease: 'BounceInOut', yoyo: true },
-    //     });
-    // }
     // **************************************************************************
     // SET UP THE UI
     // **************************************************************************
     MenuOverlay.prototype.setUpUI = function () {
         this.buttonY = 276;
         // Set up background art for buttons
-        //v2 alpha is a png
-        //v2 final should be a grc made here
-        //this.buttonBG = this.add.image(120, this.buttonY, 'spriteAtlas', 'btnBG.png');
-        // this.buttonBG = this.make.graphics({x: 0, y: 0, add: false});
         this.buttonBG = this.add.graphics();
         this.buttonBG.lineStyle(3, 0x5C5822, 1);
         this.buttonBG.fillStyle(0xFBED62, 1);
@@ -765,75 +689,42 @@ var MenuOverlay = /** @class */ (function (_super) {
         var isVis = true;
         var numBadge;
         // Play Button #######################################################################
-        this.btnPlay = new Button(this, 0, 0, 'spriteAtlas', 'btnPlay.png', this.action_BtnPlay, "play", true).setVisible(isVis);
-        // if (kTOUCH == 0) {
-        //     this.c_btnPlay = this.add.container(0, 0, [this.btnPlay, numBadge]).setVisible(isVis);
-        // }
-        // else {
-        //     this.c_btnPlay = this.add.container(0, 0, [this.btnPlay]).setVisible(isVis);
-        // }
+        this.btnPlay = new Button(this, 0, 0, kSPRITE_ATLAS, kBTN_PLAY, this.action_BtnPlay, "play", true).setVisible(isVis);
         // Sound Button #######################################################################
-        var whichButton = 'btnSoundOff.png';
+        var whichButton = kBTN_SOUND_OFF;
         // if (AAPrefs.playAudio) {
-        //     whichButton = 'btnSoundOn.png';
+        //     whichButton = kBTN_SOUND_ON;
         // }
-        this.btnSound = new Button(this, 0, 5, 'spriteAtlas', 'btnSoundOn.png', this.action_btnSound, "sound", true).setVisible(isVis);
-        // if (kTOUCH == 0) {
-        //     numBadge = this.add.image(0, -14, "spriteAtlas", "tag3.png").setVisible(gIsTouchDevice);
-        //     this.c_btnSound = this.add.container(this.cameras.main.width - 10, this.cameras.main.height - 10, [this.btnSound, numBadge]).setVisible(isVis);
-        // } else {
-        //     this.c_btnSound = this.add.container(this.cameras.main.width - 10, positionVert, [this.btnSound]).setVisible(isVis);
-        // }
+        this.btnSound = new Button(this, 0, 5, kSPRITE_ATLAS, kBTN_SOUND_ON, this.action_btnSound, "sound", true).setVisible(isVis);
         // Help/Back Button #######################################################################
-        whichButton = 'btnHelp.png';
-        this.btnHelp = new Button(this, 0, 5, 'spriteAtlas', whichButton, this.action_BtnHelpBack, "help", true).setVisible(true);
-        // if (kTOUCH == 0) {
-        //     numBadge = this.add.image(0, -14, "spriteAtlas", "tag1.png").setVisible(gIsTouchDevice);
-        //     this.c_btnHelp = this.add.container(15, this.cameras.main.height - 10, [this.btnHelp, numBadge]).setVisible(true);
-        // } else {
-        //     this.c_btnHelp = this.add.container(15, positionVert, [this.btnHelp]).setVisible(true);
-        // }
+        whichButton = kBTN_HELP;
+        this.btnHelp = new Button(this, 0, 5, kSPRITE_ATLAS, whichButton, this.action_BtnHelpBack, "help", true).setVisible(true);
         // Settings Button #######################################################################
-        whichButton = 'btnSettings.png';
-        this.btnSettings = new Button(this, 0, 5, 'spriteAtlas', whichButton, this.action_btnSettings, "settings", true).setVisible(true);
-        // if (kTOUCH == 1) {
-        //     numBadge = this.add.image(0, -14, "spriteAtlas", "tag4.png").setVisible(gIsTouchDevice);
-        //     this.c_btnSettings = this.add.container(15, this.cameras.main.height - 10, [this.btnSettings, numBadge]).setVisible(kSHOW_SETTINGS_BUTTON);
-        // } else {
-        //     this.c_btnSettings = this.add.container(15, positionVert, [this.btnSettings]).setVisible(kSHOW_SETTINGS_BUTTON);
-        // }
+        whichButton = kBTN_SETTINGS;
+        this.btnSettings = new Button(this, 0, 5, kSPRITE_ATLAS, whichButton, this.action_btnSettings, "settings", true).setVisible(kSHOW_SETTINGS_BUTTON);
         // More Games Button #######################################################################
-        this.btnMoreGames = new Button(this, 0, 0, 'spriteAtlas', 'btnMoreGames.png', this.action_btnMoreGames, "more", true).setVisible(isVis);
-        // if (kTOUCH == 0) {
-        //     numBadge = this.add.image(0, -20, "spriteAtlas", "tag2.png").setVisible(gIsTouchDevice);
-        //     this.c_btnMoreGames = this.add.container(0, 0, [this.btnMoreGames, numBadge]).setVisible(isVis);
-        // } else {
-        //     this.c_btnMoreGames = this.add.container(0, positionVert, [this.btnMoreGames]).setVisible(isVis);
-        // }
+        this.btnMoreGames = new Button(this, 0, 0, kSPRITE_ATLAS, kBTN_MORE_GAMES, this.action_btnMoreGames, "more", true).setVisible(isVis);
         // Reset Button #######################################################################
-        this.btnResetGame = new Button(this, 40, this.cameras.main.height + 25, 'spriteAtlas', 'btnResetGame.png', this.action_btnResetGame, "resetgame", true);
+        this.btnResetGame = new Button(this, 40, this.cameras.main.height + 25, kSPRITE_ATLAS, kBTN_RESET_GAME, this.action_btnResetGame, "resetgame", true);
         //.setVisible(true);
         // Fullscreen Button #######################################################################
-        // this.btnFullscreen = new Button(this, 0, 5, 'spriteAtlas', 'btnFullscreenOn.png', this.action_btnFullscreen, "fullscreen", true).setVisible(isVis);
+        // this.btnFullscreen = new Button(this, 0, 5, kSPRITE_ATLAS, kBTN_FULLSCREEN_ON, this.action_btnFullscreen, "fullscreen", true).setVisible(isVis);
         // if (kTOUCH == 0) {
-        //     numBadge = this.add.image(0, -14, "spriteAtlas", "tag#.png").setVisible(gIsTouchDevice);
+        //     numBadge = this.add.image(0, -14, kSPRITE_ATLAS, "tag#.png").setVisible(gIsTouchDevice);
         //     this.c_btnFullScreen = this.add.container(this.cameras.main.width - 10, this.cameras.main.height - 10, [this.btnFullscreen, numBadge]).setVisible(kSHOW_FULLSCREEN_BUTTON);
         // } else {
         //     this.c_btnFullScreen = this.add.container(this.cameras.main.width - 10, this.cameras.main.height - 10, [this.btnFullscreen]).setVisible(kSHOW_FULLSCREEN_BUTTON);
         // }
         // Pause Button #######################################################################
         // whichButton = 'btnPause.png';
-        // this.btnPause = new Button(this, this.cameras.main.width - 35, 20, 'spriteAtlas', whichButton, this.action_btnPause, "pause", true).setVisible(false);
-        // // Sponsor Button #####################################################################
-        // this.btnSponsor = new Button(this, this.sys.canvas.width - 60, this.sys.canvas.height, 'spriteAtlas', "sponsor.png", this.action_sponsorButton, "sponsor", true).setVisible(true).setOrigin(.5, 1);
-        // DISPLAY BUTTONS #######################################################################
-        // #######################################################################################
+        // this.btnPause = new Button(this, this.cameras.main.width - 35, 20, kSPRITE_ATLAS, whichButton, this.action_btnPause, "pause", true).setVisible(false);
+        // DISPLAY BUTTONS #######################################################
+        // #######################################################################
         // HELP -- PLAY -- SOUND
         var buttonOffset = 45;
         if (kTOUCH == 1) {
             buttonOffset *= 4;
         }
-        //(this.cameras.main.height - buttonOffset);
         if (kSHOW_SETTINGS_BUTTON) {
             AAFunctions.displayButtons([this.btnHelp, this.btnMoreGames, this.btnPlay, this.btnSound, this.btnSettings], this.cameras.main, this.buttonY, -25);
         }
@@ -841,19 +732,18 @@ var MenuOverlay = /** @class */ (function (_super) {
             AAFunctions.displayButtons([this.btnHelp, this.btnMoreGames, this.btnPlay, this.btnSound], this.cameras.main, this.buttonY, -25);
         }
         this.tags = [
-            this.add.image(this.btnHelp.x, this.btnHelp.y - this.tagVOffset, "spriteAtlas", "tag1.png").setVisible(!gIsTouchDevice),
-            this.add.image(this.btnMoreGames.x, this.btnMoreGames.y - this.tagVOffset, "spriteAtlas", "tag2.png").setVisible(!gIsTouchDevice),
-            this.add.image(this.btnPlay.x, this.btnPlay.y - this.tagVOffset, "spriteAtlas", "tag5.png").setVisible(!gIsTouchDevice),
-            this.add.image(this.btnSound.x, this.btnSound.y - this.tagVOffset, "spriteAtlas", "tag3.png").setVisible(!gIsTouchDevice)
-            // this.add.image(this.btnSettings.x, this.btnSettings.y - this.tagVOffset, "spriteAtlas", "tag4.png").setVisible(!gIsTouchDevice)
+            this.add.image(this.btnHelp.x, this.btnHelp.y - this.tagVOffset, kSPRITE_ATLAS, kTAG_1).setVisible(!gIsTouchDevice),
+            this.add.image(this.btnMoreGames.x, this.btnMoreGames.y - this.tagVOffset, kSPRITE_ATLAS, kTAG_2).setVisible(!gIsTouchDevice),
+            this.add.image(this.btnPlay.x, this.btnPlay.y - this.tagVOffset, kSPRITE_ATLAS, kTAG_5).setVisible(!gIsTouchDevice),
+            this.add.image(this.btnSound.x, this.btnSound.y - this.tagVOffset, kSPRITE_ATLAS, kTAG_3).setVisible(!gIsTouchDevice)
         ];
         //Settings Button is a special case.  Some games do have a settings buttons
         if (kSHOW_SETTINGS_BUTTON) {
-            var settBtnTag = this.add.image(this.btnSettings.x, this.btnSettings.y - this.tagVOffset, "spriteAtlas", "tag4.png");
+            var settBtnTag = this.add.image(this.btnSettings.x, this.btnSettings.y - this.tagVOffset, kSPRITE_ATLAS, kTAG_4);
             settBtnTag.setVisible(kSHOW_SETTINGS_BUTTON || !gIsTouchDevice);
             this.tags.push(settBtnTag);
         }
-        this.audioOffImage = this.add.image(this.btnSound.x, this.btnSound.y, 'spriteAtlas', 'btnSoundOff.png').setVisible(!AAPrefs.playAudio);
+        this.audioOffImage = this.add.image(this.btnSound.x, this.btnSound.y, kSPRITE_ATLAS, kBTN_SOUND_OFF).setVisible(!AAPrefs.playAudio);
         // SETTINGS -- MORE GAMES -- FULLSCREEN
         if (kTOUCH == 1) {
             this.buttonY2 = (this.cameras.main.height - 105 * 3);
@@ -870,38 +760,47 @@ var MenuOverlay = /** @class */ (function (_super) {
         // Pause Graphic #######################################################################
         this.createPauseGrc();
         // GameOver Sprite #######################################################################
-        this.gameoverSprite = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2.5, 'spriteAtlas', 'gameover.png').setVisible(false);
+        this.gameoverSprite = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2.5, kSPRITE_ATLAS, kIMG_GAMEOVER).setVisible(false);
         // Number Font #######################################################################
         //this.makeTheNumbersFont();
         // Score Text #######################################################################
-        var scoreSize = 32; //15 * 1.5;
-        if (kTOUCH == 1) {
-            scoreSize = 32 * 2; //15 * 3;
-        }
-        this.scoreText = this.add.bitmapText(9, 6, 'sysFont', '0', scoreSize).setDepth(999);
-        //this.add.bitmapText(9, 6, 'numbersFont', '0', scoreSize).setDepth(999);
-        this.scoreText.setOrigin(0);
-        this.scoreText.setTint(0xffffff);
-        this.scoreText.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+        // let scoreSize = 32;//15 * 1.5;
+        // if (kTOUCH == 1) {
+        //     scoreSize = 32 * 2;//15 * 3;
+        // }
+        // This is the main div holding the score and high score text
+        this.scoresDom = document.getElementById('scores');
+        this.scoresDom.style.opacity = "1";
+        this.scoreDom = document.getElementById('scoreText');
+        // this.scoreDom.style.display = 'block';
+        this.highscoreDom = document.getElementById('highscoreText');
+        // this.highscoreDom.style.display = 'block';
+        this.highscoreDom.innerText = AAHighScores.highScore;
+        // this.scoreText = this.add.bitmapText(9, 6, 'sysFont', '0', scoreSize).setDepth(999);
+        // //this.add.bitmapText(9, 6, 'numbersFont', '0', scoreSize).setDepth(999);
+        // this.scoreText.setOrigin(0);
+        // this.scoreText.setTint(0xffffff);
+        // this.scoreText.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
         // this.scoreText.scaleX = .5;
         // this.scoreText.scaleY = .5;
         // HighScore Text #######################################################################
-        scoreSize = 16; //8 * 1.5;
-        var touchOffset = 1.5;
-        if (kTOUCH == 1) {
-            scoreSize = 16 * 3; //8 * 3;
-            touchOffset = 3;
-        }
-        this.highScoreText = this.add.bitmapText(9, 25 * touchOffset, 'sysFont', AAHighScores.highScore, scoreSize).setDepth(999);
-        // this.add.bitmapText(12, 25 * touchOffset, 'numbersFont', AAHighScores.highScore, scoreSize).setDepth(999);
-        this.highScoreText.setOrigin(0);
+        // scoreSize = 16;//8 * 1.5;
+        // let touchOffset = 1.5;
+        // if (kTOUCH == 1) {
+        //     scoreSize = 16 * 3;//8 * 3;
+        //     touchOffset = 3;
+        // }
+        // this.highScoreText = this.add.bitmapText(9, 25 * touchOffset, 'sysFont', AAHighScores.highScore, scoreSize).setDepth(999);
+        // // this.add.bitmapText(12, 25 * touchOffset, 'numbersFont', AAHighScores.highScore, scoreSize).setDepth(999);
+        // this.highScoreText.setOrigin(0);
         // this.highScoreText.setTint(0xcccccc);
         // this.highScoreText.scaleX = .5;
         // t5his.highScoreText.scaleY = .5;
         // FPS TEXT #######################################################################
-        this.fpsText = this.add.bitmapText(9, this.game.canvas.height / 2, 'sysFont', '0.0', 16).setVisible(this._SHOWFPS);
-        this.fpsText.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
-        this.fpsText.setTint(0x666666);
+        this.fpsMeter = document.getElementById('fpsMeter');
+        // this.fpsText = this.add.bitmapText(9, this.game.canvas.height / 2, 'sysFont', '0.0', 16).setVisible(gSHOW_FPS);
+        // this.fpsText.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+        // this.fpsText.setTint(0x666666);
         // this.debugInfo = this.add.bitmapText(10, 130, 'numbersFont', '0', scoreSize).setDepth(999);
         var element = this.add.dom(10, 90).createFromCache('newgameHTML').setOrigin(0, 0);
     };
@@ -937,44 +836,16 @@ var MenuOverlay = /** @class */ (function (_super) {
         }
     };
     MenuOverlay.prototype.update = function (time, delta) {
-        if (this._SHOWFPS) {
-            this.fpsText.setText((1000 / delta).toFixed(1));
+        if (gSHOW_FPS) {
+            this.fpsMeter.innerText = (1000 / delta).toFixed(1);
+        }
+        if ((++this.fpsMeterCount % this.fpsMeterMOD) == 0) {
+            addToFPSArray((1000 / delta).toFixed(1));
         }
         //Yup...this ia a hack but ti works
         if (!AAPrefs.playAudio) {
             this.audioOffImage.y = this.btnSound.y;
         }
-        // if (!gIsTouchDevice) {
-        //     let left = Phaser.Input.Keyboard.JustDown(AAControls.AKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.left);
-        //     let right = Phaser.Input.Keyboard.JustDown(AAControls.DKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.right);
-        //     let up = Phaser.Input.Keyboard.JustDown(AAControls.WKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.up);
-        //     let down = Phaser.Input.Keyboard.JustDown(AAControls.SKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.down);
-        //     if (right) {
-        //         this.navigateDirectionToButton(1);
-        //         AAControls.right = 0;
-        //     } else if (left) {
-        //         this.navigateDirectionToButton(-1);
-        //         AAControls.left = 0;
-        //     }
-        //     if (down) {
-        //         this.navigateDirectionToButton(3);
-        //         AAControls.right = 0;
-        //     } else if (up) {
-        //         this.navigateDirectionToButton(-3);
-        //         AAControls.left = 0;
-        //     }
-        //     let click = Phaser.Input.Keyboard.JustDown(AAControls.spacebar) || Phaser.Input.Keyboard.JustDown(AAControls.returnKey);
-        //     if (click) {
-        //         this.buttons[this.currentActiveButton].first.pointerUp(null);
-        //     }
-        // }
-        // if (this.debugInfo) {
-        //     this.debugInfo.setText([
-        //         'GameData.rockcount: ' + GameData.rockCount
-        //         this.bigRocks
-        //     ]);
-        //     // this.debugText.text = gGameState.toString();
-        // }
     };
     MenuOverlay.prototype.navigateDirectionToButton = function (dir) {
         var nextButton = Phaser.Math.Clamp(this.currentActiveButton + dir, 0, this.buttons.length - 1);
@@ -997,9 +868,14 @@ var MenuOverlay = /** @class */ (function (_super) {
         this.displayScore(thescore);
     };
     MenuOverlay.prototype.displayScore = function (thescore) {
-        this.scoreText.text = thescore.toString();
+        var _this = this;
+        this.scoreDom.innerText = thescore.toString();
+        this.scoreDom.classList.add("scoreBounce");
+        setTimeout(function () { _this.scoreDom.classList.remove("scoreBounce"); }, 1200);
         if (thescore >= AAHighScores.highScore) {
-            this.highScoreText.text = this.scoreText.text;
+            this.highscoreDom.innerText = thescore.toString();
+            this.highscoreDom.classList.add("scoreBounce");
+            setTimeout(function () { _this.highscoreDom.classList.remove("scoreBounce"); }, 1200);
             AAHighScores.saveScoreToLocalStorage(thescore);
         }
     };
@@ -1057,27 +933,15 @@ var MenuOverlay = /** @class */ (function (_super) {
         this.pauseEnabled = false;
         // this.btnPause.setVisible(false);
     };
-    // hideTopPlaySoundButtons(_y) {
-    //     this.showButton(this.c_btnSound, _y, this.c_btnSound.x);
-    //     setTimeout(() => {
-    //         this.showButton(this.c_btnPlay, _y, this.c_btnPlay.x);
-    //     }, 50);
-    // }
-    // hideTopRowOfButtons(_y) {
-    //     this.showButton(this.c_btnSettings, _y, this.c_btnSettings.x);
-    //     setTimeout(() => {
-    //         this.showButton(this.c_btnMoreGames, _y, this.c_btnMoreGames.x);
-    //     }, 50);
-    //     setTimeout(() => {
-    //         this.showButton(this.c_btnFullScreen, _y, this.c_btnFullScreen.x);
-    //     }, 100);
-    // }
     // **************************************************************************
     // **************************************************************************
     // **************************************************************************
     // Button CALLBACKS
     // **************************************************************************
     MenuOverlay.prototype.action_BtnPlay = function (state) {
+        if (this.tweeners != 0) {
+            return;
+        }
         if (state == 'up') {
             this.playBtnSnd();
             switch (gGameState) {
@@ -1098,17 +962,16 @@ var MenuOverlay = /** @class */ (function (_super) {
         }
     };
     MenuOverlay.prototype.action_btnSound = function (_state) {
+        if (this.tweeners != 0) {
+            return;
+        }
         if (_state == 'up') {
             this.playBtnSnd();
             AAPrefs.toggleAudio();
             if (AAPrefs.playAudio == true) {
-                // If we playAudio we flip the frame of the button to show the ON state when up and the OFF state when pressed         
-                //this.btnSound.setFrames('btnSoundOn.png', 'btnSoundOff.png', 'btnSoundOn.png');
                 AAKaiAnalytics.sendEvent("soundOn");
             }
             else {
-                // This will display the the OFF state when up and the ON state when pressed
-                // this.btnSound.setFrames('btnSoundOff.png', 'btnSoundOn.png', 'btnSoundOff.png');//, 'btn_sound_off.png');
                 AAKaiAnalytics.sendEvent("soundOff");
             }
             this.audioOffImage.setVisible(!AAPrefs.playAudio);
@@ -1116,13 +979,14 @@ var MenuOverlay = /** @class */ (function (_super) {
         }
     };
     MenuOverlay.prototype.action_btnPause = function (_state) {
+        if (this.tweeners != 0) {
+            return;
+        }
         if (_state == 'up') {
             this.playBtnSnd();
             if (gGameState == states.kSTATE_PLAYING) {
-                this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
+                this.btnHelp.setTexture(kSPRITE_ATLAS, kBTN_BACK);
                 gGameState = states.kSTATE_PAUSED;
-                // this.showButton(this.c_btnHelp, this.buttonY, this.c_btnHelp.x);
-                // this.showButton(this.c_btnSound, this.buttonY, this.c_btnSound.x);
                 this.pauseImage.setVisible(true);
                 AAFunctions.tweenBounce(this, this.pauseImage);
                 // (<SponsorOverlay>this.scene.get("SponsorOverlay")).showBanner();
@@ -1131,8 +995,6 @@ var MenuOverlay = /** @class */ (function (_super) {
             }
             else if (gGameState == states.kSTATE_PAUSED) {
                 gGameState = states.kSTATE_PLAYING;
-                // this.showButton(this.c_btnHelp, this.buttonY + this.kHideDistance, this.c_btnHelp.x);
-                // this.showButton(this.c_btnSound, this.buttonY + this.kHideDistance, this.c_btnSound.x);
                 this.pauseImage.setVisible(false);
                 // (<SponsorOverlay>this.scene.get("SponsorOverlay")).hideBanner();
                 game.scene.resume("GameScene");
@@ -1142,6 +1004,9 @@ var MenuOverlay = /** @class */ (function (_super) {
     };
     MenuOverlay.prototype.action_BtnHelpBack = function (_state) {
         var _this = this;
+        if (this.tweeners != 0) {
+            return;
+        }
         if (_state == 'up') {
             this.playBtnSnd();
             // Just make sure that the gameover sprite is hidden in case this is called from a gameover()
@@ -1154,21 +1019,22 @@ var MenuOverlay = /** @class */ (function (_super) {
                     this.hideNumberTags(this.tags);
                     this.hideAllButtons(function () {
                         _this.hideButtonBG(function () {
-                            _this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
+                            _this.btnHelp.setTexture(kSPRITE_ATLAS, kBTN_BACK);
                             _this.showButtonBG(function () {
                                 _this.showNumberTags(_this.tags[0]);
                                 _this.showSpecificButtons([_this.btnHelp], function () { });
                             });
                         });
                     });
-                    this.scene.get("SponsorOverlay").hideBanner();
+                    // (<SponsorOverlay>this.scene.get("SponsorOverlay")).
+                    hideBanner();
                     AAKaiAnalytics.sendEvent("help");
                     break;
                 case states.kSTATE_GAMEOVER:
                     this.hideNumberTags(this.tags);
                     this.hideAllButtons(function () {
                         _this.hideButtonBG(function () {
-                            _this.btnHelp.setTexture('spriteAtlas', 'btnHelp.png');
+                            _this.btnHelp.setTexture(kSPRITE_ATLAS, kBTN_HELP);
                             _this.showButtonBG(function () {
                                 _this.scene.get("GameScene").scene.start("MenuScene");
                                 gGameState = states.kSTATE_MENU;
@@ -1193,16 +1059,19 @@ var MenuOverlay = /** @class */ (function (_super) {
         }
     };
     MenuOverlay.prototype.action_btnFullscreen = function (_state) {
+        if (this.tweeners != 0) {
+            return;
+        }
         if (kSHOW_FULLSCREEN_BUTTON) {
             if (gGameState == states.kSTATE_MENU) {
                 if (_state == 'up') {
                     this.playBtnSnd();
                     if (this.scale.isFullscreen) {
-                        this.btnFullscreen.setTexture('spriteAtlas', 'btnFullscreenOn.png');
+                        this.btnFullscreen.setTexture(kSPRITE_ATLAS, kBTN_FULLSCREEN_ON);
                         this.scale.stopFullscreen();
                     }
                     else {
-                        this.btnFullscreen.setTexture('spriteAtlas', 'btnFullscreenOff.png');
+                        this.btnFullscreen.setTexture(kSPRITE_ATLAS, kBTN_FULLSCREEN_OFF);
                         this.scale.startFullscreen();
                     }
                 }
@@ -1212,6 +1081,9 @@ var MenuOverlay = /** @class */ (function (_super) {
     MenuOverlay.prototype.action_btnSettings = function (_state) {
         var _this = this;
         // if (gGameState == states.kSTATE_MENU) {
+        if (this.tweeners != 0) {
+            return;
+        }
         if (_state == 'up') {
             this.playBtnSnd();
             this.scene.get("MenuScene").scene.start("SettingsScene");
@@ -1219,20 +1091,24 @@ var MenuOverlay = /** @class */ (function (_super) {
             this.hideNumberTags(this.tags);
             this.hideAllButtons(function () {
                 _this.hideButtonBG(function () {
-                    _this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
+                    _this.btnHelp.setTexture(kSPRITE_ATLAS, kBTN_BACK);
                     _this.showButtonBG(function () {
                         _this.showNumberTags(_this.tags[0]);
                         _this.showSpecificButtons([_this.btnHelp], function () { });
                     });
                 });
             });
-            this.scene.get("SponsorOverlay").hideBanner();
+            // (<SponsorOverlay>this.scene.get("SponsorOverlay")).
+            hideBanner();
             AAKaiAnalytics.sendEvent("settings");
         }
         // }
     };
     MenuOverlay.prototype.action_btnMoreGames = function (_state) {
         var _this = this;
+        if (this.tweeners != 0) {
+            return;
+        }
         if (_state == 'up') {
             this.playBtnSnd();
             this.scene.get("MenuScene").scene.start("MoreGamesScene");
@@ -1240,19 +1116,23 @@ var MenuOverlay = /** @class */ (function (_super) {
             this.hideNumberTags(this.tags);
             this.hideAllButtons(function () {
                 _this.hideButtonBG(function () {
-                    _this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
+                    _this.btnHelp.setTexture(kSPRITE_ATLAS, kBTN_BACK);
                     _this.showButtonBG(function () {
                         _this.showNumberTags(_this.tags[0]);
                         _this.showSpecificButtons([_this.btnHelp], function () { });
                     });
                 });
             });
-            this.scene.get("SponsorOverlay").hideBanner();
+            // (<SponsorOverlay>this.scene.get("SponsorOverlay")).
+            hideBanner();
             AAKaiAnalytics.sendEvent("moregames");
         }
     };
     //V2 ==================================================
     MenuOverlay.prototype.action_btnResetGame = function (_state) {
+        if (this.tweeners != 0) {
+            return;
+        }
         if (gGameState == states.kSTATE_MENU) {
             if (_state == 'up') {
                 this.playBtnSnd();
@@ -1261,6 +1141,7 @@ var MenuOverlay = /** @class */ (function (_super) {
         }
     };
     MenuOverlay.prototype.showResetButton = function (how) {
+        var _this = this;
         //this.btnResetGame.setVisible(how);
         var bY = this.cameras.main.height - 5;
         if (how === false) {
@@ -1271,8 +1152,12 @@ var MenuOverlay = /** @class */ (function (_super) {
             targets: this.btnResetGame,
             y: bY,
             duration: 200,
-            ease: 'Sine.easeInOut',
+            onComplete: function () {
+                _this.tweeners--;
+            },
+            onCompleteScope: this
         });
+        this.tweeners++;
     };
     MenuOverlay.prototype.backToMenu = function (fromWhere) {
         var _this = this;
@@ -1281,7 +1166,7 @@ var MenuOverlay = /** @class */ (function (_super) {
             _this.hideButtonBG(function () {
                 _this.scene.get(fromWhere).scene.start("MenuScene");
                 // hide the reset button
-                _this.btnHelp.setTexture('spriteAtlas', 'btnHelp.png');
+                _this.btnHelp.setTexture(kSPRITE_ATLAS, kBTN_HELP);
                 if (_this.pauseEnabled) {
                     _this.btnPause.setVisible(false);
                     _this.pauseImage.setVisible(false);
@@ -1292,40 +1177,59 @@ var MenuOverlay = /** @class */ (function (_super) {
                     _this.showNumberTags(_this.tags);
                     _this.showSpecificButtons(_this.buttons, function () {
                         gGameState = states.kSTATE_MENU;
-                        if (false == _this.scoreText.visible) {
-                            _this.scoreText.setVisible(true);
-                            _this.highScoreText.setVisible(true);
-                        }
-                        _this.scene.get("SponsorOverlay").showBanner();
+                        // if (false == this.scoreText.visible) {
+                        //     this.scoreText.setVisible(true);
+                        //     this.highScoreText.setVisible(true);
+                        // }
+                        _this.hideScores(false);
+                        // (<SponsorOverlay>this.scene.get("SponsorOverlay")).
+                        showBanner();
                     });
                 });
             });
         });
     };
     MenuOverlay.prototype.hideNumberTags = function (theTags) {
+        var _this = this;
         this.tweens.add({
             targets: theTags,
             y: this.game.canvas.height + 20,
             duration: 200,
             ease: 'Sine.easeInOut',
-            delay: this.tweens.stagger(50)
+            delay: this.tweens.stagger(50),
+            onComplete: function () {
+                _this.tweeners--;
+            },
+            onCompleteScope: this
         });
+        this.tweeners++;
     };
     MenuOverlay.prototype.showNumberTags = function (theTags) {
+        var _this = this;
         this.tweens.add({
             targets: theTags,
             y: this.buttonY - this.tagVOffset,
             duration: 200,
             ease: 'Sine.easeInOut',
-            delay: this.tweens.stagger(50)
+            delay: this.tweens.stagger(50),
+            onComplete: function () {
+                _this.tweeners--;
+            },
+            onCompleteScope: this
         });
+        this.tweeners++;
     };
     MenuOverlay.prototype.hideScores = function (how) {
-        // BOWLING SPECIFIC 
-        this.scoreText.visible = how;
-        this.highScoreText.visible = how;
+        var op = "1"; //"block";
+        if (how == true) {
+            op = "0"; //"none";
+        }
+        // this.scoreDom.style.display = op;
+        // this.highscoreDom.style.display = op;
+        this.scoresDom.style.opacity = op;
     };
     MenuOverlay.prototype.hideAllButtons = function (theCallback) {
+        var _this = this;
         this.showResetButton(false);
         // if (AAPrefs.playAudio){
         //     this.audioOffImage.setVisible(false);
@@ -1338,32 +1242,40 @@ var MenuOverlay = /** @class */ (function (_super) {
             delay: this.tweens.stagger(5),
             onComplete: function () {
                 //this.showSpecificButtons(showList);
+                _this.tweeners--;
                 theCallback();
             }
         });
+        this.tweeners++;
     };
     MenuOverlay.prototype.hideButtonBG = function (theCallback) {
+        var _this = this;
         this.tweens.add({
             targets: this.buttonBG,
             x: -this.game.canvas.width - 50,
             duration: 100,
             ease: 'Sine.easeInOut',
-            onComplete: function () { theCallback(); }
+            onComplete: function () { theCallback(); _this.tweeners--; }
         });
+        this.tweeners++;
     };
     MenuOverlay.prototype.showButtonBG = function (theCallback) {
+        var _this = this;
         this.tweens.add({
             targets: this.buttonBG,
             x: 0,
             duration: 100,
             ease: 'Sine.easeInOut',
             onComplete: function () {
+                _this.tweeners--;
                 theCallback();
             },
             callbackScope: this
         });
+        this.tweeners++;
     };
     MenuOverlay.prototype.hideSpecificButtons = function (theButtons, theFunction) {
+        var _this = this;
         this.tweens.add({
             targets: theButtons,
             y: this.game.canvas.height + 50,
@@ -1371,11 +1283,14 @@ var MenuOverlay = /** @class */ (function (_super) {
             ease: 'Sine.easeInOut',
             delay: this.tweens.stagger(50),
             onComplete: function () {
+                _this.tweeners--;
                 theFunction(theFunction);
             }
         });
+        this.tweeners++;
     };
     MenuOverlay.prototype.showSpecificButtons = function (theButtons, theCallback) {
+        var _this = this;
         this.tweens.add({
             targets: theButtons,
             y: this.buttonY,
@@ -1383,9 +1298,11 @@ var MenuOverlay = /** @class */ (function (_super) {
             ease: 'Sine.easeInOut',
             delay: this.tweens.stagger(50),
             onComplete: function () {
+                _this.tweeners--;
                 theCallback();
             }
         });
+        this.tweeners++;
     };
     return MenuOverlay;
 }(Phaser.Scene)); //end scene
@@ -1399,6 +1316,8 @@ var MenuScene = /** @class */ (function (_super) {
         gGameState = states.kSTATE_MENU;
     };
     MenuScene.prototype.create = function () {
+        AAKaiAds.preLoadBannerAd();
+        this.removeLogo();
         this.scene.sendToBack();
         var element = this.add.dom(10, 140).createFromCache('newgameHTML').setOrigin(0, 0);
         var vy = this.sys.canvas.height - 17;
@@ -1407,7 +1326,18 @@ var MenuScene = /** @class */ (function (_super) {
             vy = 8;
             vx = this.game.canvas.width - 60;
         }
-        this.add.bitmapText(vx, vy, 'sysFont', gGameVersion, 12).setDepth(999);
+        // this.add.bitmapText(vx, vy, 'sysFont', gGameVersion, 12).setDepth(999);
+    };
+    MenuScene.prototype.removeLogo = function () {
+        var element = document.getElementsByClassName('loader')[0];
+        if (element != undefined) {
+            element.style.opacity = "0";
+            var op = 1; // initial opacity
+            var timer = setInterval(function () {
+                clearInterval(timer);
+                element.remove();
+            }, 2000);
+        }
     };
     return MenuScene;
 }(Phaser.Scene));
@@ -1421,226 +1351,10 @@ var HelpScene = /** @class */ (function (_super) {
     HelpScene.prototype.create = function () {
         gGameState = states.kSTATE_HELP;
         var mo = this.scene.get('MenuOverlay');
-        mo.scoreText.setVisible(false);
-        mo.highScoreText.setVisible(false);
-        //    setTimeout(()=>{
-        //       // (<MenuOverlay>mo).showButtonBG();
-        //       // (<MenuOverlay>mo).btnHelp.setTexture('spriteAtlas', 'btnBack.png');
-        //       // (<MenuOverlay>mo).showSpecificButtons([(<MenuOverlay>mo).btnHelp]);
-        //     },200);
-        this.add.image(0, 0, 'spriteAtlas', 'help_en.png').setOrigin(0, 0);
+        mo.hideScores(true);
+        this.add.image(0, 0, kSPRITE_ATLAS, kIMG_HELP).setOrigin(0, 0);
     };
     return HelpScene;
-}(Phaser.Scene));
-var SponsorOverlay = /** @class */ (function (_super) {
-    __extends(SponsorOverlay, _super);
-    function SponsorOverlay() {
-        var _this = _super.call(this, { key: 'SponsorOverlay' }) || this;
-        _this.bottomPos = kBOTTOM_POSITION_FOR_AD * gRetinaOffset;
-        return _this;
-    }
-    SponsorOverlay.prototype.preload = function () {
-    };
-    SponsorOverlay.prototype.create = function () {
-        // if (kUSESPONSOR == false) {
-        //     return;
-        // }
-        this.events.removeListener('hideAd');
-        this.events.removeListener('showAd');
-        emitter.on('hideAd', this.hideBanner, this);
-        emitter.on('showAd', this.showBanner, this);
-        this.domad = document.getElementById('sponsorad');
-        this.sponsorTag = document.getElementsByClassName('tagNum')[0];
-        ///////////////////////////////////////////////////
-        var adFrame = this.add.image(0, 0, 'sponsor');
-        adFrame.setOrigin(0, 0);
-        // NOTE: 3/30/20
-        // commented out the sponsor code to play with KaiAds
-        // commented out setInteractive() and pointerUp
-        this.btn = this.add.image(this.sys.canvas.width - 25, this.bottomPos, "spriteAtlas", "tag8.png").setVisible(!gIsTouchDevice); //false);
-        var where = -this.bottomPos;
-        if (kTOUCH == 1) {
-            where = 950;
-        }
-        this.adContainer = this.add.container(0, where, [adFrame, this.btn]).setVisible(true).setVisible(false);
-        ;
-        // adFrame.setInteractive();
-        // let xthis = this;
-        // adFrame.on('pointerup', function (pointer) {
-        //     (<MenuOverlay>xthis.scene.get("MenuOverlay")).visitSponsor();
-        // });
-        this.startyScore = this.scene.get("MenuOverlay").scoreText.y;
-        this.startyHighScore = this.scene.get("MenuOverlay").highScoreText.y;
-        // Sponsor Button #####################################################################
-        if (kTOUCH == 0) {
-            this.btnSponsor = new Button(this, this.sys.canvas.width - 80 * gRetinaOffset, this.sys.canvas.height + 60, 'spriteAtlas', "btnSponsor.png", this.action_sponsorButton, "sponsor", true).setVisible(true).setOrigin(.5, 1).setVisible(isKaiOS);
-            if ((gRunnngInBrowser) || (kTOUCH == 1)) {
-                this.btnSponsor.setVisible(false);
-            }
-        }
-        // this.showBanner();
-        this.scene.bringToTop();
-        //if (isKaiOS) {
-        //    this.showBanner();
-        //}
-    };
-    SponsorOverlay.prototype.hideBanner = function () {
-        // this.adContainer.setVisible(false);
-        // if (kUSESPONSOR == false) {
-        //     return;
-        // }
-        if (kTOUCH == 0) {
-            //works
-            //this.domad.style.visibility = "hidden";
-            this.tweens.add({
-                targets: [this.adContainer, this.btn],
-                y: -110,
-                ease: 'Sine.easeIn',
-                onUpdate: function () {
-                    this.domad.style.top = this.adContainer.y + "px";
-                },
-                callbackScope: this,
-                duration: 250
-            });
-            if (!gIsTouchDevice) { //(isKaiOS) {
-                this.sponsorTag.style.visibility = "visible";
-            }
-            gTween = this.tweens.add({
-                targets: this.btnSponsor,
-                y: this.sys.game.canvas.height + 60,
-                ease: 'Sine.easeIn',
-                duration: 250
-            });
-            // this.tweens.add({
-            //     targets: (<MenuOverlay>this.scene.get("MenuOverlay")).scoreText,
-            //     y: this.startyScore,
-            //     ease: 'Sine.easeIn',
-            //     duration: 250
-            // });
-            // gTween = this.tweens.add({
-            //     targets: (<MenuOverlay>this.scene.get("MenuOverlay")).highScoreText,
-            //     y: this.startyHighScore,
-            //     ease: 'Sine.easeIn',
-            //     duration: 250
-            // });
-        }
-        else {
-            this.tweens.add({
-                targets: [this.adContainer, this.btn],
-                y: 950,
-                ease: 'Sine.easeIn',
-                onUpdate: function () {
-                    this.domad.style.top = this.adContainer.y + "px";
-                },
-                callbackScope: this,
-                duration: 250
-            });
-        }
-    };
-    SponsorOverlay.prototype.showBanner = function () {
-        // console.log('show banner yo');
-        this.scene.bringToTop();
-        //works
-        //this.domad.style.visibility = "visible";
-        // if (gAdShowingBanner) {
-        //     if (isKaiOS) {
-        //         this.sponsorTag.style.visibility = "visible";
-        //     }
-        // } else {
-        //     return;
-        // }
-        if (!gIsTouchDevice) { //(isKaiOS) {
-            this.sponsorTag.style.visibility = "visible";
-        }
-        switch (true) {
-            // case (gGameState == states.kSTATE_PLAYING):
-            case (gGameState == states.kSTATE_SETTINGS):
-            case (gGameState == states.kSTATE_HELP):
-            case (gGameState == states.kSTATE_MOREGAMES):
-                return;
-                break;
-            default:
-                break;
-        }
-        // if (gGameState == states.kSTATE_PLAYING) {
-        //     return;
-        // }
-        // if (gGameState == states.kSTATE_SETTINGS) {
-        //     return;
-        // }
-        // if (gGameState == states.kSTATE_HELP) {
-        //     return;
-        // }
-        // if (gGameState == states.kSTATE_MOREGAMES) {
-        //     return;
-        // }
-        // if (kUSESPONSOR == false) {
-        //     return;
-        // }
-        // if (gAdShowingBanner == false) {
-        //     return;
-        // }
-        // let newX = (window.innerWidth /2)-120 ; //150; 150 is for non kaios
-        // this.domad.style.left = newX + "px";
-        if (kTOUCH == 0) {
-            // this.adContainer.setVisible(true);
-            this.tweens.add({
-                targets: [this.adContainer, this.btn],
-                y: 0,
-                ease: 'Sine.easeOut',
-                onUpdate: function () {
-                    this.domad.style.top = this.adContainer.y + "px";
-                },
-                callbackScope: this,
-                duration: 500
-            });
-            this.tweens.add({
-                targets: this.btn,
-                y: this.bottomPos,
-                ease: 'Sine.easeOut',
-                duration: 500
-            });
-            gTween = this.tweens.add({
-                targets: this.btnSponsor,
-                y: this.sys.game.canvas.height + 2,
-                ease: 'Sine.easeOut',
-                duration: 250
-            });
-            // this.tweens.add({
-            //     targets: (<MenuOverlay>this.scene.get("MenuOverlay")).scoreText,
-            //     y: this.startyScore + (this.bottomPos),
-            //     ease: 'Sine.easeOut',
-            //     duration: 500
-            // });
-            // gTween = this.tweens.add({
-            //     targets: (<MenuOverlay>this.scene.get("MenuOverlay")).highScoreText,
-            //     y: this.startyHighScore + (this.bottomPos),
-            //     ease: 'Sine.easeOut',
-            //     duration: 500
-            // });
-        }
-        else {
-            this.tweens.add({
-                targets: [this.adContainer, this.btn],
-                y: 900,
-                ease: 'Sine.easeOut',
-                onUpdate: function () {
-                    this.domad.style.top = this.adContainer.y + "px";
-                },
-                callbackScope: this,
-                duration: 500
-            });
-        }
-    };
-    SponsorOverlay.prototype.action_sponsorButton = function (_state) {
-        if (_state == 'up') {
-            if (!gFullscreenAdShowing) {
-                //this.playBtnSnd();
-                AAKaiAds.theBannerAd.call('click');
-            }
-        }
-    };
-    return SponsorOverlay;
 }(Phaser.Scene));
 var GameScene = /** @class */ (function (_super) {
     __extends(GameScene, _super);
@@ -1878,7 +1592,8 @@ var AAKaiAds;
             // Max supported size is 240x264
             onerror: function (err) {
                 _this.err = err;
-                emitter.emit('hideAd');
+                // emitter.emit('hideAd');
+                hideBanner();
             },
             onready: function (ad) {
                 _this.theBannerAd = ad;
@@ -1893,12 +1608,13 @@ var AAKaiAds;
                     // a classname to navigate
                     // this classname will be applied
                     // to the container
-                    navClass: 'items',
+                    navClass: '',
                     // display style will be applied
                     // to the container block or inline-block
                     display: 'block',
                 });
-                emitter.emit('showAd');
+                // emitter.emit('showAd');
+                showBanner();
                 // (<SponsorOverlay>this.scene.get("SponsorOverlay")).showBanner();
             }
         });
@@ -2423,7 +2139,7 @@ var AAKaiAnalytics;
         http.mozSystem = true;
         var url = 'https://www.google-analytics.com/collect?';
         // var params = 'v=1&t=pageview&tid='+ googleID +'&cid='+this.cid+'&dh=taara.games&dp='+ gGameName +'&dt='+gGameState;
-        var pageName = location.pathname.substring(location.pathname.lastIndexOf("/") + 1);
+        var pageName = gGameName; //location.pathname.substring(location.pathname.lastIndexOf("/") + 1);
         var params = 'v=1&t=pageview&tid=' + googleID + '&cid=' + escape(this.cid) + '&dt=' + escape(gGameName) + '&an=' + escape(gGameName) + '&av=' + escape(gGameVersion) + "&dp=" + pageName + "&cn=kaiosapp";
         http.open('POST', url, true);
         //console.log(url + params);
@@ -2439,8 +2155,8 @@ var AAKaiAnalytics;
     AAKaiAnalytics.initAnalytics = initAnalytics;
     function sendEvent(_action, _value) {
         if (_value === void 0) { _value = 0; }
-        var pageName = location.pathname.substring(location.pathname.lastIndexOf("/") + 1);
-        var data = 'v=1&t=event&tid=' + this._googleID + '&cid=' + escape(this.cid) + '&ec=' + escape(gGameName) + '&ea=' + escape(_action) + '&an=' + escape(gGameName) + '&av=' + escape(gGameVersion) + "&dp=" + escape(pageName) + "&cn=kaiosapp";
+        var pageName = gGameName; //location.pathname.substring(location.pathname.lastIndexOf("/") + 1);
+        var data = 'v=1&t=event&tid=' + this._googleID + '&cid=' + escape(this.cid) + '&ec=' + escape(gGameName) + '&el=' + escape(gGameName) + '&ea=' + escape(_action) + '&an=' + escape(gGameName) + '&av=' + escape(gGameVersion) + "&dp=" + escape(pageName) + "&cn=kaiosapp";
         //'&ev='+_value+
         //'&el='+gGameVersion
         var http = new window.XMLHttpRequest();
@@ -2457,8 +2173,8 @@ var AAKaiAnalytics;
     // non interact is implied here.
     function sendSpecial(_action, _label, _value) {
         if (_value === void 0) { _value = 0; }
-        var pageName = location.pathname.substring(location.pathname.lastIndexOf("/") + 1);
-        var data = 'v=1&t=event&ni=1&tid=' + this._googleID + '&cid=' + this.cid + '&ec=' + escape(gGameName) + '&ea=' + _action + '&el=' + _label + '&ev=' + _value + '&an=' + escape(gGameName) + '&av=' + gGameVersion + "&dp=" + pageName + "&cn=kaiosapp";
+        var pageName = gGameName; //location.pathname.substring(location.pathname.lastIndexOf("/") + 1);
+        var data = 'v=1&t=event&ni=1&tid=' + this._googleID + '&cid=' + this.cid + '&ec=' + escape(gGameName) + '&ea=' + escape(_action) + '&el=' + escape(_label) + '&ev=' + _value + '&an=' + escape(gGameName) + '&av=' + escape(gGameVersion) + "&dp=" + escape(pageName) + "&cn=kaiosapp";
         var http = new window.XMLHttpRequest();
         http.mozAnon = true;
         http.mozSystem = true;
@@ -2480,6 +2196,7 @@ var AAKaiAnalytics;
 /// <reference path='MoreGamesScene.ts'/>
 /// <reference path='SettingsScene.ts'/>
 /// <reference path='Sponsor.ts'/>
+/// <reference path='consts.ts'/>
 /// <reference path='../../../AAShared/AAFunctions.ts'/>
 /// <reference path='../../../AAShared/AAPrefs.ts'/>
 /// <reference path='../../../AAShared/AAKaiAds.ts'/>
@@ -2487,32 +2204,31 @@ var AAKaiAnalytics;
 /// <reference path='../../../AAShared/AAControls.ts'/>
 /// <reference path='../../../AAShared/AAHighScores.ts'/>
 /// <reference path='../../../AAShared/AAKaiAnalytics.ts'/>
-var kTESTMODE = 1; /* set to 0 for real ads */
-var kTOUCH = 0;
-var kBOTTOM_POSITION_FOR_AD = 65;
-var gGameName = "_TEMPLATE_";
-var gGameVersion = "1.0.0";
-var gamePrefsFile = "games.taara." + gGameName + ".prefs";
+// ADD GAME RELATED GLOBALS HERE
+// ***********************************************************************
+// ************************************************************************
+// ******************************************************************************
+// INIT GAME
+// ******************************************************************************
+// This is called when preload is done.  This is new 10/16/20 so I can load the manifest nad use it's data.
+function initGame() {
+    manifest = game.cache.json.get('manifest');
+    gGameName = manifest.name;
+    gamePrefsFile = "games.taara." + gGameName.replace(/\s/g, '').toLowerCase() + ".prefs";
+    gGameVersion = manifest.version;
+    game.config.gameTitle = gGameName;
+    // Google ID Notes
+    // TEST:UA-150350318-3
+    // PROD:UA-150350318-1
+    // ******************************************************************************
+    AAKaiAnalytics.initAnalytics(manifest.gid, _uuid);
+    setTimeout(function () { AAKaiAnalytics.sendUA(); }, 1000);
+}
+// NO NEED TO TOUCH ANYTHING PAST HERE ===================================
+// =======================================================================
 // IF TESTING ON PC THEN IT"S ALWAYS TRUE!!!
 var gIsTouchDevice = false;
 // gIsTouchDevice = is_touch_device();
-var gameBGColor = 0x333333;
-var gStageWidth = 240; // I'm leaving it as a multiple to remind me of org size
-var gStageHeight = 320; //228 * 2; //web is 228
-// If I'm on a touch device I want to stage to be larger
-// This will be the default touch screen size even for a larger device.
-if (kTOUCH == 1) {
-    gStageWidth = 480;
-    gStageHeight = 960;
-}
-var gRetinaOffset = .5;
-var gShowNewGame = 0;
-// Display length of Taara games Logo
-var gLogoDisplayLength = 2000;
-// SPONSOR
-var gTween; //sponsor tween
-var kUSESPONSOR = true;
-var gChangeBackToFullscreenFromAdView = false;
 var gIsKaiOSAppMode = (window.location.protocol == 'app:');
 // Display certain buttons if needed.  There are only two that are shown or not
 var kSHOW_SETTINGS_BUTTON = false;
@@ -2540,7 +2256,7 @@ myScale = {
     width: gStageWidth,
     height: gStageHeight
 };
-var scenes = [BootScene, PreloadScene, MenuOverlay, SponsorOverlay, MenuScene, HelpScene, GameScene, MoreGamesScene, SettingsScene];
+var scenes = [BootScene, PreloadScene, MenuOverlay, MenuScene, HelpScene, GameScene, MoreGamesScene, SettingsScene];
 var states;
 (function (states) {
     states[states["kSTATE_NOTHING"] = 0] = "kSTATE_NOTHING";
@@ -2564,19 +2280,9 @@ var states;
 var game;
 var gGameState = states.kSTATE_NOTHING;
 var emitter = new Phaser.Events.EventEmitter();
-// ******************************************************************************
-// ******************************************************************************
-// NOTE ******* 
-// Firebase does not work on KaiOS.  Period.
-// 
-// Using Google Analytics //////////////////////////////////////////////////////
-// TEST:UA-150350318-3
-// PROD:UA-150350318-1
-// ******************************************************************************
-//AAKaiAnalytics.initAnalytics('UA-150350318-3', gGameName);
 var _uuid = getUUID();
-AAKaiAnalytics.initAnalytics('UA-150350318-3', _uuid);
-setTimeout(function () { AAKaiAnalytics.sendUA(); }, 1000);
+// AAKaiAnalytics.initAnalytics(kGOOGLE_ID, _uuid);
+// setTimeout(function () { AAKaiAnalytics.sendUA(); }, 1000);
 function getUUID() {
     var lsID = 'games.taara.uuid';
     var uuid = Phaser.Utils.String.UUID();
@@ -2588,6 +2294,18 @@ function getUUID() {
         uuid = scr;
     }
     return uuid;
+}
+var avgFPS = [];
+function addToFPSArray(_fps) {
+    //values.reduce(function(a, b){return a+b;})
+    avgFPS.push(parseFloat(_fps));
+    if (avgFPS.length > 50) {
+        avgFPS.shift(); //remove the first value in array
+    }
+}
+function calcFPSAverage() {
+    var f = (avgFPS.reduce(function (a, b) { return a + b; }) / avgFPS.length).toFixed(1);
+    AAKaiAnalytics.sendSpecial("fps", f.toString());
 }
 function resize() {
     // if (gRunnngInBrowser) {
@@ -2629,7 +2347,7 @@ window.onload = function () {
         physics: {
             default: 'arcade',
             arcade: {
-                debug: false,
+                debug: kDEBUG,
                 gravity: { x: 0, y: 0 }
             }
         },
@@ -2666,4 +2384,26 @@ window.onload = function () {
         }
     });
 };
+// emitter.on('hideAd', hideBanner);
+// emitter.on('showAd', showBanner);
+function hideBanner() {
+    var domad = document.getElementById('sponsorad');
+    var scoreDom = document.getElementById('scores');
+    var sponsorBtnDom = document.getElementById('sponsorButton');
+    domad.style.top = "-36px";
+    domad.style.opacity = "0";
+    scoreDom.style.top = "20px";
+    sponsorBtnDom.style.opacity = "0";
+    sponsorBtnDom.style.bottom = "-25px";
+}
+function showBanner() {
+    var domad = document.getElementById('sponsorad');
+    var scoreDom = document.getElementById('scores');
+    var sponsorBtnDom = document.getElementById('sponsorButton');
+    domad.style.top = "0";
+    domad.style.opacity = "1";
+    scoreDom.style.top = "50px";
+    sponsorBtnDom.style.opacity = "1";
+    sponsorBtnDom.style.bottom = "-5px";
+}
 //# sourceMappingURL=game.js.map

@@ -32,17 +32,16 @@ class MoreGamesScene extends Phaser.Scene {
         graphics.fill();
 
         let mo = this.scene.get('MenuOverlay');
-        (<MenuOverlay>mo).scoreText.setVisible(false);
-        (<MenuOverlay>mo).highScoreText.setVisible(false);
-        //this.add.image(0,0,'spriteAtlas','moreGames.png').setOrigin(0,0);
+        (<MenuOverlay>mo).hideScores(true);
 
+       
         // add the icons
         // should be in AAShared in the future!
         // and SHOULD be an html file
 
         var element = this.add.dom(0, 10).createFromCache('moreGamesHTML').setOrigin(0,0);
 
-        this.add.image(this.sys.canvas.width/2, this.sys.canvas.height-70, 'spriteAtlas','kaiStore.png');
+        this.add.image(this.sys.canvas.width/2, this.sys.canvas.height-70, kSPRITE_ATLAS,kIMG_KAISTORE);
 
 
         if (gRunnngInBrowser) {

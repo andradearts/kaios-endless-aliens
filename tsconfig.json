@@ -18,8 +18,8 @@
     "dom"
   ],
   "files": [
+    "./game/src/consts.ts",
     "./game/src/Button.ts",
-    "./game/src/PieMeter.ts",
     "./game/src/BootScene.ts",
     "./game/src/MoreGamesScene.ts",
     "./game/src/SettingsScene.ts",

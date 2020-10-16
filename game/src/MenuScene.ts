@@ -14,6 +14,9 @@ class MenuScene extends Phaser.Scene {
     }
 
     create() {
+        AAKaiAds.preLoadBannerAd();
+        this.removeLogo();
+        
         this.scene.sendToBack();
         var element = this.add.dom(10, 140).createFromCache('newgameHTML').setOrigin(0, 0);
 
@@ -23,8 +26,20 @@ class MenuScene extends Phaser.Scene {
             vy = 8;
             vx = this.game.canvas.width-60;
         }
-        this.add.bitmapText(vx, vy, 'sysFont', gGameVersion, 12).setDepth(999);
+        // this.add.bitmapText(vx, vy, 'sysFont', gGameVersion, 12).setDepth(999);
+        
     }
 
+    removeLogo() {
+        let element = document.getElementsByClassName('loader')[0];
+        if (element != undefined) {
+            (<any>element).style.opacity = "0";
 
+            var op = 1;  // initial opacity
+            var timer = setInterval(function () {
+                clearInterval(timer);
+                (<any>element).remove();
+            }, 2000);
+        }
+    }
 }

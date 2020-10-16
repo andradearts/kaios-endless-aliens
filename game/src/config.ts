@@ -7,6 +7,7 @@
 /// <reference path='MoreGamesScene.ts'/>
 /// <reference path='SettingsScene.ts'/>
 /// <reference path='Sponsor.ts'/>
+/// <reference path='consts.ts'/>
 
 /// <reference path='../../../AAShared/AAFunctions.ts'/>
 /// <reference path='../../../AAShared/AAPrefs.ts'/>
@@ -16,45 +17,41 @@
 /// <reference path='../../../AAShared/AAHighScores.ts'/>
 /// <reference path='../../../AAShared/AAKaiAnalytics.ts'/>
 
-// This is needed so I can use the KaiAds SDK and not get complier errors
-declare var getKaiAd: any;
 
-const kTESTMODE = 1; /* set to 0 for real ads */
-let kTOUCH:Number = 0;
+// ADD GAME RELATED GLOBALS HERE
 
-const kBOTTOM_POSITION_FOR_AD = 65;
 
-const gGameName = "_TEMPLATE_";
-const gGameVersion = "1.0.0";
-const gamePrefsFile = "games.taara."+gGameName+".prefs";
+// ***********************************************************************
+// ************************************************************************
+// ******************************************************************************
+// INIT GAME
+// ******************************************************************************
 
+
+// This is called when preload is done.  This is new 10/16/20 so I can load the manifest nad use it's data.
+function initGame() {
+
+    manifest = game.cache.json.get('manifest')
+    gGameName = manifest.name;
+    gamePrefsFile = "games.taara." + gGameName.replace(/\s/g, '').toLowerCase() + ".prefs";
+    gGameVersion = manifest.version;
+    game.config.gameTitle = gGameName;
+
+    // Google ID Notes
+    // TEST:UA-150350318-3
+    // PROD:UA-150350318-1
+    // ******************************************************************************
+    AAKaiAnalytics.initAnalytics(manifest.gid, _uuid);
+    setTimeout(function () { AAKaiAnalytics.sendUA(); }, 1000);
+
+}
+
+// NO NEED TO TOUCH ANYTHING PAST HERE ===================================
+// =======================================================================
 
 // IF TESTING ON PC THEN IT"S ALWAYS TRUE!!!
 let gIsTouchDevice = false;
 // gIsTouchDevice = is_touch_device();
-
-const gameBGColor = 0x333333;
-
-let gStageWidth = 240;  // I'm leaving it as a multiple to remind me of org size
-let gStageHeight = 320;  //228 * 2; //web is 228
-
-// If I'm on a touch device I want to stage to be larger
-// This will be the default touch screen size even for a larger device.
-if (kTOUCH == 1){
-    gStageWidth = 480;
-    gStageHeight = 960;
-}
-
-let gRetinaOffset = .5;
-let gShowNewGame = 0;
-
-// Display length of Taara games Logo
-const gLogoDisplayLength = 2000;
-
-// SPONSOR
-let gTween; //sponsor tween
-let kUSESPONSOR = true;
-let gChangeBackToFullscreenFromAdView = false;
 
 let gIsKaiOSAppMode = (window.location.protocol == 'app:');
 
@@ -92,7 +89,7 @@ myScale = {
 }
 
 
-const scenes = [BootScene, PreloadScene, MenuOverlay, SponsorOverlay, MenuScene, HelpScene, GameScene, MoreGamesScene, SettingsScene];
+const scenes = [BootScene, PreloadScene, MenuOverlay, MenuScene, HelpScene, GameScene, MoreGamesScene, SettingsScene];
 
 enum states {
     kSTATE_NOTHING = 0,
@@ -119,21 +116,9 @@ let gGameState = states.kSTATE_NOTHING;
 let emitter = new Phaser.Events.EventEmitter();
 
 
-// ******************************************************************************
-// ******************************************************************************
-// NOTE ******* 
-// Firebase does not work on KaiOS.  Period.
-// 
-// Using Google Analytics //////////////////////////////////////////////////////
-// TEST:UA-150350318-3
-// PROD:UA-150350318-1
-// ******************************************************************************
-//AAKaiAnalytics.initAnalytics('UA-150350318-3', gGameName);
-
 let _uuid = getUUID();
-
-AAKaiAnalytics.initAnalytics('UA-150350318-3', _uuid);
-setTimeout( function(){AAKaiAnalytics.sendUA();} , 1000);
+// AAKaiAnalytics.initAnalytics(kGOOGLE_ID, _uuid);
+// setTimeout(function () { AAKaiAnalytics.sendUA(); }, 1000);
 
 function getUUID() {
 
@@ -148,7 +133,19 @@ function getUUID() {
     return uuid;
 }
 
+var avgFPS = [];
+function addToFPSArray(_fps) {
+    //values.reduce(function(a, b){return a+b;})
+    avgFPS.push(parseFloat(_fps));
+    if (avgFPS.length > 50) {
+        avgFPS.shift(); //remove the first value in array
+    }
+}
 
+function calcFPSAverage() {
+    let f = (avgFPS.reduce(function (a, b) { return a + b; }) / avgFPS.length).toFixed(1);
+    AAKaiAnalytics.sendSpecial("fps", f.toString());
+}
 function resize() {
 
     // if (gRunnngInBrowser) {
@@ -202,7 +199,7 @@ window.onload = () => {
         physics: {
             default: 'arcade',
             arcade: {
-                debug: false,
+                debug: kDEBUG,
                 gravity: { x: 0, y: 0 }
             }
         },
@@ -225,7 +222,7 @@ window.onload = () => {
     }, false);
 
     resize();
-    
+
     if ((gIsTouchDevice) && (isKaiOS)) {
         document.documentElement.requestFullscreen();
         (<any>navigator).mozAudioChannelManager.volumeControlChannel = 'normal';
@@ -238,7 +235,6 @@ window.onload = () => {
         if (document.fullscreenElement) {
             gStageHeight = window.innerHeight - 30;// * (dpi_w / dpi_h);
             game.canvas.style.height = gStageHeight + 'px';
-
             // emitter.emit('fullscreen', [2.5]);
         } else {
             // emitter.emit('fullscreen', [1]);
@@ -247,3 +243,32 @@ window.onload = () => {
     });
 
 };
+
+
+// emitter.on('hideAd', hideBanner);
+// emitter.on('showAd', showBanner);
+function hideBanner() {
+    var domad = document.getElementById('sponsorad');
+    var scoreDom = document.getElementById('scores');
+    var sponsorBtnDom = document.getElementById('sponsorButton');
+
+    domad.style.top = "-36px";
+    domad.style.opacity = "0";
+    scoreDom.style.top = "20px";
+
+    sponsorBtnDom.style.opacity = "0";
+    sponsorBtnDom.style.bottom = "-25px";
+}
+
+function showBanner() {
+    var domad = document.getElementById('sponsorad');
+    var scoreDom = document.getElementById('scores');
+    var sponsorBtnDom = document.getElementById('sponsorButton');
+
+    domad.style.top = "0";
+    domad.style.opacity = "1";
+    scoreDom.style.top = "50px";
+    sponsorBtnDom.style.opacity = "1";
+    sponsorBtnDom.style.bottom = "-5px";
+
+}

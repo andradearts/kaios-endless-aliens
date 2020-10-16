@@ -12,9 +12,6 @@ class BootScene extends Phaser.Scene {
 
         this.load.image('logo', 'taara-logo.png');
 
-        // this.load.image('preloadBar', 'progressBar.png', null);
-        // this.load.image('preloadBarMask', 'progressBarMask.png', null);
-
         this.load.on('complete', function () {
             this.scene.start('PreloadScene');
         }, this);

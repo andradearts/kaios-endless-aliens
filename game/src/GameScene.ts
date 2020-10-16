@@ -65,7 +65,7 @@ class GameScene extends Phaser.Scene {
                 break;
         }
     }
-
+    
     gameover() {
         AAKaiAnalytics.sendEvent("gameover");
         gGameState = states.kSTATE_GAMEOVER;

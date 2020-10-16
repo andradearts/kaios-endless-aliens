@@ -1,0 +1,222 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+
+:root {
+    /* ad heights 54px or 36px */
+    --ad-height: 36px;
+    --ad-width: 216px;
+    --ad-height-offest: -36px;
+
+    --scoreYPos:20px;
+    --score-font-size:18px;
+    --highscore-font-size:9px;
+    --align-score:flex-start; /*flex-end for right side of screen */
+    --score-bottom-margin:5px;
+    --score-color:white;
+    --highscore-color:white;
+}
+
+
+html,
+body {
+    max-width: 100%;
+    max-height: 100%;
+    padding: 0px;
+    margin: 0px;
+    text-transform: lowercase;
+    background-color: #fbf300;
+    overflow: hidden;
+    touch-action: none;
+    -ms-touch-action: none;
+}
+
+#gameStage {
+    position: sticky;
+    background-color: #fbf300;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    max-width: 100%;
+    /* //240px; */
+    z-index: 1;
+}
+
+.sponsorbanner {
+    z-index: 9999;
+    position: absolute;
+    top: 0;
+    width: var(--ad-width);
+}
+
+#sponsorad {
+    position: relative;
+    width: var(--ad-width);
+    min-height: var(--ad-height);
+    max-height: var(--ad-height);
+    min-width: var(--ad-width);
+    max-width: var(--ad-width);
+    margin: 0 auto;
+    margin-bottom: var(--ad-height-offest) !important;
+    z-index: 9999;
+    top: var(--ad-height-offest);
+    opacity: 0;
+    transition: top 1s, opacity 1s;
+}
+
+.sponsorButton {
+    position: absolute;
+    padding-right: 12px;
+    right: 0;
+    bottom: -25px;
+    transition:  top .4s, bottom .4s, opacity .4s; 
+    opacity: 0;;
+    z-index: 999;
+}
+/* Tag is the number associated with activating the ad */
+.tagNum {
+    position: absolute;
+    z-index: 99999;
+    top: 25px;
+    right: -10px;
+    opacity: inherit;
+    transition: top .5s opacity .5s;
+
+}
+
+
+
+/* LOGO */
+.loader {
+    width: 100vh;
+    text-align: center;
+    transition: opacity 3s;
+}
+
+.taara_logo {
+    position: absolute;
+    width: 100%;
+    height: 100vh;
+    z-index: 1;
+}
+
+.taara_logo div {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+    animation: taara_logo 1.2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.taara_logo img {
+    width: 80%;
+}
+
+
+@keyframes taara_logo {
+    0% {
+        transform: scale(0.95);
+    }
+
+    5% {
+        transform: scale(1.1);
+    }
+
+    39% {
+        transform: scale(0.85);
+    }
+
+    45% {
+        transform: scale(1);
+    }
+
+    60% {
+        transform: scale(0.95);
+    }
+
+    100% {
+        transform: scale(0.9);
+    }
+}
+
+/* press-start-2p-regular - latin */
+@font-face {
+    font-family: 'Press Start 2P';
+    font-style: normal;
+    font-weight: 400;
+    src: url('../fonts/press-start-2p-v9-latin-regular.eot');
+    /* IE9 Compat Modes */
+    src: local('Press Start 2P Regular'), local('PressStart2P-Regular'),
+        url('../fonts/press-start-2p-v9-latin-regular.eot?#iefix') format('embedded-opentype'),
+        /* IE6-IE8 */
+        url('../fonts/press-start-2p-v9-latin-regular.woff2') format('woff2'),
+        /* Super Modern Browsers */
+        url('../fonts/press-start-2p-v9-latin-regular.woff') format('woff'),
+        /* Modern Browsers */
+        url('../fonts/press-start-2p-v9-latin-regular.ttf') format('truetype'),
+        /* Safari, Android, iOS */
+        url('../fonts/press-start-2p-v9-latin-regular.svg#PressStart2P') format('svg');
+    /* Legacy iOS */
+}
+
+.fps {
+    position: absolute;
+    bottom: 0px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 8px;
+    color: red;
+    background-color: #000;
+    display: none;
+}
+
+#scores {
+    background-color: transparent;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    align-items: var(--align-score);
+    padding: 0 1rem;
+    opacity: 0;
+    width: 100%;
+    position: absolute;
+    top: var(--scoreYPos);
+    transition: top 1s, opacity 1s;
+}
+
+.score {
+    color: var(--score-color);
+    font-family: 'Press Start 2P', cursive;
+    font-size: var(--score-font-size) ;
+    margin-bottom: var(--score-bottom-margin);
+}
+
+.highscore {
+    color:var(--highscore-color);;
+    font-family: 'Press Start 2P', cursive;
+    font-size: var(--highscore-font-size) ;
+}
+
+.scoreBounce {
+    animation: scoreBounce 1.0s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+@keyframes scoreBounce {
+    0% {
+        transform: scale(0.35);
+    }
+
+    5% {
+        transform: scale(1.6);
+    }
+
+    19% {
+        transform: scale(0.85);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}

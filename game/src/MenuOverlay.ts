@@ -16,8 +16,7 @@ class MenuOverlay extends Phaser.Scene {
 
     //end v2 ================================================================
 
-    kHideDistance = 350;
-    _SHOWFPS = true;
+    //kHideDistance = 350;
     pauseEnabled = false;
 
     gameoverSprite;
@@ -55,27 +54,36 @@ class MenuOverlay extends Phaser.Scene {
 
     transitioning;
 
-    scoreText;
-    highScoreText;
-    fpsText;
+    // scoreText;
+    // highScoreText;
+    // fpsText;
     singlePress;
 
     pauseImage;
     pauseKey;
-
-
     cursors;
+
+    tweeners = 0;
+
+    //dom elements
+    fpsMeter;
+    fpsMeterCount = 0;
+    fpsMeterMOD = 60;
+
+    scoreDom;
+    highscoreDom;
+    scoresDom;
 
     constructor() {
         super({ key: 'MenuOverlay' });
     }
 
     preload() {
+
         // Get the Prefs & high score
         AAPrefs.initGamePrefs(gamePrefsFile);
         AAHighScores.initHighScores();
-        // AAKaiAds.displayFullscreenAd();
-        //AAKaiAds.preLoadBannerAd();
+
 
         if (!gIsTouchDevice) {
             AAKaiControls.setUpInputs(this);
@@ -88,15 +96,6 @@ class MenuOverlay extends Phaser.Scene {
 
     create() {
 
-
-        // else {
-        //     AAControls.setUpInputs(this);
-        // }
-        // this.cursors = this.input.keyboard.createCursorKeys();
-
-        if (kTOUCH == 1) {
-            this.kHideDistance = 400;
-        }
         this.setUpAudio();
         this.setUpUI();
 
@@ -110,6 +109,8 @@ class MenuOverlay extends Phaser.Scene {
         // IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // THIS IS CALLED FROM THE FIREFOX UI WHEN A USER CLICKS "EXIT"
         emitter.on('fullscreen', this.action_btnFullscreen, this);
+
+        this.tweeners = 0;
 
         // var txt = [
         //     "window innerHeight: " + window.innerHeight + " ",
@@ -141,6 +142,10 @@ class MenuOverlay extends Phaser.Scene {
             return;
         }
 
+        if (this.tweeners != 0) {
+            return;
+        }
+
         if (gGameState != states.kSTATE_MENU) {
             if (theKeyEvent.key == "Backspace") {
                 theKeyEvent.preventDefault();
@@ -165,6 +170,9 @@ class MenuOverlay extends Phaser.Scene {
 
     keyup(theKeyEvent) {
 
+        if (this.tweeners != 0) {
+            return;
+        }
 
         let theKey = theKeyEvent.key;
         switch (gGameState) {
@@ -267,7 +275,7 @@ class MenuOverlay extends Phaser.Scene {
 
 
         // Make sure the correct texture for hte back button is being used.
-        this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
+        this.btnHelp.setTexture(kSPRITE_ATLAS, kBTN_BACK);
 
         this.showButtonBG(() => {
             this.showNumberTags(this.tags);
@@ -324,8 +332,12 @@ class MenuOverlay extends Phaser.Scene {
         if (kTOUCH == 0) {
             if (theKey == "*") {
                 this.singlePress = true;
-                this._SHOWFPS = !this._SHOWFPS
-                this.fpsText.visible = !this.fpsText.visible
+                gSHOW_FPS = !gSHOW_FPS
+                if (gSHOW_FPS) {
+                    this.fpsMeter.style.display = "block";
+                } else {
+                    this.fpsMeter.style.display = "none";
+                }
             }
         }
     }
@@ -360,9 +372,9 @@ class MenuOverlay extends Phaser.Scene {
                 // }
                 break;
             case "4":
-                // if (kSHOW_SETTINGS_BUTTON) {
-                this.btnSettings.pointerUp(null);
-                // }
+                if (kSHOW_SETTINGS_BUTTON) {
+                    this.btnSettings.pointerUp(null);
+                }
                 break;
             case "Enter":
             case "5":
@@ -400,28 +412,6 @@ class MenuOverlay extends Phaser.Scene {
         }
     }
 
-    // showButton(who, ly, lx) {
-    //     var scaleSpeed = 250;
-
-    //     // reset the scales of the button to 1.0 to avoid weird scaling issues
-    //     who.scaleX = 1.0;
-    //     who.scaleY = 1.0;
-
-    //     let _y = ly;
-    //     let _x = lx;
-
-    //     let theEase = 'BounceInOut'
-
-
-    //     let xthis = this;
-    //     this.buttonTween = this.tweens.add({
-    //         targets: who,
-    //         y: { value: _y, duration: scaleSpeed, ease: theEase },
-    //         x: { value: _x, duration: scaleSpeed, ease: theEase },
-    //         // scaleX: { value: .25, duration: scaleSpeed / 1.5, ease: 'BounceInOut', yoyo: true },
-    //         // scaleY: { value: 2.5, duration: scaleSpeed / 1.5, ease: 'BounceInOut', yoyo: true },
-    //     });
-    // }
 
     // **************************************************************************
     // SET UP THE UI
@@ -432,11 +422,6 @@ class MenuOverlay extends Phaser.Scene {
         this.buttonY = 276;
 
         // Set up background art for buttons
-        //v2 alpha is a png
-        //v2 final should be a grc made here
-
-        //this.buttonBG = this.add.image(120, this.buttonY, 'spriteAtlas', 'btnBG.png');
-        // this.buttonBG = this.make.graphics({x: 0, y: 0, add: false});
         this.buttonBG = this.add.graphics();
         this.buttonBG.lineStyle(3, 0x5C5822, 1);
         this.buttonBG.fillStyle(0xFBED62, 1);
@@ -453,69 +438,40 @@ class MenuOverlay extends Phaser.Scene {
         let numBadge;
 
         // Play Button #######################################################################
-        this.btnPlay = new Button(this, 0, 0, 'spriteAtlas', 'btnPlay.png', this.action_BtnPlay, "play", true).setVisible(isVis);
-        // if (kTOUCH == 0) {
-
-        //     this.c_btnPlay = this.add.container(0, 0, [this.btnPlay, numBadge]).setVisible(isVis);
-        // }
-        // else {
-        //     this.c_btnPlay = this.add.container(0, 0, [this.btnPlay]).setVisible(isVis);
-        // }
+        this.btnPlay = new Button(this, 0, 0, kSPRITE_ATLAS, kBTN_PLAY, this.action_BtnPlay, "play", true).setVisible(isVis);
 
         // Sound Button #######################################################################
 
-        let whichButton = 'btnSoundOff.png';
+        let whichButton = kBTN_SOUND_OFF;
         // if (AAPrefs.playAudio) {
-        //     whichButton = 'btnSoundOn.png';
+        //     whichButton = kBTN_SOUND_ON;
         // }
 
-        this.btnSound = new Button(this, 0, 5, 'spriteAtlas', 'btnSoundOn.png', this.action_btnSound, "sound", true).setVisible(isVis);
-
-
-        // if (kTOUCH == 0) {
-        //     numBadge = this.add.image(0, -14, "spriteAtlas", "tag3.png").setVisible(gIsTouchDevice);
-        //     this.c_btnSound = this.add.container(this.cameras.main.width - 10, this.cameras.main.height - 10, [this.btnSound, numBadge]).setVisible(isVis);
-        // } else {
-        //     this.c_btnSound = this.add.container(this.cameras.main.width - 10, positionVert, [this.btnSound]).setVisible(isVis);
-        // }
+        this.btnSound = new Button(this, 0, 5, kSPRITE_ATLAS, kBTN_SOUND_ON, this.action_btnSound, "sound", true).setVisible(isVis);
 
         // Help/Back Button #######################################################################
 
-        whichButton = 'btnHelp.png';
-        this.btnHelp = new Button(this, 0, 5, 'spriteAtlas', whichButton, this.action_BtnHelpBack, "help", true).setVisible(true);
-        // if (kTOUCH == 0) {
-        //     numBadge = this.add.image(0, -14, "spriteAtlas", "tag1.png").setVisible(gIsTouchDevice);
-        //     this.c_btnHelp = this.add.container(15, this.cameras.main.height - 10, [this.btnHelp, numBadge]).setVisible(true);
-        // } else {
-        //     this.c_btnHelp = this.add.container(15, positionVert, [this.btnHelp]).setVisible(true);
-        // }
+        whichButton = kBTN_HELP;
+        this.btnHelp = new Button(this, 0, 5, kSPRITE_ATLAS, whichButton, this.action_BtnHelpBack, "help", true).setVisible(true);
+
+
         // Settings Button #######################################################################
-        whichButton = 'btnSettings.png';
-        this.btnSettings = new Button(this, 0, 5, 'spriteAtlas', whichButton, this.action_btnSettings, "settings", true).setVisible(true);
-        // if (kTOUCH == 1) {
-        //     numBadge = this.add.image(0, -14, "spriteAtlas", "tag4.png").setVisible(gIsTouchDevice);
-        //     this.c_btnSettings = this.add.container(15, this.cameras.main.height - 10, [this.btnSettings, numBadge]).setVisible(kSHOW_SETTINGS_BUTTON);
-        // } else {
-        //     this.c_btnSettings = this.add.container(15, positionVert, [this.btnSettings]).setVisible(kSHOW_SETTINGS_BUTTON);
-        // }
+        whichButton = kBTN_SETTINGS;
+        this.btnSettings = new Button(this, 0, 5, kSPRITE_ATLAS, whichButton, this.action_btnSettings, "settings", true).setVisible(kSHOW_SETTINGS_BUTTON);
+
         // More Games Button #######################################################################
-        this.btnMoreGames = new Button(this, 0, 0, 'spriteAtlas', 'btnMoreGames.png', this.action_btnMoreGames, "more", true).setVisible(isVis);
-        // if (kTOUCH == 0) {
-        //     numBadge = this.add.image(0, -20, "spriteAtlas", "tag2.png").setVisible(gIsTouchDevice);
-        //     this.c_btnMoreGames = this.add.container(0, 0, [this.btnMoreGames, numBadge]).setVisible(isVis);
-        // } else {
-        //     this.c_btnMoreGames = this.add.container(0, positionVert, [this.btnMoreGames]).setVisible(isVis);
-        // }
+        this.btnMoreGames = new Button(this, 0, 0, kSPRITE_ATLAS, kBTN_MORE_GAMES, this.action_btnMoreGames, "more", true).setVisible(isVis);
+
 
         // Reset Button #######################################################################
-        this.btnResetGame = new Button(this, 40, this.cameras.main.height + 25, 'spriteAtlas', 'btnResetGame.png', this.action_btnResetGame, "resetgame", true);
+        this.btnResetGame = new Button(this, 40, this.cameras.main.height + 25, kSPRITE_ATLAS, kBTN_RESET_GAME, this.action_btnResetGame, "resetgame", true);
         //.setVisible(true);
 
 
         // Fullscreen Button #######################################################################
-        // this.btnFullscreen = new Button(this, 0, 5, 'spriteAtlas', 'btnFullscreenOn.png', this.action_btnFullscreen, "fullscreen", true).setVisible(isVis);
+        // this.btnFullscreen = new Button(this, 0, 5, kSPRITE_ATLAS, kBTN_FULLSCREEN_ON, this.action_btnFullscreen, "fullscreen", true).setVisible(isVis);
         // if (kTOUCH == 0) {
-        //     numBadge = this.add.image(0, -14, "spriteAtlas", "tag#.png").setVisible(gIsTouchDevice);
+        //     numBadge = this.add.image(0, -14, kSPRITE_ATLAS, "tag#.png").setVisible(gIsTouchDevice);
         //     this.c_btnFullScreen = this.add.container(this.cameras.main.width - 10, this.cameras.main.height - 10, [this.btnFullscreen, numBadge]).setVisible(kSHOW_FULLSCREEN_BUTTON);
         // } else {
         //     this.c_btnFullScreen = this.add.container(this.cameras.main.width - 10, this.cameras.main.height - 10, [this.btnFullscreen]).setVisible(kSHOW_FULLSCREEN_BUTTON);
@@ -523,21 +479,18 @@ class MenuOverlay extends Phaser.Scene {
         // Pause Button #######################################################################
 
         // whichButton = 'btnPause.png';
-        // this.btnPause = new Button(this, this.cameras.main.width - 35, 20, 'spriteAtlas', whichButton, this.action_btnPause, "pause", true).setVisible(false);
+        // this.btnPause = new Button(this, this.cameras.main.width - 35, 20, kSPRITE_ATLAS, whichButton, this.action_btnPause, "pause", true).setVisible(false);
 
-        // // Sponsor Button #####################################################################
-        // this.btnSponsor = new Button(this, this.sys.canvas.width - 60, this.sys.canvas.height, 'spriteAtlas', "sponsor.png", this.action_sponsorButton, "sponsor", true).setVisible(true).setOrigin(.5, 1);
 
-        // DISPLAY BUTTONS #######################################################################
-        // #######################################################################################
+
+        // DISPLAY BUTTONS #######################################################
+        // #######################################################################
 
         // HELP -- PLAY -- SOUND
         let buttonOffset = 45;
         if (kTOUCH == 1) {
             buttonOffset *= 4;
         }
-        //(this.cameras.main.height - buttonOffset);
-
 
         if (kSHOW_SETTINGS_BUTTON) {
             AAFunctions.displayButtons([this.btnHelp, this.btnMoreGames, this.btnPlay, this.btnSound, this.btnSettings], this.cameras.main, this.buttonY, -25);
@@ -546,22 +499,21 @@ class MenuOverlay extends Phaser.Scene {
         }
 
         this.tags = [
-            this.add.image(this.btnHelp.x, this.btnHelp.y - this.tagVOffset, "spriteAtlas", "tag1.png").setVisible(!gIsTouchDevice),
-            this.add.image(this.btnMoreGames.x, this.btnMoreGames.y - this.tagVOffset, "spriteAtlas", "tag2.png").setVisible(!gIsTouchDevice),
-            this.add.image(this.btnPlay.x, this.btnPlay.y - this.tagVOffset, "spriteAtlas", "tag5.png").setVisible(!gIsTouchDevice),
-            this.add.image(this.btnSound.x, this.btnSound.y - this.tagVOffset, "spriteAtlas", "tag3.png").setVisible(!gIsTouchDevice)
-            // this.add.image(this.btnSettings.x, this.btnSettings.y - this.tagVOffset, "spriteAtlas", "tag4.png").setVisible(!gIsTouchDevice)
+            this.add.image(this.btnHelp.x, this.btnHelp.y - this.tagVOffset, kSPRITE_ATLAS, kTAG_1).setVisible(!gIsTouchDevice),
+            this.add.image(this.btnMoreGames.x, this.btnMoreGames.y - this.tagVOffset, kSPRITE_ATLAS, kTAG_2).setVisible(!gIsTouchDevice),
+            this.add.image(this.btnPlay.x, this.btnPlay.y - this.tagVOffset, kSPRITE_ATLAS, kTAG_5).setVisible(!gIsTouchDevice),
+            this.add.image(this.btnSound.x, this.btnSound.y - this.tagVOffset, kSPRITE_ATLAS, kTAG_3).setVisible(!gIsTouchDevice)
         ];
 
         //Settings Button is a special case.  Some games do have a settings buttons
         if (kSHOW_SETTINGS_BUTTON) {
-            let settBtnTag = this.add.image(this.btnSettings.x, this.btnSettings.y - this.tagVOffset, "spriteAtlas", "tag4.png");
+            let settBtnTag = this.add.image(this.btnSettings.x, this.btnSettings.y - this.tagVOffset, kSPRITE_ATLAS, kTAG_4);
             settBtnTag.setVisible(kSHOW_SETTINGS_BUTTON || !gIsTouchDevice);
             this.tags.push(settBtnTag);
 
         }
 
-        this.audioOffImage = this.add.image(this.btnSound.x, this.btnSound.y, 'spriteAtlas', 'btnSoundOff.png').setVisible(!AAPrefs.playAudio);
+        this.audioOffImage = this.add.image(this.btnSound.x, this.btnSound.y, kSPRITE_ATLAS, kBTN_SOUND_OFF).setVisible(!AAPrefs.playAudio);
 
         // SETTINGS -- MORE GAMES -- FULLSCREEN
         if (kTOUCH == 1) {
@@ -571,7 +523,7 @@ class MenuOverlay extends Phaser.Scene {
         }
 
 
-         if (kSHOW_SETTINGS_BUTTON) {
+        if (kSHOW_SETTINGS_BUTTON) {
             this.buttons = [this.btnHelp, this.btnMoreGames, this.btnPlay, this.btnSound, this.btnSettings];
         } else {
             this.buttons = [this.btnHelp, this.btnMoreGames, this.btnPlay, this.btnSound];
@@ -583,7 +535,7 @@ class MenuOverlay extends Phaser.Scene {
 
         // GameOver Sprite #######################################################################
 
-        this.gameoverSprite = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2.5, 'spriteAtlas', 'gameover.png').setVisible(false);
+        this.gameoverSprite = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2.5, kSPRITE_ATLAS, kIMG_GAMEOVER).setVisible(false);
 
         // Number Font #######################################################################
 
@@ -591,40 +543,53 @@ class MenuOverlay extends Phaser.Scene {
 
         // Score Text #######################################################################
 
-        let scoreSize = 32;//15 * 1.5;
+        // let scoreSize = 32;//15 * 1.5;
 
-        if (kTOUCH == 1) {
-            scoreSize = 32 * 2;//15 * 3;
-        }
-        this.scoreText = this.add.bitmapText(9, 6, 'sysFont', '0', scoreSize).setDepth(999);
-        //this.add.bitmapText(9, 6, 'numbersFont', '0', scoreSize).setDepth(999);
-        this.scoreText.setOrigin(0);
-        this.scoreText.setTint(0xffffff);
-        this.scoreText.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+        // if (kTOUCH == 1) {
+        //     scoreSize = 32 * 2;//15 * 3;
+        // }
+
+        // This is the main div holding the score and high score text
+        this.scoresDom = document.getElementById('scores');
+        this.scoresDom.style.opacity = "1";
+        
+        this.scoreDom = document.getElementById('scoreText');
+        // this.scoreDom.style.display = 'block';
+
+        this.highscoreDom = document.getElementById('highscoreText');
+        // this.highscoreDom.style.display = 'block';
+        this.highscoreDom.innerText = AAHighScores.highScore;
+
+        // this.scoreText = this.add.bitmapText(9, 6, 'sysFont', '0', scoreSize).setDepth(999);
+        // //this.add.bitmapText(9, 6, 'numbersFont', '0', scoreSize).setDepth(999);
+        // this.scoreText.setOrigin(0);
+        // this.scoreText.setTint(0xffffff);
+        // this.scoreText.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
         // this.scoreText.scaleX = .5;
         // this.scoreText.scaleY = .5;
 
         // HighScore Text #######################################################################
 
-        scoreSize = 16;//8 * 1.5;
-        let touchOffset = 1.5;
-        if (kTOUCH == 1) {
-            scoreSize = 16 * 3;//8 * 3;
-            touchOffset = 3;
-        }
-        this.highScoreText = this.add.bitmapText(9, 25 * touchOffset, 'sysFont', AAHighScores.highScore, scoreSize).setDepth(999);
+        // scoreSize = 16;//8 * 1.5;
+        // let touchOffset = 1.5;
+        // if (kTOUCH == 1) {
+        //     scoreSize = 16 * 3;//8 * 3;
+        //     touchOffset = 3;
+        // }
+        // this.highScoreText = this.add.bitmapText(9, 25 * touchOffset, 'sysFont', AAHighScores.highScore, scoreSize).setDepth(999);
 
-        // this.add.bitmapText(12, 25 * touchOffset, 'numbersFont', AAHighScores.highScore, scoreSize).setDepth(999);
-        this.highScoreText.setOrigin(0);
+        // // this.add.bitmapText(12, 25 * touchOffset, 'numbersFont', AAHighScores.highScore, scoreSize).setDepth(999);
+        // this.highScoreText.setOrigin(0);
         // this.highScoreText.setTint(0xcccccc);
         // this.highScoreText.scaleX = .5;
         // t5his.highScoreText.scaleY = .5;
 
         // FPS TEXT #######################################################################
+        this.fpsMeter = document.getElementById('fpsMeter');
 
-        this.fpsText = this.add.bitmapText(9, this.game.canvas.height / 2, 'sysFont', '0.0', 16).setVisible(this._SHOWFPS);
-        this.fpsText.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
-        this.fpsText.setTint(0x666666);
+        // this.fpsText = this.add.bitmapText(9, this.game.canvas.height / 2, 'sysFont', '0.0', 16).setVisible(gSHOW_FPS);
+        // this.fpsText.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+        // this.fpsText.setTint(0x666666);
 
         // this.debugInfo = this.add.bitmapText(10, 130, 'numbersFont', '0', scoreSize).setDepth(999);
 
@@ -669,50 +634,17 @@ class MenuOverlay extends Phaser.Scene {
     }
 
     update(time, delta) {
-        if (this._SHOWFPS) {
-            this.fpsText.setText((1000 / delta).toFixed(1));
+        if (gSHOW_FPS) {
+            this.fpsMeter.innerText = (1000 / delta).toFixed(1);
         }
-
+        if ((++this.fpsMeterCount % this.fpsMeterMOD) == 0) {
+            addToFPSArray((1000 / delta).toFixed(1));
+        }
         //Yup...this ia a hack but ti works
         if (!AAPrefs.playAudio) {
             this.audioOffImage.y = this.btnSound.y;
         }
-        // if (!gIsTouchDevice) {
-        //     let left = Phaser.Input.Keyboard.JustDown(AAControls.AKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.left);
-        //     let right = Phaser.Input.Keyboard.JustDown(AAControls.DKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.right);
 
-        //     let up = Phaser.Input.Keyboard.JustDown(AAControls.WKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.up);
-        //     let down = Phaser.Input.Keyboard.JustDown(AAControls.SKey) || Phaser.Input.Keyboard.JustDown(AAControls.cursors.down);
-
-        //     if (right) {
-        //         this.navigateDirectionToButton(1);
-        //         AAControls.right = 0;
-        //     } else if (left) {
-        //         this.navigateDirectionToButton(-1);
-        //         AAControls.left = 0;
-        //     }
-
-        //     if (down) {
-        //         this.navigateDirectionToButton(3);
-        //         AAControls.right = 0;
-        //     } else if (up) {
-        //         this.navigateDirectionToButton(-3);
-        //         AAControls.left = 0;
-        //     }
-
-        //     let click = Phaser.Input.Keyboard.JustDown(AAControls.spacebar) || Phaser.Input.Keyboard.JustDown(AAControls.returnKey);
-        //     if (click) {
-        //         this.buttons[this.currentActiveButton].first.pointerUp(null);
-        //     }
-
-        // }
-        // if (this.debugInfo) {
-        //     this.debugInfo.setText([
-        //         'GameData.rockcount: ' + GameData.rockCount
-        //         this.bigRocks
-        //     ]);
-        //     // this.debugText.text = gGameState.toString();
-        // }
     }
 
 
@@ -745,10 +677,14 @@ class MenuOverlay extends Phaser.Scene {
     }
 
     displayScore(thescore) {
-        this.scoreText.text = thescore.toString();
+        this.scoreDom.innerText = thescore.toString();
+        this.scoreDom.classList.add("scoreBounce");
+        setTimeout(() => { this.scoreDom.classList.remove("scoreBounce"); }, 1200);
 
         if (thescore >= AAHighScores.highScore) {
-            this.highScoreText.text = this.scoreText.text;
+            this.highscoreDom.innerText = thescore.toString();
+            this.highscoreDom.classList.add("scoreBounce");
+            setTimeout(() => { this.highscoreDom.classList.remove("scoreBounce"); }, 1200);
             AAHighScores.saveScoreToLocalStorage(thescore)
         }
     }
@@ -825,27 +761,8 @@ class MenuOverlay extends Phaser.Scene {
 
     disablePause() {
         this.pauseEnabled = false
-       // this.btnPause.setVisible(false);
+        // this.btnPause.setVisible(false);
     }
-
-    // hideTopPlaySoundButtons(_y) {
-
-    //     this.showButton(this.c_btnSound, _y, this.c_btnSound.x);
-    //     setTimeout(() => {
-    //         this.showButton(this.c_btnPlay, _y, this.c_btnPlay.x);
-    //     }, 50);
-    // }
-
-    // hideTopRowOfButtons(_y) {
-    //     this.showButton(this.c_btnSettings, _y, this.c_btnSettings.x);
-    //     setTimeout(() => {
-    //         this.showButton(this.c_btnMoreGames, _y, this.c_btnMoreGames.x);
-    //     }, 50);
-    //     setTimeout(() => {
-    //         this.showButton(this.c_btnFullScreen, _y, this.c_btnFullScreen.x);
-    //     }, 100);
-    // }
-
 
     // **************************************************************************
     // **************************************************************************
@@ -853,6 +770,10 @@ class MenuOverlay extends Phaser.Scene {
     // Button CALLBACKS
     // **************************************************************************
     action_BtnPlay(state) {
+
+        if (this.tweeners != 0) {
+            return;
+        }
 
         if (state == 'up') {
             this.playBtnSnd();
@@ -882,19 +803,17 @@ class MenuOverlay extends Phaser.Scene {
     }
 
     action_btnSound(_state) {
-
+        if (this.tweeners != 0) {
+            return;
+        }
         if (_state == 'up') {
             this.playBtnSnd();
 
             AAPrefs.toggleAudio();
 
             if (AAPrefs.playAudio == true) {
-                // If we playAudio we flip the frame of the button to show the ON state when up and the OFF state when pressed         
-                //this.btnSound.setFrames('btnSoundOn.png', 'btnSoundOff.png', 'btnSoundOn.png');
                 AAKaiAnalytics.sendEvent("soundOn");
             } else {
-                // This will display the the OFF state when up and the ON state when pressed
-                // this.btnSound.setFrames('btnSoundOff.png', 'btnSoundOn.png', 'btnSoundOff.png');//, 'btn_sound_off.png');
                 AAKaiAnalytics.sendEvent("soundOff");
             }
             this.audioOffImage.setVisible(!AAPrefs.playAudio);
@@ -905,18 +824,17 @@ class MenuOverlay extends Phaser.Scene {
     }
 
     action_btnPause(_state) {
-
+        if (this.tweeners != 0) {
+            return;
+        }
         if (_state == 'up') {
             this.playBtnSnd();
 
             if (gGameState == states.kSTATE_PLAYING) {
 
-                this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
+                this.btnHelp.setTexture(kSPRITE_ATLAS, kBTN_BACK);
 
                 gGameState = states.kSTATE_PAUSED;
-
-                // this.showButton(this.c_btnHelp, this.buttonY, this.c_btnHelp.x);
-                // this.showButton(this.c_btnSound, this.buttonY, this.c_btnSound.x);
 
                 this.pauseImage.setVisible(true);
                 AAFunctions.tweenBounce(this, this.pauseImage);
@@ -927,8 +845,6 @@ class MenuOverlay extends Phaser.Scene {
             } else if (gGameState == states.kSTATE_PAUSED) {
 
                 gGameState = states.kSTATE_PLAYING;
-                // this.showButton(this.c_btnHelp, this.buttonY + this.kHideDistance, this.c_btnHelp.x);
-                // this.showButton(this.c_btnSound, this.buttonY + this.kHideDistance, this.c_btnSound.x);
                 this.pauseImage.setVisible(false);
                 // (<SponsorOverlay>this.scene.get("SponsorOverlay")).hideBanner();
                 game.scene.resume("GameScene");
@@ -938,7 +854,9 @@ class MenuOverlay extends Phaser.Scene {
     }
 
     action_BtnHelpBack(_state) {
-
+        if (this.tweeners != 0) {
+            return;
+        }
         if (_state == 'up') {
             this.playBtnSnd();
 
@@ -957,7 +875,7 @@ class MenuOverlay extends Phaser.Scene {
                     this.hideNumberTags(this.tags);
                     this.hideAllButtons(() => {
                         this.hideButtonBG(() => {
-                            this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
+                            this.btnHelp.setTexture(kSPRITE_ATLAS, kBTN_BACK);
                             this.showButtonBG(() => {
                                 this.showNumberTags(this.tags[0]);
                                 this.showSpecificButtons([this.btnHelp], () => { });
@@ -965,7 +883,8 @@ class MenuOverlay extends Phaser.Scene {
                         });
                     });
 
-                    (<SponsorOverlay>this.scene.get("SponsorOverlay")).hideBanner();
+                    // (<SponsorOverlay>this.scene.get("SponsorOverlay")).
+                    hideBanner();
                     AAKaiAnalytics.sendEvent("help");
                     break;
 
@@ -974,7 +893,7 @@ class MenuOverlay extends Phaser.Scene {
                     this.hideNumberTags(this.tags);
                     this.hideAllButtons(() => {
                         this.hideButtonBG(() => {
-                            this.btnHelp.setTexture('spriteAtlas', 'btnHelp.png');
+                            this.btnHelp.setTexture(kSPRITE_ATLAS, kBTN_HELP);
                             this.showButtonBG(() => {
                                 this.scene.get("GameScene").scene.start("MenuScene");
                                 gGameState = states.kSTATE_MENU;
@@ -1004,15 +923,18 @@ class MenuOverlay extends Phaser.Scene {
 
 
     action_btnFullscreen(_state) {
+        if (this.tweeners != 0) {
+            return;
+        }
         if (kSHOW_FULLSCREEN_BUTTON) {
             if (gGameState == states.kSTATE_MENU) {
                 if (_state == 'up') {
                     this.playBtnSnd();
                     if (this.scale.isFullscreen) {
-                        this.btnFullscreen.setTexture('spriteAtlas', 'btnFullscreenOn.png');
+                        this.btnFullscreen.setTexture(kSPRITE_ATLAS, kBTN_FULLSCREEN_ON);
                         this.scale.stopFullscreen();
                     } else {
-                        this.btnFullscreen.setTexture('spriteAtlas', 'btnFullscreenOff.png');
+                        this.btnFullscreen.setTexture(kSPRITE_ATLAS, kBTN_FULLSCREEN_OFF);
                         this.scale.startFullscreen();
                     }
                 }
@@ -1022,6 +944,9 @@ class MenuOverlay extends Phaser.Scene {
 
     action_btnSettings(_state) {
         // if (gGameState == states.kSTATE_MENU) {
+        if (this.tweeners != 0) {
+            return;
+        }
         if (_state == 'up') {
             this.playBtnSnd();
 
@@ -1031,7 +956,7 @@ class MenuOverlay extends Phaser.Scene {
             this.hideNumberTags(this.tags);
             this.hideAllButtons(() => {
                 this.hideButtonBG(() => {
-                    this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
+                    this.btnHelp.setTexture(kSPRITE_ATLAS, kBTN_BACK);
                     this.showButtonBG(() => {
                         this.showNumberTags(this.tags[0]);
                         this.showSpecificButtons([this.btnHelp], () => { });
@@ -1039,13 +964,17 @@ class MenuOverlay extends Phaser.Scene {
                 });
             });
 
-            (<SponsorOverlay>this.scene.get("SponsorOverlay")).hideBanner();
+            // (<SponsorOverlay>this.scene.get("SponsorOverlay")).
+            hideBanner();
             AAKaiAnalytics.sendEvent("settings");
 
         }
         // }
     }
     action_btnMoreGames(_state) {
+        if (this.tweeners != 0) {
+            return;
+        }
         if (_state == 'up') {
             this.playBtnSnd();
 
@@ -1055,7 +984,7 @@ class MenuOverlay extends Phaser.Scene {
             this.hideNumberTags(this.tags);
             this.hideAllButtons(() => {
                 this.hideButtonBG(() => {
-                    this.btnHelp.setTexture('spriteAtlas', 'btnBack.png');
+                    this.btnHelp.setTexture(kSPRITE_ATLAS, kBTN_BACK);
                     this.showButtonBG(() => {
                         this.showNumberTags(this.tags[0]);
                         this.showSpecificButtons([this.btnHelp], () => { });
@@ -1063,7 +992,8 @@ class MenuOverlay extends Phaser.Scene {
                 });
             });
 
-            (<SponsorOverlay>this.scene.get("SponsorOverlay")).hideBanner();
+            // (<SponsorOverlay>this.scene.get("SponsorOverlay")).
+            hideBanner();
             AAKaiAnalytics.sendEvent("moregames");
 
         }
@@ -1072,6 +1002,9 @@ class MenuOverlay extends Phaser.Scene {
     //V2 ==================================================
 
     action_btnResetGame(_state) {
+        if (this.tweeners != 0) {
+            return;
+        }
         if (gGameState == states.kSTATE_MENU) {
             if (_state == 'up') {
                 this.playBtnSnd();
@@ -1091,8 +1024,12 @@ class MenuOverlay extends Phaser.Scene {
             targets: this.btnResetGame,
             y: bY,
             duration: 200,
-            ease: 'Sine.easeInOut',
-        })
+            onComplete: () => {
+                this.tweeners--;
+            },
+            onCompleteScope: this
+        });
+        this.tweeners++;
     }
 
     backToMenu(fromWhere) {
@@ -1105,7 +1042,7 @@ class MenuOverlay extends Phaser.Scene {
                 // hide the reset button
 
 
-                this.btnHelp.setTexture('spriteAtlas', 'btnHelp.png');
+                this.btnHelp.setTexture(kSPRITE_ATLAS, kBTN_HELP);
 
                 if (this.pauseEnabled) {
                     this.btnPause.setVisible(false);
@@ -1119,11 +1056,13 @@ class MenuOverlay extends Phaser.Scene {
                     this.showSpecificButtons(this.buttons, () => {
                         gGameState = states.kSTATE_MENU;
 
-                        if (false == this.scoreText.visible) {
-                            this.scoreText.setVisible(true);
-                            this.highScoreText.setVisible(true);
-                        }
-                        (<SponsorOverlay>this.scene.get("SponsorOverlay")).showBanner();
+                        // if (false == this.scoreText.visible) {
+                        //     this.scoreText.setVisible(true);
+                        //     this.highScoreText.setVisible(true);
+                        // }
+                        this.hideScores(false);
+                        // (<SponsorOverlay>this.scene.get("SponsorOverlay")).
+                        showBanner();
                     });
 
                 });
@@ -1137,8 +1076,13 @@ class MenuOverlay extends Phaser.Scene {
             y: this.game.canvas.height + 20,
             duration: 200,
             ease: 'Sine.easeInOut',
-            delay: (<any>this.tweens).stagger(50)
+            delay: (<any>this.tweens).stagger(50),
+            onComplete: () => {
+                this.tweeners--;
+            },
+            onCompleteScope: this
         });
+        this.tweeners++;
     }
 
     showNumberTags(theTags) {
@@ -1147,13 +1091,22 @@ class MenuOverlay extends Phaser.Scene {
             y: this.buttonY - this.tagVOffset,
             duration: 200,
             ease: 'Sine.easeInOut',
-            delay: (<any>this.tweens).stagger(50)
+            delay: (<any>this.tweens).stagger(50),
+            onComplete: () => {
+                this.tweeners--;
+            },
+            onCompleteScope: this
         });
+        this.tweeners++;
     }
     hideScores(how) {
-        // BOWLING SPECIFIC 
-        this.scoreText.visible = how;
-        this.highScoreText.visible = how;
+        let op = "1";//"block";
+        if (how == true) {
+            op = "0";//"none";
+        }
+        // this.scoreDom.style.display = op;
+        // this.highscoreDom.style.display = op;
+        this.scoresDom.style.opacity = op;
     }
     hideAllButtons(theCallback) {
 
@@ -1169,9 +1122,11 @@ class MenuOverlay extends Phaser.Scene {
             delay: (<any>this.tweens).stagger(5),
             onComplete: () => {
                 //this.showSpecificButtons(showList);
+                this.tweeners--;
                 theCallback();
             }
         });
+        this.tweeners++;
     }
 
     hideButtonBG(theCallback) {
@@ -1181,8 +1136,9 @@ class MenuOverlay extends Phaser.Scene {
             x: -this.game.canvas.width - 50,
             duration: 100,
             ease: 'Sine.easeInOut',
-            onComplete: () => { theCallback(); }
+            onComplete: () => { theCallback(); this.tweeners--; }
         });
+        this.tweeners++;
     }
 
     showButtonBG(theCallback) {
@@ -1192,10 +1148,12 @@ class MenuOverlay extends Phaser.Scene {
             duration: 100,
             ease: 'Sine.easeInOut',
             onComplete: () => {
+                this.tweeners--;
                 theCallback();
             },
             callbackScope: this
         });
+        this.tweeners++;
     }
 
 
@@ -1207,9 +1165,11 @@ class MenuOverlay extends Phaser.Scene {
             ease: 'Sine.easeInOut',
             delay: (<any>this.tweens).stagger(50),
             onComplete: () => {
+                this.tweeners--;
                 theFunction(theFunction);
             }
         });
+        this.tweeners++;
     }
 
     showSpecificButtons(theButtons, theCallback) {
@@ -1220,9 +1180,11 @@ class MenuOverlay extends Phaser.Scene {
             ease: 'Sine.easeInOut',
             delay: (<any>this.tweens).stagger(50),
             onComplete: () => {
+                this.tweeners--;
                 theCallback();
             }
         });
+        this.tweeners++;
 
     }
 }//end scene

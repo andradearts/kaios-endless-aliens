@@ -45,26 +45,14 @@ class PreloadScene extends Phaser.Scene {
 
         // *** LOAD ASSETS ***
 
-        // ========================================================================
-        // 3/30/20
-        // commented this out as I'm trying out banner kaios ads
-        // ========================================================================
-        // let d = '?' + new Date().getTime();
-        // this.load.text('sponsorURL', 'https://taara.games/sponsor.txt' + d);
-        // this.load.image('sponsor', 'https://taara.games/sponsor.png' + d);
-
-        // this.load.setPath("assets/");
-        // let it:Phaser.Types.Loader.XHRSettingsObject = Phaser.Loader.XHRSettings();
-        // it.header = "Access-Control-Allow-Origin: *";
-        // it.headerValue = "Access-Control-Allow-Origin: *";
-        //this.load.script('analytics', 'https://www.google-analytics.com/analytics.js');
+        this.load.json('manifest','manifest.webapp');
 
         this.load.setPath("assets/html/");
         this.load.html('moreGamesHTML', 'moregames.html');
         this.load.html('newgameHTML', 'newgame.html');
         
 
-        let touchExt = '-v2';
+        let touchExt = '';
         if (kTOUCH === 1){
             touchExt = '_TP';
         }
@@ -82,12 +70,6 @@ class PreloadScene extends Phaser.Scene {
 
         // this.load.image('coverart', 'coverart.png');
 
-        //Fonts
-        this.load.image('numbersFont', 'numbers@2x.png');
-        // this.load.bitmapFont('sysFont', 'retroSystem.png', 'retroSystem.fnt', null, null);
-
-        this.load.bitmapFont('sysFont', '8bitfont_0.png', '8bitfont.fnt', null, null);
-
 
         //Sound Effects
         this.load.setPath("assets/audio/");
@@ -101,27 +83,10 @@ class PreloadScene extends Phaser.Scene {
     }
 
     goToGameScene(a, c, b, d) {
+        initGame();
         this.scene.start('MenuScene');
         this.scene.start('MenuOverlay');
         this.scene.start('SponsorOverlay');
-
-        let element = document.getElementsByClassName('spinner')[0];
-
-        var op = 1;  // initial opacity
-        var timer = setInterval(function () {
-            if (op <= 0.1) {
-                clearInterval(timer);
-                // (<any>element).style.opacity = 0;
-                // (<any>element).style.display = 'none';
-                (<any>element).remove();
-
-            }
-            (<any>element).style.opacity = op;
-            (<any>element).style.filter = 'alpha(opacity=' + op * 100 + ")";
-            op -= op * 0.3;
-        }, 50);
-
-        
     }
 
 }
