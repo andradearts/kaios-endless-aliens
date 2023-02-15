@@ -1,3 +1,49 @@
+2/14/23
+
+Started new version with updated UI and icons
+
+----------
+
+-- smaller file size --
+javascript-obfuscator "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/_Template_KaiOS_2023/game/dist/assets/game.js" --output "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/_Template_KaiOS_2023/game/dist/assets/game.min.js" --compact true --debug-protection true --rename-globals true
+
+-- larger file size --
+javascript-obfuscator "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/_Template_KaiOS_2023/game/dist/assets/game.js" --output "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/_Template_KaiOS_2023/game/dist/assets/game.min.js" --compact true --dead-code-injection true --dead-code-injection-threshold .7 --debug-protection true --rename-globals true --unicode-escape-sequence true
+
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+
+
+firebase deploy --only hosting:sameblox
+
+--- WINDOWS ----
+javascript-obfuscator "E:\OneDrive\Taara Games\KaiOS\games\010_KAIOS_SAMEBLOX\game\dist\assets\game.js" --output "E:\OneDrive\Taara Games\KaiOS\games\010_KAIOS_SAMEBLOX\game\dist\assets\game.min.js"  --compact true --dead-code-injection true --dead-code-injection-threshold .7 --debug-protection true --rename-globals true --unicode-escape-sequence true
+
+adb -s YYNG190814000131 root && adb -s YYNG190814000131 forward tcp:6000 localfilesystem:/data/local/debugger-socket
+
+adb -s 1e564c11 root && adb -s 1e564c11 forward tcp:6000 localfilesystem:/data/local/debugger-socket
+====================================================================================================
+====================================================================================================
+
+
+
+8/26/22
+
+Added check for KaiOS 3 and appended " 3" to the gameName.
+Added KaiOS3 manifests
+Removed HTML DOM sprites
+Removed More Games Button
+Removed Settings Scenes
+Removed MoreGames Scenes
+
+5/20/21
+
+Added KaiAds sdk and phaser framwork into AAShared.
+I now compile phaser and kaiads into the game.min.js file and obfuscate that so now there is only one javascript file
+I left the links to the Phaser and kaiads in the html file for now just in case it does not work
+
+THere is also a new build of phaser that reduces it's size.  There is a no physics and an arcade physics version.  Just need to change which to use in the tsconfig.json file
+
 PWA
 Index.html files should contain all css and PWA data
 sw.js - service worker

@@ -1,53 +1,87 @@
-* {
-    padding: 0;
-    margin: 0;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 :root {
     /* ad heights 54px or 36px */
-    --ad-height: 36px;
-    --ad-width: 216px;
-    --ad-height-offest: -36px;
+    --ad-height: 54px;
+    --ad-width: 240px;
+    --ad-height-offest: -54px;
 
-    --scoreYPos:20px;
+    --scoreYPos:15px;
     --score-font-size:18px;
-    --highscore-font-size:9px;
+    --bet-font-size:9px;
     --align-score:flex-start; /*flex-end for right side of screen */
     --score-bottom-margin:5px;
     --score-color:white;
-    --highscore-color:white;
+    --highscore-color:rgba(255, 255, 255, 0.727);
 }
-
 
 html,
 body {
-    max-width: 100%;
-    max-height: 100%;
+ 
+    height: 100vh;
+    width: 100%;
     padding: 0px;
     margin: 0px;
-    text-transform: lowercase;
-    background-color: #fbf300;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    justify-content: center;
+    align-items: center;
     overflow: hidden;
     touch-action: none;
     -ms-touch-action: none;
+    background: hsl(56, 83%, 49%);
+    background: linear-gradient(135deg, rgba(227,214,21,1) 0%, rgba(16,132,156,1) 31%, rgba(146,104,92,1) 72%, rgba(170,161,32,1) 100%);
 }
 
 #gameStage {
     position: sticky;
     background-color: #fbf300;
     top: 0;
+    left:0;
     height: 100%;
     width: 100%;
     max-width: 100%;
-    /* //240px; */
     z-index: 1;
 }
+#gameStage2 {
+    position: relative;
+    background-color: transparent;
+    top: 0;
+    left:0;
+    height: 320px;
+    width: 240px;
+    max-width: 240px;
+    z-index: 1;
+    overflow: hidden;
+    border: 1px solid black;
+    box-shadow:
+    6.3px 6.1px 4.7px rgba(0, 0, 0, 0.048),
+    8.5px 8.1px 10.7px rgba(0, 0, 0, 0.059),
+    9.4px 9.1px 19.7px rgba(0, 0, 0, 0.066),
+    11.4px 11px 37.5px rgba(0, 0, 0, 0.074),
+    25px 24px 100px rgba(0, 0, 0, 0.1)
+  ;
+  
+}
+
+
 
 .sponsorbanner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     z-index: 9999;
     position: absolute;
     top: 0;
     width: var(--ad-width);
+    overflow: hidden;
 }
 
 #sponsorad {
@@ -63,6 +97,7 @@ body {
     top: var(--ad-height-offest);
     opacity: 0;
     transition: top 1s, opacity 1s;
+    
 }
 
 .sponsorButton {
@@ -73,6 +108,8 @@ body {
     transition:  top .4s, bottom .4s, opacity .4s; 
     opacity: 0;;
     z-index: 999;
+    width:80px;
+    height:20px;
 }
 /* Tag is the number associated with activating the ad */
 .tagNum {
@@ -82,23 +119,40 @@ body {
     right: -10px;
     opacity: inherit;
     transition: top .5s opacity .5s;
-
 }
 
 
+.progressbar{
+    position:relative;
+    width:0px;
+    opacity: 1;
+    height:15px;
+    background-color: rgb(195, 214, 25);
+    z-index: 10;
+    left:20px;
+    top:280px;
+    border-radius: 50vh;
+    transition: .25s;
+}
 
 /* LOGO */
 .loader {
-    width: 100vh;
+    position: absolute;
+    width: 100%;
+    height:100%;
+    top:0;
+    left:0;
+    background-color: transparent;
     text-align: center;
     transition: opacity 3s;
 }
 
 .taara_logo {
     position: absolute;
-    width: 100%;
-    height: 100vh;
+    width: 240px;
+    height: 320px;
     z-index: 1;
+    background-image: url("../images/bg.png");
 }
 
 .taara_logo div {
@@ -106,9 +160,9 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100vw;
-    height: 100vh;
-    animation: taara_logo 1.2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+    width: 240px;
+    height: 320px;
+    animation: taara_logo 5.2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 
 .taara_logo img {
@@ -147,19 +201,8 @@ body {
     font-family: 'Press Start 2P';
     font-style: normal;
     font-weight: 400;
-    src: url('../fonts/press-start-2p-v9-latin-regular.eot');
-    /* IE9 Compat Modes */
     src: local('Press Start 2P Regular'), local('PressStart2P-Regular'),
-        url('../fonts/press-start-2p-v9-latin-regular.eot?#iefix') format('embedded-opentype'),
-        /* IE6-IE8 */
-        url('../fonts/press-start-2p-v9-latin-regular.woff2') format('woff2'),
-        /* Super Modern Browsers */
-        url('../fonts/press-start-2p-v9-latin-regular.woff') format('woff'),
-        /* Modern Browsers */
-        url('../fonts/press-start-2p-v9-latin-regular.ttf') format('truetype'),
-        /* Safari, Android, iOS */
-        url('../fonts/press-start-2p-v9-latin-regular.svg#PressStart2P') format('svg');
-    /* Legacy iOS */
+        url('../fonts/press-start-2p-v9-latin-regular.woff') format('woff');
 }
 
 .fps {
@@ -177,8 +220,12 @@ body {
     display: flex;
     flex-direction: column;
     flex: 1;
+    gap:.5rem;
+    justify-items: center;
+    justify-content: space-around;
+    align-items: center;
     align-items: var(--align-score);
-    padding: 0 1rem;
+    padding-inline: 1em;
     opacity: 0;
     width: 100%;
     position: absolute;
@@ -190,13 +237,15 @@ body {
     color: var(--score-color);
     font-family: 'Press Start 2P', cursive;
     font-size: var(--score-font-size) ;
-    margin-bottom: var(--score-bottom-margin);
+    float:left;
+    margin-right: 1em;
 }
 
 .highscore {
-    color:var(--highscore-color);;
+    color:var(--highscore-color);  
     font-family: 'Press Start 2P', cursive;
-    font-size: var(--highscore-font-size) ;
+    font-size: var(--bet-font-size) ;
+    transition: inherit;
 }
 
 .scoreBounce {

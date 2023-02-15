@@ -28,7 +28,7 @@
         {
             "label": "obfuscate",
             "type": "shell",
-            "command": "javascript-obfuscator \"/c/Users/marka/OneDrive2018/OneDrive/Taara Games/002_KAIOS_PENGUINJUMP/game/dist/assets/game.js\" --output \"/c/Users/marka/OneDrive2018/OneDrive/Taara Games/002_KAIOS_PENGUINJUMP/game/dist/assets/game.min.js\" --compact: true --controlFlowFlattening: true --controlFlowFlatteningThreshold: 1 --deadCodeInjection: true --deadCodeInjectionThreshold: 1 --debugProtection: true --debugProtectionInterval: true --disableConsoleOutput: true --log: false --mangle: true --renameGlobals: false --rotateStringArray: true --selfDefending: true --stringArray: true --stringArrayEncoding: 'rc4' --stringArrayThreshold: 1 --unicodeEscapeSequence: false",
+            "command": "javascript-obfuscator \"/d/OneDrive/Taara Games/_Template_KaiOS/game/dist/assets/game.js\" --output \"/d/OneDrive/Taara Games/_Template_KaiOS/game/dist/assets/game.min.js\" --compact: true --controlFlowFlattening: true --controlFlowFlatteningThreshold: 1 --deadCodeInjection: true --deadCodeInjectionThreshold: 1 --debugProtection: true --debugProtectionInterval: true --disableConsoleOutput: true --log: false --mangle: true --renameGlobals: false --rotateStringArray: true --selfDefending: true --stringArray: true --stringArrayEncoding: 'rc4' --stringArrayThreshold: 1 --unicodeEscapeSequence: false",
             
             // "args": [
             //     "${cwd}\\assets\\games.js",

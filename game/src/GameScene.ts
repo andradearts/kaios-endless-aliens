@@ -47,7 +47,6 @@ class GameScene extends Phaser.Scene {
         gGameState = states.kSTATE_PLAYING;
         this.poop = 0;
 
-        // this.add.image(this.sys.canvas.width/2,this.sys.canvas.height/2,"spriteAtlas","btnPause.png")
     }
 
     update(time, delta) {
@@ -64,6 +63,7 @@ class GameScene extends Phaser.Scene {
                 }
                 break;
         }
+
     }
     
     gameover() {
@@ -91,6 +91,8 @@ class GameScene extends Phaser.Scene {
 
     }
     setUpUI() {
-        (<MenuOverlay>this.scene.get('MenuOverlay')).showResetButton(true);
+
+        (<MenuOverlay>this.scene.get('MenuOverlay')).showScores(true);
+        //(<MenuOverlay>this.scene.get('MenuOverlay')).showResetButton(true);
     }
 }

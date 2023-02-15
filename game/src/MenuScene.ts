@@ -1,8 +1,5 @@
 class MenuScene extends Phaser.Scene {
 
-
-    bgContainer;
-
     constructor() {
         super({ key: 'MenuScene' });
     }
@@ -18,16 +15,15 @@ class MenuScene extends Phaser.Scene {
         this.removeLogo();
         
         this.scene.sendToBack();
-        var element = this.add.dom(10, 140).createFromCache('newgameHTML').setOrigin(0, 0);
-
+       
         let vy = this.sys.canvas.height - 17;
         let vx = 12;
-        if (kTOUCH == 1) {
-            vy = 8;
-            vx = this.game.canvas.width-60;
-        }
-        // this.add.bitmapText(vx, vy, 'sysFont', gGameVersion, 12).setDepth(999);
-        
+       
+        this.add.text(12, this.sys.canvas.height - 17, gGameVersion,{"fontSize":"12px"});
+
+        let mo = this.scene.get('MenuOverlay');
+        (<MenuOverlay>mo).showMenuSceneButtons(()=>{});
+        (<MenuOverlay>this.scene.get('MenuOverlay')).showScores(true);
     }
 
     removeLogo() {

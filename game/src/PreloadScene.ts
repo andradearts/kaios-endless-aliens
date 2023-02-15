@@ -1,8 +1,4 @@
-
 class PreloadScene extends Phaser.Scene {
-
-    meterBar;
-    kitt;
 
     constructor() {
         super({ key: 'PreloadScene' });
@@ -10,8 +6,7 @@ class PreloadScene extends Phaser.Scene {
 
     preload() {
 
-        // AAKaiAds.preLoadFullscreenAd();
-        //    AAKaiAds.preLoadBannerAd();
+        AAKaiAds.preloadFullscreenAd()
 
         this.cameras.main.setBackgroundColor(0xFFDD18);
 
@@ -24,69 +19,72 @@ class PreloadScene extends Phaser.Scene {
             ease: 'Power.easeIn'
         });
 
-
-       
-        
         this.loadAssets();
     }
 
     loadAssets() {
 
+        var probar = document.getElementById('progresso');
+
         this.load.on('progress', function (it) {
-            // this.meterBar.scaleX = this.load.progress;
+            let f = (it*200)
+            probar.style.width = f.toString()+"px"
         }, this);
 
         this.load.on('complete', function () {
-            // this.meterBar.fillStyle(0x00A800, 1.0);
-            // this.meterBar.fill();
-            // this.meterBar.scaleX = 1.0;
-            AAFunctions.fade(this, "out", 500, this.goToGameScene, gLogoDisplayLength);
+            console.log(this.load.progress)
+            probar.style.opacity = "0";
+            AAFunctions.fade(this, "out", 100, this.goToGameScene, gLogoDisplayLength);
         }, this);
 
         // *** LOAD ASSETS ***
 
-        this.load.json('manifest','manifest.webapp');
+        this.load.json('manifest', 'manifest.webapp');
 
-        this.load.setPath("assets/html/");
-        this.load.html('moreGamesHTML', 'moregames.html');
-        this.load.html('newgameHTML', 'newgame.html');
-        
-
-        let touchExt = '';
-        if (kTOUCH === 1){
-            touchExt = '_TP';
-        }
-
+        // SVG Menu Items
+        this.load.setPath("assets/svg/");
+        this.load.svg(kBTN_PLAY, "btnPlay.svg", { width: 81, height: 40 });
+        this.load.svg(kBTN_BACK, "btnBackBottom.svg", { width: 65, height: 19 });
+        this.load.svg(kBTN_HELP, "btnHelp.svg", { width: 55, height: 31 });
+        this.load.svg(kBTN_SOUND_OFF, "btnSoundOff.svg", { width: 55, height: 31 });
+        this.load.svg(kBTN_SOUND_ON, "btnSoundOn.svg", { width: 55, height: 31 });
+       
+        this.load.svg("btnResetGame", "btnResetGame.svg", { width: 56, height: 15 });
+   
+        this.load.svg(kIMG_GAMEOVER, "gameover.svg", { width: 196, height: 62 });
+   
         // Spritesheets
         this.load.setPath("assets/images/");
+
+        this.load.image(kIMG_BG,"bg.png");
+        this.load.image(kIMG_LOGO,"taara-logo.png");
+
         this.load.atlas(
-            "spriteAtlas",
-            "spriteAtlas"+touchExt+".png",
-            "spriteAtlas"+touchExt+".json",
+            kSPRITE_ATLAS,
+            kSPRITE_ATLAS + ".png",
+            kSPRITE_ATLAS + ".json",
             null,
             null
         );
 
-
         // this.load.image('coverart', 'coverart.png');
-
 
         //Sound Effects
         this.load.setPath("assets/audio/");
-        let ext = '.ogg';
+        let ext = '.mp3';
 
         // These two sounds are the standard button sounds
-        this.load.audio("button", "click" + ext);
-        // this.load.audio("buttonNav", "chime-triad" + ext);
-
+        this.load.audio("button", "sfxButton_select" + ext);
+        this.load.audio("play", "sfxButton_play" + ext);
+        this.load.audio("back", "sfxButton_back" + ext);
 
     }
 
     goToGameScene(a, c, b, d) {
         initGame();
-        this.scene.start('MenuScene');
         this.scene.start('MenuOverlay');
-        this.scene.start('SponsorOverlay');
+        this.scene.start('MenuScene');
+    
     }
 
 }

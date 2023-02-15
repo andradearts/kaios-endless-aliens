@@ -1,21 +1,21 @@
 {
   "version":"1.0.0",
   "build":"20041401",
-  "gid":"UA-150350318-3",
-  "name": "__name__",
+  "gid":"UA-150350318-1",
+  "name": "template",
   "description": "__DESCRIPTION___",
   "scope": "/",
-  "launch_path": "/kaios_game.html",
+  "launch_path": "/index.html",
    "locales": {
     "en-US": {
-      "name": "__name__",
+      "name": "template",
       "subtitle": "__24 chars__",
       "description":  "Use the direction pad to move the red cursor. Press the center button to start a bubble. Make a chain reaction to wash away all the germs. Wash Your Hands!"
     }
   },
    "icons": {
-    "56":  "https://bubbles.taara.games/assets/icons/icon56.png",
-    "112": "https://bubbles.taara.games/assets/icons/icon112.png"
+    "56":  "/assets/icons/icon56.png",
+    "112": "/assets/icons/icon112.png"
   },
   "fullscreen":"true",
   "type": "privileged",
@@ -24,11 +24,14 @@
   "background_color": "#000000",
   "developer": {
     "name": "Taara Games",
-    "url": "https://www.taaragames.com"
+    "url": "https://taara.games/"
   },
   "permissions": {
     "systemXHR": {}
   },
+  "dependencies": {
+		"ads-sdk": "1.4.1"
+	},
   "cursor": "false",
   "default_locale": "en-US",
   "chrome": { "navigation": false }

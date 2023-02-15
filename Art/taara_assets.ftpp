@@ -1,0 +1,76 @@
+{
+  "meta": {
+    "version": "0.6.7"
+  },
+  "savePath": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/_Template_KaiOS_2023/game/dist/assets/images",
+  "images": [
+    {
+      "name": "btnBackBottom.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/shared-assets/2023/export/btnBackBottom.png",
+      "folder": ""
+    },
+    {
+      "name": "btnHelp.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/shared-assets/2023/export/btnHelp.png",
+      "folder": ""
+    },
+    {
+      "name": "btnPlay.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/shared-assets/2023/export/btnPlay.png",
+      "folder": ""
+    },
+    {
+      "name": "btnRestart.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/shared-assets/2023/export/btnRestart.png",
+      "folder": ""
+    },
+    {
+      "name": "btnSound.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/shared-assets/2023/export/btnSound.png",
+      "folder": ""
+    },
+    {
+      "name": "btnSoundOff.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/shared-assets/2023/export/btnSoundOff.png",
+      "folder": ""
+    },
+    {
+      "name": "btnSponsor.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/shared-assets/2023/export/btnSponsor.png",
+      "folder": ""
+    },
+    {
+      "name": "gameover.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/shared-assets/2023/export/gameover.png",
+      "folder": ""
+    }
+  ],
+  "folders": [],
+  "packOptions": {
+    "textureName": "spriteatlas2",
+    "textureFormat": "png",
+    "removeFileExtension": false,
+    "prependFolderName": true,
+    "base64Export": false,
+    "tinify": false,
+    "tinifyKey": "",
+    "scale": 1,
+    "filter": "none",
+    "exporter": "JSON (hash)",
+    "fileName": "pack-result",
+    "savePath": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/_Template_KaiOS_2023/game/dist/assets/images",
+    "width": 2048,
+    "height": 2048,
+    "fixedSize": false,
+    "powerOfTwo": true,
+    "padding": 1,
+    "extrude": 1,
+    "allowRotation": true,
+    "allowTrim": true,
+    "trimMode": "trim",
+    "alphaThreshold": "0",
+    "detectIdentical": true,
+    "packer": "OptimalPacker",
+    "packerMethod": "Automatic"
+  }
+}

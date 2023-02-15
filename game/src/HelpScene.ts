@@ -13,7 +13,11 @@ class HelpScene extends Phaser.Scene {
 
        let mo = this.scene.get('MenuOverlay');
 
-       (<MenuOverlay>mo).hideScores(true);
+       hideBanner();
+       (<MenuOverlay>mo).showScores(false);
+       (<MenuOverlay>mo).showBackButton(()=>{});
+       
+       AAKaiAnalytics.sendEvent("help");
 
        this.add.image(0,0,kSPRITE_ATLAS,kIMG_HELP).setOrigin(0,0);
 

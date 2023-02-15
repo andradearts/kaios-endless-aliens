@@ -18,19 +18,14 @@
     "dom"
   ],
   "files": [
+    "./game/src/config.ts",
     "./game/src/consts.ts",
     "./game/src/Button.ts",
-    "./game/src/BootScene.ts",
-    "./game/src/MoreGamesScene.ts",
-    "./game/src/SettingsScene.ts",
     "./game/src/PreloadScene.ts",
     "./game/src/MenuOverlay.ts",
-    "./game/src/MoreGamesScene.ts",
     "./game/src/MenuScene.ts",
     "./game/src/HelpScene.ts",
-    "./game/src/Sponsor.ts",
-    "./game/src/GameScene.ts",
-    "./game/src/config.ts"
+    "./game/src/GameScene.ts"
 ]
   
 }
