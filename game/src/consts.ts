@@ -67,3 +67,8 @@ const kIMG_HELP = 'help.png';
 var debug_log;
 if (kDEBUG) debug_log = console.log.bind(window.console)
 else debug_log = function(){}
+
+// ⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️
+// ⬇️ GAME CONSTS HERE ⬇️  
+// ⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️
+

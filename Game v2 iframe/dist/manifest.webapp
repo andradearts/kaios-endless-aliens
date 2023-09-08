@@ -1,0 +1,39 @@
+{
+  "version":"1.7.0",
+  "build":"23090701",
+  "name": "Bubble Bee",
+  "description": "Collect the honey and avoid the flies.  Grab power ups to make you stronger in this re-imagining of the classic game snake.",
+  "scope": "/",
+  "launch_path": "/index.html",
+   "locales": {
+    "en-US": {
+      "name": "Bubble Bee",
+      "subtitle": "Collect the honey and avoid the flies.",
+      "description":  "Collect the honey and avoid the flies.  Grab power ups to make you stronger in this re-imagining of the classic game snake. "
+    }
+  },
+   "icons": {
+    "56":  "/assets/icons/icon-56-v2.png",
+    "112": "/assets/icons/icon-112-v2.png"
+  },
+  "fullscreen":"true",
+  "type": "privileged",
+  "orientation": "Portrait",
+  "theme_color": "#FBF200",
+  "background_color": "#000000",
+  "developer": {
+    "name": "Taara Games",
+    "url": "https://taara.games/"
+  },
+  "permissions": {
+    "systemXHR": {},
+    "mobiledata":{},
+    "wifidata":{}
+  },
+  "dependencies": {
+		"ads-sdk": "1.5.8"
+	},
+  "cursor": "false",
+  "default_locale": "en-US",
+  "chrome": { "navigation": false }
+}

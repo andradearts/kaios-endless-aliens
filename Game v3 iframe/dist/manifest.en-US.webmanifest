@@ -1,0 +1,46 @@
+{
+  "lang": "en-US",
+  "id": "Bubble Bee 3",
+  "name": "Bubble Bee 3",
+  "short_name": "Bubble Bee",
+  "description": "Collect the honey and avoid the flies.  Grab power ups to make you stronger in this re-imagining of the classic game snake.",
+  "orientation": "portrait",
+  "categories": ["games"],
+  "start_url": "/index.html",
+  "scope": "/",
+  "theme_color": "#FBF200",
+  "background_color": "#000000",
+  "version":"3.0.0",
+  "build":"23090701",
+  "icons": [
+    {
+      "src": "assets/icons/icon-56-v3.png",
+      "type": "image/png",
+      "sizes": "56x56"
+    },
+    {
+      "src": "assets/icons/icon-112-v3.png",
+      "type": "image/png",
+      "sizes": "112x112"
+    }
+  ],
+  "display": "fullscreen",
+  "b2g_features": {
+    "dependencies": {
+      "ads-sdk": "1.5.8"
+    },
+    "subtitle": "Collect the honey and avoid the flies.",
+    "version": "3.0.0",
+    "developer": {
+      "name": "Taara Games",
+      "url": "https://taara.games"
+    },
+    "type": "privileged",
+    "permissions": {
+        "systemXHR": {},
+        "mobiledata":{},
+        "wifidata":{}
+    }
+  }
+}
+
