@@ -12,7 +12,7 @@ Started new version with updated UI and icons
   
 WATERFOX: To reset IDE if it does bonkers -----
 1. type "about:support" in url box
-2. click refersh water fox Button
+2. click refresh water fox Button
 
 ----------
 
