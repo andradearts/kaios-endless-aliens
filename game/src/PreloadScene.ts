@@ -32,7 +32,6 @@ class PreloadScene extends Phaser.Scene {
         }, this);
 
         this.load.on('complete', function () {
-            console.log(this.load.progress)
             probar.style.opacity = "0";
             AAFunctions.fade(this, "out", 100, this.goToGameScene, gLogoDisplayLength);
         }, this);
@@ -41,22 +40,11 @@ class PreloadScene extends Phaser.Scene {
 
         this.load.json('manifest', 'manifest.webapp');
 
-        // SVG Menu Items
-        this.load.setPath("assets/svg/");
-        this.load.svg(kBTN_PLAY, "btnPlay.svg", { width: 81, height: 40 });
-        this.load.svg(kBTN_BACK, "btnBackBottom.svg", { width: 65, height: 19 });
-        this.load.svg(kBTN_HELP, "btnHelp.svg", { width: 55, height: 31 });
-        this.load.svg(kBTN_SOUND_OFF, "btnSoundOff.svg", { width: 55, height: 31 });
-        this.load.svg(kBTN_SOUND_ON, "btnSoundOn.svg", { width: 55, height: 31 });
-       
-        this.load.svg("btnResetGame", "btnResetGame.svg", { width: 56, height: 15 });
-   
-        this.load.svg(kIMG_GAMEOVER, "gameover.svg", { width: 196, height: 62 });
-   
         // Spritesheets
         this.load.setPath("assets/images/");
 
         this.load.image(kIMG_BG,"bg.png");
+        this.load.image(kIMG_COVER,"coverart.jpg");
         this.load.image(kIMG_LOGO,"taara-logo.png");
 
         this.load.atlas(
@@ -71,14 +59,18 @@ class PreloadScene extends Phaser.Scene {
 
         //Sound Effects
         this.load.setPath("assets/audio/");
-        let ext = '.mp3';
 
+        let ext = '.wav';
+        //SOund effects are to be wavs.  Some mp3 and oggs can crash phaser!
+
+        ext = '.mp3';
         // These two sounds are the standard button sounds
         this.load.audio("button", "sfxButton_select" + ext);
         this.load.audio("play", "sfxButton_play" + ext);
         this.load.audio("back", "sfxButton_back" + ext);
-
+       
     }
+
 
     goToGameScene(a, c, b, d) {
         initGame();

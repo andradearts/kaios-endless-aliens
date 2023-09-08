@@ -2,6 +2,18 @@
 
 Started new version with updated UI and icons
 
+firebase deploy --only hosting:(dinorun-kaios) <-replace name
+
+Started new version with updated UI and icons
+
+----------
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser-arcade-physics.min.js" integrity="sha512-3ggJ43PNjH5aQCsd8/CBKa18RPMR8OaQX0JvHCZ4iJO/2Jk9mLdVZYVGFVUJmIoKeoF9Hg1pVgmROv9+xpgQlQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+
+  
+WATERFOX: To reset IDE if it does bonkers -----
+1. type "about:support" in url box
+2. click refersh water fox Button
+
 ----------
 
 -- smaller file size --

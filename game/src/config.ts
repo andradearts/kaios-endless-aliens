@@ -19,6 +19,10 @@
 // INIT GAME
 // ******************************************************************************
 
+let isKaiOS = true;
+if (navigator.userAgent.toLowerCase().indexOf('kaios') > -1) {
+    isKaiOS = true;
+}
 
 // This is called when preload is done.  This is new 10/16/20 so I can load the manifest nad use it's data.
 function initGame() {
@@ -53,7 +57,7 @@ function initGame() {
     // TEST:UA-150350318-3
     // PROD:UA-150350318-1
     // ******************************************************************************
-    AAKaiAnalytics.initAnalytics(manifest.gid, getUUID());
+    AAKaiAnalytics.initAnalytics(getUUID());
     setTimeout(function () { AAKaiAnalytics.sendUA(); }, 3000);
 
     AAKaiAds.preLoadBannerAd();
@@ -62,11 +66,6 @@ function initGame() {
 
 // NO NEED TO TOUCH ANYTHING PAST HERE ===================================
 // =======================================================================
-
-let isKaiOS = true;
-if (navigator.userAgent.toLowerCase().indexOf('kaios') > -1) {
-    isKaiOS = true;
-}
 
 
 let centerGame = Phaser.Scale.CENTER_HORIZONTALLY;//CENTER_BOTH;

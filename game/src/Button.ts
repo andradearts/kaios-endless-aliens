@@ -26,8 +26,8 @@ class Button extends Phaser.GameObjects.Sprite {
     selectColor = 0x00FF00;
 
     // constructor(_scene, _x, _y, _tex, _upFrame, _callback, theName, hasRollver) {
-    constructor(_scene, _x, _y, _upFrame, _callback, hasRollver) {
-        super(_scene, _x, _y, _upFrame);
+    constructor(_scene, _x, _y, _tex, _upFrame, _callback, hasRollver) {
+        super(_scene, _x, _y, _tex, _upFrame);
         _scene.add.existing(this);
 
         this.rollovedEnabled = hasRollver;

@@ -13,6 +13,17 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var GameScene = /** @class */ (function (_super) {
     __extends(GameScene, _super);
     function GameScene() {
@@ -65,8 +76,16 @@ var GameScene = /** @class */ (function (_super) {
         this.scene.get('MenuOverlay').events.emit('gameover');
         // if (AAPrefs.playAudio == true)
         //     this.sfxEndGame.play();
-        window.navigator.vibrate(300);
+        if (window.navigator.vibrate) {
+            window.navigator.vibrate(300);
+        }
         this.cameras.main.shake(150);
+        if (++gFullscreenAdCount % gShowFullscreenAdEveryX == 0) {
+            gFullscreenAdCount = 0;
+            // Display Fullscreen!
+            AAKaiAds.showFullscreenAd();
+            AAKaiAds.preloadFullscreenAd();
+        }
     };
     GameScene.prototype.setUpSprites = function () {
     };
@@ -91,12 +110,14 @@ var MenuScene = /** @class */ (function (_super) {
         AAKaiAds.preLoadBannerAd();
         this.removeLogo();
         this.scene.sendToBack();
+        this.add.image(this.game.canvas.width / 2, this.game.canvas.height / 2, kSPRITE_ATLAS, "title.png").setOrigin(.5);
         var vy = this.sys.canvas.height - 17;
         var vx = 12;
         this.add.text(12, this.sys.canvas.height - 17, gGameVersion, { "fontSize": "12px" });
         var mo = this.scene.get('MenuOverlay');
         mo.showMenuSceneButtons(function () { });
-        this.scene.get('MenuOverlay').showScores(true);
+        mo.showScores(true);
+        // (<MenuOverlay>this.scene.get('MenuOverlay')).showScores(true);
     };
     MenuScene.prototype.removeLogo = function () {
         var element = document.getElementsByClassName('loader')[0];
@@ -106,7 +127,7 @@ var MenuScene = /** @class */ (function (_super) {
             var timer = setInterval(function () {
                 clearInterval(timer);
                 element.remove();
-            }, 2000);
+            }, 500);
         }
     };
     return MenuScene;
@@ -168,20 +189,19 @@ var MenuOverlay = /** @class */ (function (_super) {
             if (theKeyEvent.key == "Backspace") {
                 theKeyEvent.preventDefault();
             }
-        }
-        switch (theKeyEvent.key) {
-            case "1": //help
-            case "2": //moregames 
-            case "3": //sound
-            case "4": //settings
-            case "5": //play
-            case "#": //fullscreen
-            case "8": //sponsor
-            case "SoftLeft":
-            case "SoftRight":
-                theKeyEvent.preventDefault();
-                break;
-        }
+        } // switch (theKeyEvent.key) {
+        //     case "1": //help
+        //     case "2": //moregames 
+        //     case "3": //sound
+        //     case "4": //settings
+        //     case "5": //play
+        //     case "#": //fullscreen
+        //     case "8": //sponsor
+        //     case "SoftLeft":
+        //     case "SoftRight":
+        //         theKeyEvent.preventDefault();
+        //         break;
+        // }
     };
     MenuOverlay.prototype.keyup = function (theKeyEvent) {
         if (this.tweeners != 0) {
@@ -208,6 +228,14 @@ var MenuOverlay = /** @class */ (function (_super) {
             // this.action_sponsorButton("up");
             this.visitSponsor();
         }
+        if (theKeyEvent.key == "SoftLeft") {
+            switch (gGameState) {
+                case states.kSTATE_HELP:
+                    // case states.kSTATE_GAMEOVER:
+                    this.action_BtnBack("up");
+                    break;
+            }
+        }
         if (theKeyEvent.key == "Backspace") {
             switch (gGameState) {
                 case states.kSTATE_MENU:
@@ -226,19 +254,19 @@ var MenuOverlay = /** @class */ (function (_super) {
                     break;
             }
         }
-        switch (theKeyEvent.key) {
-            case "1": //help
-            case "2": //moregames 
-            case "3": //sound
-            case "4": //settings
-            case "5": //play
-            case "#": //fullscreen
-            case "8": //sponsor
-            case "SoftRight":
-            case "SoftLeft":
-                theKeyEvent.preventDefault();
-                break;
-        }
+        // switch (theKeyEvent.key) {
+        //     case "1": //help
+        //     case "2": //moregames 
+        //     case "3": //sound
+        //     case "4": //settings
+        //     case "5": //play
+        //     case "#": //fullscreen
+        //     case "8": //sponsor
+        //     case "SoftRight":
+        //     case "SoftLeft":
+        //         theKeyEvent.preventDefault();
+        //         break;
+        // }
     };
     MenuOverlay.prototype.setUpAudio = function () {
         this.sfxButton = this.sound.add('button');
@@ -277,6 +305,7 @@ var MenuOverlay = /** @class */ (function (_super) {
             if (AAKaiAds.fullscreenAdLoaded) {
                 if (++gFullscreenAdCount == gShowFullscreenAdEveryX) {
                     AAKaiAds.showFullscreenAd();
+                    gFullscreenAdCount = 0;
                 }
             }
         }
@@ -356,37 +385,36 @@ var MenuOverlay = /** @class */ (function (_super) {
     // **************************************************************************
     MenuOverlay.prototype.setUpUI = function () {
         // this.buttonY = 276;
-        this.add.image(0, 0, kIMG_BG).setOrigin(0);
-        this.logo = this.add.image(this.game.canvas.width / 2, this.game.canvas.height + 100, kIMG_LOGO).setAlpha(.25);
+        this.logo = this.add.image(this.game.canvas.width / 2, this.game.canvas.height + 100, kSPRITE_ATLAS, kIMG_LOGO).setAlpha(.25);
         this.logo.setData('homeY', this.game.canvas.height - 25);
         var isVis = true;
         var numBadge;
         // Play Button #######################################################################
-        this.btnPlay = new Button(this, 0, 0, kBTN_PLAY, this.action_BtnPlay, true).setVisible(isVis);
+        this.btnPlay = new Button(this, 0, 0, kSPRITE_ATLAS, kBTN_PLAY, this.action_BtnPlay, true).setVisible(isVis);
         this.btnPlay.setData('homeY', this.buttonY - 25);
         // Sound Button #######################################################################
         var whichButton = kBTN_SOUND_OFF;
         // if (AAPrefs.playAudio) {
         //     whichButton = kBTN_SOUND_ON;
         // }
-        this.btnSound = new Button(this, 0, 5, kBTN_SOUND_ON, this.action_btnSound, true).setVisible(isVis);
+        this.btnSound = new Button(this, 0, 5, kSPRITE_ATLAS, kBTN_SOUND_ON, this.action_btnSound, true).setVisible(isVis);
         this.btnSound.setData('homeY', this.buttonY);
         // Help Button #######################################################################
         whichButton = kBTN_HELP;
-        this.btnHelp = new Button(this, 0, 5, whichButton, this.action_BtnHelp, true).setVisible(true);
+        this.btnHelp = new Button(this, 0, 5, kSPRITE_ATLAS, whichButton, this.action_BtnHelp, true).setVisible(true);
         this.btnHelp.setData('homeY', this.buttonY);
-        this.btnBack = new Button(this, 10, this.game.canvas.height, kBTN_BACK, this.action_BtnBack, true).setVisible(true);
+        this.btnBack = new Button(this, 10, this.game.canvas.height, kSPRITE_ATLAS, kBTN_BACK, this.action_BtnBack, true).setVisible(true);
         this.btnBack.setOrigin(0);
         // Reset Button #######################################################################
-        this.btnResetGame = new Button(this, 40, this.cameras.main.height + 25, kBTN_RESET_GAME, this.action_btnResetGame, true);
+        this.btnResetGame = new Button(this, 40, this.cameras.main.height + 25, kSPRITE_ATLAS, kBTN_RESET_GAME, this.action_btnResetGame, true);
         //.setVisible(true);
         // DISPLAY BUTTONS #######################################################
         // #######################################################################
         AAFunctions.displayButtons([this.btnHelp, this.btnPlay, this.btnSound], this.cameras.main, this.game.canvas.height + 100, -25);
-        this.audioOffImage = this.add.image(this.btnSound.x, this.btnSound.y, kBTN_SOUND_OFF).setVisible(!AAPrefs.playAudio);
+        this.audioOffImage = this.add.image(this.btnSound.x, this.btnSound.y, kSPRITE_ATLAS, kBTN_SOUND_OFF).setVisible(!AAPrefs.playAudio);
         this.buttons = [this.btnHelp, this.btnPlay, this.btnSound];
         // GameOver Sprite #######################################################################
-        this.gameoverSprite = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, kIMG_GAMEOVER).setVisible(false);
+        this.gameoverSprite = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, kSPRITE_ATLAS, kIMG_GAMEOVER).setVisible(false);
         // This is the main div holding the score and high score text
         this.scoresDom = document.getElementById('scores');
         this.scoresDom.style.opacity = "1";
@@ -515,6 +543,8 @@ var MenuOverlay = /** @class */ (function (_super) {
                 case states.kSTATE_GAMEOVER:
                     this.hideBackButton(function () {
                         _this_1.gameoverSprite.setVisible(false);
+                        //this.scene.switch("MenuScene")
+                        _this_1.scene.get("GameScene").scene.stop("GameScene");
                         _this_1.scene.get("GameScene").scene.start("MenuScene");
                     });
                     AAKaiAnalytics.sendEvent("back-gameover");
@@ -522,6 +552,7 @@ var MenuOverlay = /** @class */ (function (_super) {
                 case states.kSTATE_HELP:
                     this.hideBackButton(function () {
                         _this_1.gameoverSprite.setVisible(false);
+                        _this_1.scene.get("MenuScene").scene.stop("HelpScene");
                         _this_1.scene.get("GameScene").scene.start("MenuScene");
                     });
                     AAKaiAnalytics.sendEvent("back-help");
@@ -546,6 +577,7 @@ var MenuOverlay = /** @class */ (function (_super) {
                     this.gameoverSprite.setVisible(false);
                     this.hideBackButton(function () {
                         _this_1.hideMenuSceneButtons(function () {
+                            _this_1.scene.get("MenuScene").scene.stop("GameScene");
                             _this_1.scene.get("MenuScene").scene.start("HelpScene");
                             gGameState = states.kSTATE_HELP;
                         });
@@ -731,21 +763,11 @@ var PreloadScene = /** @class */ (function (_super) {
             probar.style.width = f.toString() + "px";
         }, this);
         this.load.on('complete', function () {
-            console.log(this.load.progress);
             probar.style.opacity = "0";
             AAFunctions.fade(this, "out", 100, this.goToGameScene, gLogoDisplayLength);
         }, this);
         // *** LOAD ASSETS ***
         this.load.json('manifest', 'manifest.webapp');
-        // SVG Menu Items
-        this.load.setPath("assets/svg/");
-        this.load.svg(kBTN_PLAY, "btnPlay.svg", { width: 81, height: 40 });
-        this.load.svg(kBTN_BACK, "btnBackBottom.svg", { width: 65, height: 19 });
-        this.load.svg(kBTN_HELP, "btnHelp.svg", { width: 55, height: 31 });
-        this.load.svg(kBTN_SOUND_OFF, "btnSoundOff.svg", { width: 55, height: 31 });
-        this.load.svg(kBTN_SOUND_ON, "btnSoundOn.svg", { width: 55, height: 31 });
-        this.load.svg("btnResetGame", "btnResetGame.svg", { width: 56, height: 15 });
-        this.load.svg(kIMG_GAMEOVER, "gameover.svg", { width: 196, height: 62 });
         // Spritesheets
         this.load.setPath("assets/images/");
         this.load.image(kIMG_BG, "bg.png");
@@ -789,6 +811,10 @@ var HelpScene = /** @class */ (function (_super) {
 var kTESTMODE = 1; /* set to 0 for real ads */
 var gGameName = "_TEMPLATE_";
 var gGameVersion = "1.0.0";
+// GOOGLE  -- ALSO ADD TO INDEX.HTML !!!!!!!
+// UNIQUE TO EVERY GAME TEMPLATE ID IS taaragames.com for testing
+var measurement_id = "G-NG6FFXYDP5";
+var api_secret = "x8Mm4cF4Rjy4mIqI1KqRpg";
 //used for arcade debug and console.logs()
 var kDEBUG = false;
 var gSHOW_FPS = false; // this can be dynamically set
@@ -796,7 +822,7 @@ var gBannerAdDuration = 1000 * 30;
 var gUseBanner = true;
 var gUseFullscreenAd = false;
 var gShowFullscreenAdEveryX = 5;
-var gFullscreenAdCount = 0;
+var gFullscreenAdCount = 3;
 // END CHANGE * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // ******************************************************************************
 // ******************************************************************************
@@ -816,17 +842,17 @@ var gamePrefsFile = "games.taara." + gGameName + ".prefs";
 // MAIN ATLAS
 var kSPRITE_ATLAS = 'spriteatlas2';
 // BUTTONS
-var kBTN_BACK = 'btnBackBottom';
-var kBTN_PLAY = 'btnPlay';
-var kBTN_SOUND_OFF = 'btnSoundOff';
-var kBTN_SOUND_ON = 'btnSoundOn';
-var kBTN_HELP = 'btnHelp';
-var kBTN_RESET_GAME = 'btnRestart';
-var kBTN_SPONSOR = 'btnSponsor';
+var kBTN_BACK = 'btnBackBottom.png';
+var kBTN_PLAY = 'btnPlay.png';
+var kBTN_SOUND_OFF = 'btnSoundOff.png';
+var kBTN_SOUND_ON = 'btnSound.png';
+var kBTN_HELP = 'btnHelp.png';
+var kBTN_RESET_GAME = 'btnRestart.png';
+var kBTN_SPONSOR = 'btnSponsor.png';
 // UI SPRITES
 var kIMG_BG = 'purpBG';
-var kIMG_GAMEOVER = "gameoverSprite";
-var kIMG_LOGO = "taara-logo";
+var kIMG_GAMEOVER = "gameover.png";
+var kIMG_LOGO = "taara-logo.png";
 var kIMG_HELP = 'help.png';
 var debug_log;
 if (kDEBUG)
@@ -1539,138 +1565,204 @@ var AAHighScores;
     // }
 })(AAHighScores || (AAHighScores = {}));
 // Google analytics engine to anon track user engagment
-//
-// Events show up in real time.
-// !IMPORTANT --> Events can take up to 48 hours to show up in the behaviors section
-//
-// This code was modified from definityTyped.org typscript repo
-//
-// It's best to create a new property per game.
-//
+// https://developers.google.com/analytics/devguides/collection/protocol/ga4/sending-events?client_type=gtag
 var AAKaiAnalytics;
 (function (AAKaiAnalytics) {
-    AAKaiAnalytics.gaNewElem = {};
-    AAKaiAnalytics.gaElems = {};
-    AAKaiAnalytics.gameName = '';
-    var _googleID;
-    function getDeviceData() {
-        var myOwnRegex = [[/(kaios)\/([\w\.]+)/i], [window.UAParser.BROWSER.NAME, window.UAParser.BROWSER.VERSION]];
-        var parser = new window.UAParser({ browser: myOwnRegex });
-        var vendor = parser.getDevice().vendor;
-        var model = parser.getDevice().model;
-        var os;
-        os = parser.getBrowser();
-        if (vendor == null) {
-            vendor = 'unknown';
-        }
-        if (os == null) {
-            os = 'unknown';
-        }
-        if (model == null) {
-            model = 'unknown';
-        }
-        AAKaiAnalytics.sendSpecial("vendor", vendor + " " + model);
-        AAKaiAnalytics.sendSpecial("KaiOS", os.version);
-    }
-    AAKaiAnalytics.getDeviceData = getDeviceData;
     function sendUA() {
-        var ua = escape(window.navigator.userAgent);
-        var pageName = escape(gGameName); //location.pathname.substring(location.pathname.lastIndexOf("/") + 1);
-        var data = 'v=1&t=event&tid=' + this._googleID + '&cid=' + escape(this.cid) + '&ec=' + escape("User Agent") + '&ea=' + escape(window.navigator.userAgent) + "&dp=" + escape(pageName);
-        var http = new window.XMLHttpRequest();
-        http.mozAnon = true;
-        http.mozSystem = true;
-        var url = 'https://www.google-analytics.com/collect?';
-        var params = data;
-        http.open('POST', url, true);
-        //Send the proper header information along with the request
-        http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-        http.onreadystatechange = function () {
-            // if (http.readyState == 4 && http.status == 200) {
-            //   console.log(http.responseText);
-            // }else{
-            //   console.error(http.responseText);
-            // }
-        };
-        http.send(params);
+        if (navigator.userAgent.toLowerCase().indexOf('kaios') > -1) {
+            var _data = parseUA(window.navigator.userAgent);
+            var moz = Object.keys(_data)[0];
+            var it = _data[moz];
+            var phone = Object.keys(it)[1];
+            var kaios_version = _data["KAIOS"]["version"];
+            sendEvent("device", { "phone": phone, "kaios_version": kaios_version });
+        }
     }
     AAKaiAnalytics.sendUA = sendUA;
-    function initAnalytics(googleID, _uid) {
-        this._googleID = googleID;
+    function initAnalytics(_uid) {
         this.cid = _uid;
-        var http = new window.XMLHttpRequest();
-        http.mozAnon = true;
-        http.mozSystem = true;
-        var url = 'https://www.google-analytics.com/collect?';
-        // var params = 'v=1&t=pageview&tid='+ googleID +'&cid='+this.cid+'&dh=taara.games&dp='+ gGameName +'&dt='+gGameState;
-        var pageName = escape(gGameName); //location.pathname.substring(location.pathname.lastIndexOf("/") + 1);
-        var params = 'v=1&t=pageview&tid=' + googleID + '&cid=' + escape(this.cid) + '&dt=' + escape(gGameName) + '&an=' + escape(gGameName) + '&av=' + escape(gGameVersion) + "&dp=" + pageName;
-        // + "&cn=kaiosapp";
-        http.open('POST', url, true);
-        //console.log(url + params);
-        //Send the proper header information along with the request
-        http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-        http.onreadystatechange = function () {
-            if (http.readyState == 4 && http.status == 200) {
-                //console.log(http.responseText);
-                AAKaiAnalytics.sendUA();
-            }
-        };
-        http.send(params);
+        // AAKaiAnalytics.sendUA();
     }
     AAKaiAnalytics.initAnalytics = initAnalytics;
-    function sendEvent(_action, _value) {
-        // gtag('event', escape(_action), {
-        //   event_category:  escape(gGameName),
-        //   event_label: escape(gGameName)
-        // });
-        if (_value === void 0) { _value = 0; }
-        debug_log(_action);
-        var pageName = escape(gGameName); //;//location.pathname.substring(location.pathname.lastIndexOf("/") + 1);
-        var data = 'v=1&t=event&tid=' + this._googleID + '&cid=' + escape(this.cid) + '&ec=' + escape(gGameName)
-            + '&el=' + escape(gGameName) + '&ea=' + escape(_action) + '&an=' + escape(gGameName) + '&av=' + escape(gGameVersion) + "&dp=" + escape(pageName);
-        //+ "&cn=kaiosapp"
-        //'&ev='+_value+
-        //'&el='+gGameVersion
-        var http = new window.XMLHttpRequest();
-        http.mozAnon = true;
-        http.mozSystem = true;
-        var url = 'https://www.google-analytics.com/collect?';
-        var params = data;
-        http.open('POST', url, true);
-        //Send the proper header information along with the request
-        http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-        http.onreadystatechange = function () {
-            if (http.readyState == 4 && http.status == 200) {
-                //console.log(http.responseText);
-            }
-        };
-        http.send(params);
+    function sendEvent(_action, _params) {
+        // if (kDEBUG == true){
+        //   return
+        // }
+        // if (navigator.userAgent.toLowerCase().indexOf('kaios') > -1) {
+        if (_params === void 0) { _params = {}; }
+        //   fetch(`https://www.google-analytics.com/mp/collect?measurement_id=${measurement_id}&api_secret=${api_secret}`, {
+        //     method: "POST",
+        //     body: JSON.stringify({
+        //       client_id: this.cid,
+        //       events: [{
+        //         name: _action,
+        //         params: _params,
+        //       }]
+        //     })
+        //   });
+        // }
     }
     AAKaiAnalytics.sendEvent = sendEvent;
-    // non interact is implied here.
-    function sendSpecial(_action, _label, _value) {
-        if (_value === void 0) { _value = 0; }
-        var pageName = escape(gGameName); //gGameName;//location.pathname.substring(location.pathname.lastIndexOf("/") + 1);
-        var data = 'v=1&t=event&ni=1&tid=' + this._googleID + '&cid=' + this.cid + '&ec=' + escape(gGameName) + '&ea=' + escape(_action) + '&el=' + escape(_label) + '&ev=' + _value + '&an=' + escape(gGameName) + '&av=' + escape(gGameVersion) + "&dp=" + escape(pageName);
-        // + "&cn=kaiosapp"
-        var http = new window.XMLHttpRequest();
-        http.mozAnon = true;
-        http.mozSystem = true;
-        var url = 'https://www.google-analytics.com/collect?';
-        var params = data;
-        http.open('POST', url, true);
-        //Send the proper header information along with the request
-        http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-        http.onreadystatechange = function () {
-            // if (http.readyState == 4 && http.status == 200) {
-            //    console.log(http.responseText);
-            // }
+    var parseUA = (function () {
+        //useragent strings are just a set of phrases each optionally followed by a set of properties encapsulated in paretheses
+        var part = /\s*([^\s/]+)(\/(\S+)|)(\s+\(([^)]+)\)|)/g;
+        //these properties are delimited by semicolons
+        var delim = /;\s*/;
+        //the properties may be simple key-value pairs if;
+        var single = [
+            //it is a single comma separation,
+            /^([^,]+),\s*([^,]+)$/,
+            //it is a single space separation,
+            /^(\S+)\s+(\S+)$/,
+            //it is a single colon separation,
+            /^([^:]+):([^:]+)$/,
+            //it is a single slash separation
+            /^([^/]+)\/([^/]+)$/,
+            //or is a special string
+            /^(.NET CLR|Windows)\s+(.+)$/
+        ];
+        //otherwise it is unparsable because everyone does it differently, looking at you iPhone
+        var many = / +/;
+        //oh yeah, bots like to use links
+        var link = /^\+(.+)$/;
+        var inner = function (properties, property) {
+            var tmp;
+            if (tmp = property.match(link)) {
+                properties.link = tmp[1];
+            }
+            else if (tmp = single.reduce(function (match, regex) { return (match || property.match(regex)); }, null)) {
+                properties[tmp[1]] = tmp[2];
+            }
+            else if (many.test(property)) {
+                if (!properties.properties)
+                    properties.properties = [];
+                properties.properties.push(property);
+            }
+            else {
+                properties[property] = true;
+            }
+            return properties;
         };
-        http.send(params);
-    }
-    AAKaiAnalytics.sendSpecial = sendSpecial;
+        return function (input) {
+            var output = {};
+            for (var match = void 0; match = part.exec(input); '') {
+                output[match[1]] = __assign(__assign({}, (match[5] && match[5].split(delim).reduce(inner, {}))), (match[3] && { version: match[3] }));
+            }
+            return output;
+        };
+    })();
 })(AAKaiAnalytics || (AAKaiAnalytics = {})); //end module
+// export function sendEvent_old(_action: string, _value = 0) {
+//   // gtag('event', escape(_action), {
+//   //   event_category:  escape(gGameName),
+//   //   event_label: escape(gGameName)
+//   // });
+//   debug_log(_action)
+//   let pageName = escape(gGameName);//;//location.pathname.substring(location.pathname.lastIndexOf("/") + 1);
+//   let data = 'v=1&t=event&tid=' + this._googleID + '&cid=' + escape(this.cid) + '&ec=' + escape(gGameName) 
+//   + '&el=' + escape(gGameName) + '&ea=' + escape(_action) + '&an=' + escape(gGameName) + '&av=' + escape(gGameVersion) + "&dp=" + escape(pageName) 
+//   //+ "&cn=kaiosapp"
+//   //'&ev='+_value+
+//   //'&el='+gGameVersion
+//   var http = new window.XMLHttpRequest();
+//   (<any>http).mozAnon = true;
+//   (<any>http).mozSystem = true;
+//   var url = 'https://www.google-analytics.com/collect?';
+//   var params = data;
+//   http.open('POST', url, true);
+//   //Send the proper header information along with the request
+//   http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+//   http.onreadystatechange = function () {//Call a function when the state changes.
+//     if (http.readyState == 4 && http.status == 200) {
+//        //console.log(http.responseText);
+//     }
+//   }
+//   http.send(params);
+// }
+// non interact is implied here.
+// export function sendSpecial(_action: string, _label: string, _value = 0) {
+//   let pageName =  escape(gGameName);//gGameName;//location.pathname.substring(location.pathname.lastIndexOf("/") + 1);
+//   let data = 'v=1&t=event&ni=1&tid=' + this._googleID + '&cid=' + this.cid + '&ec=' + escape(gGameName) + '&ea=' + escape(_action) + '&el=' + escape(_label) + '&ev=' + _value + '&an=' + escape(gGameName) + '&av=' + escape(gGameVersion) + "&dp=" + escape(pageName)
+//   // + "&cn=kaiosapp"
+//   var http = new window.XMLHttpRequest();
+//   (<any>http).mozAnon = true;
+//   (<any>http).mozSystem = true;
+//   var url = 'https://www.google-analytics.com/collect?';
+//   var params = data;
+//   http.open('POST', url, true);
+//   //Send the proper header information along with the request
+//   http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+//   http.onreadystatechange = function () {//Call a function when the state changes.
+//     // if (http.readyState == 4 && http.status == 200) {
+//     //    console.log(http.responseText);
+//     // }
+//   }
+//   http.send(params);
+// }
+// old init
+// var http = new window.XMLHttpRequest();
+// (<any>http).mozAnon = true;
+// (<any>http).mozSystem = true;
+// var url = 'https://www.google-analytics.com/collect?';
+// // var params = 'v=1&t=pageview&tid='+ googleID +'&cid='+this.cid+'&dh=taara.games&dp='+ gGameName +'&dt='+gGameState;
+// let pageName = escape(gGameName);//location.pathname.substring(location.pathname.lastIndexOf("/") + 1);
+// var params = 'v=1&t=pageview&tid=' + googleID + '&cid=' + escape(this.cid) + '&dt=' + escape(gGameName) + '&an=' + escape(gGameName) + '&av=' + escape(gGameVersion) + "&dp=" + pageName
+// // + "&cn=kaiosapp";
+// http.open('POST', url, true);
+// console.log(url + params);
+// //Send the proper header information along with the request
+// http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+// http.onreadystatechange = function () {//Call a function when the state changes.
+//   if (http.readyState == 4 && http.status == 200) {
+//     //console.log(http.responseText);
+//     AAKaiAnalytics.sendUA();
+//   }
+// }
+// http.send(params);
+// console.log(`phone=${phone}, v=${kaios_version}`)
+// console.log(parseUA("Mozilla/5.0 (Mobile; N139DL; rv:84.0) Gecko/84.0 Firefox/84.0 KAIOS/3.1"));
+// console.log( "window.navigator.userAgent" )
+// sendEvent("device",{ "device": window.navigator.userAgent } );
+// sendEvent("device",{"test":"test"} );
+// let ua = escape(window.navigator.userAgent);
+// let pageName =  escape(gGameName);//location.pathname.substring(location.pathname.lastIndexOf("/") + 1);
+// let data = 'v=1&t=event&tid=' + this._googleID + '&cid=' + escape(this.cid) + '&ec=' + escape("User Agent") + '&ea=' + escape(window.navigator.userAgent) + "&dp=" + escape(pageName)
+// var http = new window.XMLHttpRequest();
+// (<any>http).mozAnon = true;
+// (<any>http).mozSystem = true;
+// var url = 'https://www.google-analytics.com/collect?';
+// var params = data;
+// http.open('POST', url, true);
+// //Send the proper header information along with the request
+// http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+// http.onreadystatechange = function () {//Call a function when the state changes.
+//   // if (http.readyState == 4 && http.status == 200) {
+//   //   console.log(http.responseText);
+//   // }else{
+//   //   console.error(http.responseText);
+//   // }
+// }
+// http.send(params);
+// let _googleID;
+// export function getDeviceData() {
+//   var myOwnRegex = [[/(kaios)\/([\w\.]+)/i], [(<any>window).UAParser.BROWSER.NAME, (<any>window).UAParser.BROWSER.VERSION]];
+//   var parser = new (<any>window).UAParser({ browser: myOwnRegex });
+//   var vendor = parser.getDevice().vendor;
+//   var model = parser.getDevice().model;
+//   var os;
+//   os = parser.getBrowser();
+//   if (vendor == null) {
+//     vendor = 'unknown';
+//   }
+//   if (os == null) {
+//     os = 'unknown';
+//   }
+//   if (model == null) {
+//     model = 'unknown';
+//   }
+//   AAKaiAnalytics.sendSpecial("vendor", vendor + " " + model);
+//   AAKaiAnalytics.sendSpecial("KaiOS", os.version);
+// }
 /// <reference path="../../phaser.d.ts" />
 /// <reference path='GameScene.ts'/>
 /// <reference path='MenuScene.ts'/>
@@ -1689,6 +1781,10 @@ var AAKaiAnalytics;
 // ******************************************************************************
 // INIT GAME
 // ******************************************************************************
+var isKaiOS = true;
+if (navigator.userAgent.toLowerCase().indexOf('kaios') > -1) {
+    isKaiOS = true;
+}
 // This is called when preload is done.  This is new 10/16/20 so I can load the manifest nad use it's data.
 function initGame() {
     manifest = game.cache.json.get('manifest');
@@ -1714,16 +1810,12 @@ function initGame() {
     // TEST:UA-150350318-3
     // PROD:UA-150350318-1
     // ******************************************************************************
-    AAKaiAnalytics.initAnalytics(manifest.gid, getUUID());
+    AAKaiAnalytics.initAnalytics(getUUID());
     setTimeout(function () { AAKaiAnalytics.sendUA(); }, 3000);
     AAKaiAds.preLoadBannerAd();
 }
 // NO NEED TO TOUCH ANYTHING PAST HERE ===================================
 // =======================================================================
-var isKaiOS = true;
-if (navigator.userAgent.toLowerCase().indexOf('kaios') > -1) {
-    isKaiOS = true;
-}
 var centerGame = Phaser.Scale.CENTER_HORIZONTALLY; //CENTER_BOTH;
 var myScale;
 myScale = {
@@ -1839,8 +1931,8 @@ function showBanner() {
 var Button = /** @class */ (function (_super) {
     __extends(Button, _super);
     // constructor(_scene, _x, _y, _tex, _upFrame, _callback, theName, hasRollver) {
-    function Button(_scene, _x, _y, _upFrame, _callback, hasRollver) {
-        var _this = _super.call(this, _scene, _x, _y, _upFrame) || this;
+    function Button(_scene, _x, _y, _tex, _upFrame, _callback, hasRollver) {
+        var _this = _super.call(this, _scene, _x, _y, _tex, _upFrame) || this;
         _this.clicked = false;
         _this.isSelected = false;
         // #UP,#DOWN or #BOTH

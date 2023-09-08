@@ -75,11 +75,19 @@ class GameScene extends Phaser.Scene {
 
         // if (AAPrefs.playAudio == true)
         //     this.sfxEndGame.play();
-
-        window.navigator.vibrate(300);
+        if (window.navigator.vibrate){
+            window.navigator.vibrate(300);
+        }
         this.cameras.main.shake(150);
 
-
+        if (++gFullscreenAdCount % gShowFullscreenAdEveryX == 0) {
+            gFullscreenAdCount = 0
+            // Display Fullscreen!
+            AAKaiAds.showFullscreenAd();
+            AAKaiAds.preloadFullscreenAd();
+        }else{
+             showBanner()
+        }
        
     }
 

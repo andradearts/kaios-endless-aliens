@@ -16,6 +16,8 @@ class MenuScene extends Phaser.Scene {
         
         this.scene.sendToBack();
        
+        this.add.image(this.game.canvas.width/2,this.game.canvas.height/2,kSPRITE_ATLAS, "title.png").setOrigin(.5)
+
         let vy = this.sys.canvas.height - 17;
         let vx = 12;
        
@@ -23,7 +25,8 @@ class MenuScene extends Phaser.Scene {
 
         let mo = this.scene.get('MenuOverlay');
         (<MenuOverlay>mo).showMenuSceneButtons(()=>{});
-        (<MenuOverlay>this.scene.get('MenuOverlay')).showScores(true);
+        (<MenuOverlay>mo).showScores(true);
+        // (<MenuOverlay>this.scene.get('MenuOverlay')).showScores(true);
     }
 
     removeLogo() {
@@ -35,7 +38,7 @@ class MenuScene extends Phaser.Scene {
             var timer = setInterval(function () {
                 clearInterval(timer);
                 (<any>element).remove();
-            }, 2000);
+            }, 500);
         }
     }
 }

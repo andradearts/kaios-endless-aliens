@@ -102,26 +102,30 @@ class MenuOverlay extends Phaser.Scene {
             return;
         }
 
+        if (gGameState == states.kSTATE_GAMEOVER_DELAY){
+            gGameState = states.kSTATE_GAMEOVER
+        }
+
         if (gGameState != states.kSTATE_MENU) {
             if (theKeyEvent.key == "Backspace") {
                 theKeyEvent.preventDefault();
             }
-        }
+        } // switch (theKeyEvent.key) {
+        //     case "1": //help
+        //     case "2": //moregames 
+        //     case "3": //sound
+        //     case "4": //settings
+        //     case "5": //play
+        //     case "#": //fullscreen
+        //     case "8": //sponsor
+        //     case "SoftLeft":
+        //     case "SoftRight":
+        //         theKeyEvent.preventDefault();
+        //         break;
 
-        switch (theKeyEvent.key) {
-            case "1": //help
-            case "2": //moregames 
-            case "3": //sound
-            case "4": //settings
-            case "5": //play
-            case "#": //fullscreen
-            case "8": //sponsor
-            case "SoftLeft":
-            case "SoftRight":
-                theKeyEvent.preventDefault();
-                break;
+        // }
 
-        }
+       
     }
 
     keyup(theKeyEvent) {
@@ -135,6 +139,7 @@ class MenuOverlay extends Phaser.Scene {
 
             case states.kSTATE_MENU:
             case states.kSTATE_GAMEOVER:
+            case states.kSTATE_GAMEOVER_DELAY:
                 this.checkMenuControls(theKey);
                 break;
 
@@ -157,6 +162,16 @@ class MenuOverlay extends Phaser.Scene {
             // this.action_sponsorButton("up");
             this.visitSponsor();
         }
+        if (theKeyEvent.key == "SoftLeft") {
+            switch (gGameState) {
+                case states.kSTATE_HELP:
+                // case states.kSTATE_GAMEOVER:
+                    this.action_BtnBack("up")
+                break;
+
+            }
+            
+        }
 
         if (theKeyEvent.key == "Backspace") {
             switch (gGameState) {
@@ -168,6 +183,7 @@ class MenuOverlay extends Phaser.Scene {
                     // }
                     break;
                 case states.kSTATE_GAMEOVER:
+                case states.kSTATE_GAMEOVER_DELAY:
                 case states.kSTATE_PLAYING:
                     this.showResetButton(false);
                     this.playBackSnd();
@@ -179,21 +195,21 @@ class MenuOverlay extends Phaser.Scene {
             }
         }
 
-        switch (theKeyEvent.key) {
+        // switch (theKeyEvent.key) {
 
-            case "1": //help
-            case "2": //moregames 
-            case "3": //sound
-            case "4": //settings
-            case "5": //play
-            case "#": //fullscreen
-            case "8": //sponsor
-            case "SoftRight":
-            case "SoftLeft":
-                theKeyEvent.preventDefault();
-                break;
+        //     case "1": //help
+        //     case "2": //moregames 
+        //     case "3": //sound
+        //     case "4": //settings
+        //     case "5": //play
+        //     case "#": //fullscreen
+        //     case "8": //sponsor
+        //     case "SoftRight":
+        //     case "SoftLeft":
+        //         theKeyEvent.preventDefault();
+        //         break;
 
-        }
+        // }
     }
 
     setUpAudio() {
@@ -244,6 +260,7 @@ class MenuOverlay extends Phaser.Scene {
             if (AAKaiAds.fullscreenAdLoaded) {
                 if (++gFullscreenAdCount == gShowFullscreenAdEveryX) {
                     AAKaiAds.showFullscreenAd();
+                    gFullscreenAdCount = 0;
                 }
             }
         }
@@ -327,6 +344,10 @@ class MenuOverlay extends Phaser.Scene {
                 break;
             case "Enter":
             case "5":
+                if (gGameState == states.kSTATE_GAMEOVER_DELAY){
+                    gGameState = states.kSTATE_GAMEOVER
+                    return;
+                }
                 this.btnPlay.pointerUp(null);
                 break;
         }
@@ -342,16 +363,16 @@ class MenuOverlay extends Phaser.Scene {
 
         // this.buttonY = 276;
 
-        this.add.image(0, 0, kIMG_BG).setOrigin(0)
+       
 
-        this.logo = this.add.image(this.game.canvas.width / 2, this.game.canvas.height + 100, kIMG_LOGO).setAlpha(.25);
+        this.logo = this.add.image(this.game.canvas.width / 2, this.game.canvas.height + 100, kSPRITE_ATLAS, kIMG_LOGO).setAlpha(.25);
         this.logo.setData('homeY', this.game.canvas.height - 25)
 
         let isVis = true;
         let numBadge;
 
         // Play Button #######################################################################
-        this.btnPlay = new Button(this, 0, 0, kBTN_PLAY, this.action_BtnPlay, true).setVisible(isVis);
+        this.btnPlay = new Button(this, 0, 0, kSPRITE_ATLAS, kBTN_PLAY, this.action_BtnPlay, true).setVisible(isVis);
         this.btnPlay.setData('homeY', this.buttonY - 25);
         // Sound Button #######################################################################
 
@@ -360,19 +381,19 @@ class MenuOverlay extends Phaser.Scene {
         //     whichButton = kBTN_SOUND_ON;
         // }
 
-        this.btnSound = new Button(this, 0, 5, kBTN_SOUND_ON, this.action_btnSound, true).setVisible(isVis);
+        this.btnSound = new Button(this, 0, 5, kSPRITE_ATLAS, kBTN_SOUND_ON, this.action_btnSound, true).setVisible(isVis);
         this.btnSound.setData('homeY', this.buttonY);
         // Help Button #######################################################################
 
         whichButton = kBTN_HELP;
-        this.btnHelp = new Button(this, 0, 5, whichButton, this.action_BtnHelp, true).setVisible(true);
+        this.btnHelp = new Button(this, 0, 5, kSPRITE_ATLAS, whichButton, this.action_BtnHelp, true).setVisible(true);
         this.btnHelp.setData('homeY', this.buttonY);
 
-        this.btnBack = new Button(this, 10, this.game.canvas.height, kBTN_BACK, this.action_BtnBack, true).setVisible(true);
+        this.btnBack = new Button(this, 10, this.game.canvas.height, kSPRITE_ATLAS, kBTN_BACK, this.action_BtnBack, true).setVisible(true);
         this.btnBack.setOrigin(0)
 
         // Reset Button #######################################################################
-        this.btnResetGame = new Button(this, 40, this.cameras.main.height + 25, kBTN_RESET_GAME, this.action_btnResetGame, true);
+        this.btnResetGame = new Button(this, 40, this.cameras.main.height + 25, kSPRITE_ATLAS, kBTN_RESET_GAME, this.action_btnResetGame, true);
         //.setVisible(true);
 
 
@@ -381,12 +402,12 @@ class MenuOverlay extends Phaser.Scene {
 
         AAFunctions.displayButtons([this.btnHelp, this.btnPlay, this.btnSound], this.cameras.main, this.game.canvas.height + 100, -25);
       
-        this.audioOffImage = this.add.image(this.btnSound.x, this.btnSound.y, kBTN_SOUND_OFF).setVisible(!AAPrefs.playAudio);
+        this.audioOffImage = this.add.image(this.btnSound.x, this.btnSound.y, kSPRITE_ATLAS,kBTN_SOUND_OFF).setVisible(!AAPrefs.playAudio);
 
         this.buttons = [this.btnHelp, this.btnPlay, this.btnSound];
 
         // GameOver Sprite #######################################################################
-        this.gameoverSprite = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, kIMG_GAMEOVER).setVisible(false);
+        this.gameoverSprite = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, kSPRITE_ATLAS,kIMG_GAMEOVER).setVisible(false);
 
 
 
@@ -557,6 +578,9 @@ class MenuOverlay extends Phaser.Scene {
                 case states.kSTATE_GAMEOVER:
                     this.hideBackButton(() => {
                         this.gameoverSprite.setVisible(false);
+
+                        //this.scene.switch("MenuScene")
+                        this.scene.get("GameScene").scene.stop("GameScene")
                         this.scene.get("GameScene").scene.start("MenuScene");
                     });
 
@@ -565,6 +589,7 @@ class MenuOverlay extends Phaser.Scene {
                 case states.kSTATE_HELP:
                     this.hideBackButton(() => {
                         this.gameoverSprite.setVisible(false);
+                        this.scene.get("MenuScene").scene.stop("HelpScene")
                         this.scene.get("GameScene").scene.start("MenuScene");
                     });
                     AAKaiAnalytics.sendEvent("back-help");
@@ -593,6 +618,7 @@ class MenuOverlay extends Phaser.Scene {
                     this.gameoverSprite.setVisible(false);
                     this.hideBackButton(() => {
                         this.hideMenuSceneButtons(() => {
+                            this.scene.get("MenuScene").scene.stop("GameScene")
                             this.scene.get("MenuScene").scene.start("HelpScene");
                             gGameState = states.kSTATE_HELP;
                         });

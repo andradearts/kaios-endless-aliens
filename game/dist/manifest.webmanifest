@@ -1,26 +1,25 @@
 {
   "lang": "en-US",
-  "id": "Video Poker 3",
-  "name": "Video Poker 3",
-  "short_name": "VideoPoker 3",
-  "description": "Your favorite casino Video Poker game is now on KaiOS! Use the direction pad to place your bet. Press the Enter button to deal. Press the direction pad to select a card to hold.  Pressing the up or down arrow keys or buttons 1-5 will toggle the hold.  Press the Enter button to deal new cards.",
+  "id": "Bubble Bee 3",
+  "name": "Bubble Bee 3",
+  "short_name": "Bubble Bee",
+  "description": "Collect the honey and avoid the flies.  Grab power ups to make you stronger in this re-imagining of the classic game snake.",
   "orientation": "portrait",
   "categories": ["games"],
-  "start_url": "/video-poker-k3.html",
+  "start_url": "/index-v3.html",
   "scope": "/",
   "theme_color": "#FBF200",
   "background_color": "#000000",
-  "version":"3.0.1",
-  "build":"22081201",
-  "gid":"UA-150350318-1",
+  "version":"3.0.0",
+  "build":"23090701",
   "icons": [
     {
-      "src": "assets/icons/icon56.png",
+      "src": "assets/icons/icon-56-v3.png",
       "type": "image/png",
       "sizes": "56x56"
     },
     {
-      "src": "assets/icons/icon112.png",
+      "src": "assets/icons/icon-112-v3.png",
       "type": "image/png",
       "sizes": "112x112"
     }
@@ -28,13 +27,13 @@
   "display": "fullscreen",
   "b2g_features": {
     "dependencies": {
-      "ads-sdk": "1.5.5"
+      "ads-sdk": "1.5.8"
     },
-    "subtitle": "The game everyone loves",
-    "version": "3.0.1",
+    "subtitle": "Collect the honey and avoid the flies.",
+    "version": "3.0.0",
     "developer": {
       "name": "Taara Games",
-      "url": "https://kaios.taara.games"
+      "url": "https://taara.games"
     },
     "type": "privileged",
     "permissions": {

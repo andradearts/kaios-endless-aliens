@@ -1,21 +1,20 @@
 {
-  "version":"1.0.0",
-  "build":"20041401",
-  "gid":"UA-150350318-1",
-  "name": "template",
-  "description": "__DESCRIPTION___",
+  "version":"1.7.0",
+  "build":"23090701",
+  "name": "Bubble Bee",
+  "description": "Collect the honey and avoid the flies.  Grab power ups to make you stronger in this re-imagining of the classic game snake.",
   "scope": "/",
   "launch_path": "/index.html",
    "locales": {
     "en-US": {
-      "name": "template",
-      "subtitle": "__24 chars__",
-      "description":  "Use the direction pad to move the red cursor. Press the center button to start a bubble. Make a chain reaction to wash away all the germs. Wash Your Hands!"
+      "name": "Bubble Bee",
+      "subtitle": "Collect the honey and avoid the flies.",
+      "description":  "Collect the honey and avoid the flies.  Grab power ups to make you stronger in this re-imagining of the classic game snake. "
     }
   },
    "icons": {
-    "56":  "/assets/icons/icon56.png",
-    "112": "/assets/icons/icon112.png"
+    "56":  "/assets/icons/icon-56-v2.png",
+    "112": "/assets/icons/icon-112-v2.png"
   },
   "fullscreen":"true",
   "type": "privileged",
@@ -27,10 +26,12 @@
     "url": "https://taara.games/"
   },
   "permissions": {
-    "systemXHR": {}
+    "systemXHR": {},
+    "mobiledata":{},
+    "wifidata":{}
   },
   "dependencies": {
-		"ads-sdk": "1.4.1"
+		"ads-sdk": "1.5.8"
 	},
   "cursor": "false",
   "default_locale": "en-US",

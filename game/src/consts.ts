@@ -3,6 +3,10 @@ const kTESTMODE = 1; /* set to 0 for real ads */
 var gGameName = "_TEMPLATE_";
 var gGameVersion = "1.0.0";
 
+// GOOGLE  -- ALSO ADD TO INDEX.HTML !!!!!!!
+// UNIQUE TO EVERY GAME TEMPLATE ID IS taaragames.com for testing
+const measurement_id = `G-T3EDZ1P5D0`;
+
 //used for arcade debug and console.logs()
 const kDEBUG = false;
 let gSHOW_FPS = false; // this can be dynamically set
@@ -12,7 +16,7 @@ var gUseBanner = true;
 
 var gUseFullscreenAd = false;
 var gShowFullscreenAdEveryX = 5;
-var gFullscreenAdCount = 0;
+var gFullscreenAdCount = 3;
 
 // END CHANGE * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // ******************************************************************************
@@ -44,19 +48,20 @@ var gamePrefsFile = "games.taara." + gGameName + ".prefs";
 const kSPRITE_ATLAS = 'spriteatlas2';
 
 // BUTTONS
-const kBTN_BACK = 'btnBackBottom';
-const kBTN_PLAY = 'btnPlay';
-const kBTN_SOUND_OFF = 'btnSoundOff';
-const kBTN_SOUND_ON = 'btnSoundOn';
-const kBTN_HELP = 'btnHelp';
-const kBTN_RESET_GAME = 'btnRestart';
-const kBTN_SPONSOR = 'btnSponsor';
+const kBTN_BACK = 'btnBackBottom.png';
+const kBTN_PLAY = 'btnPlay.png';
+const kBTN_SOUND_OFF = 'btnSoundOff.png';
+const kBTN_SOUND_ON = 'btnSound.png';
+const kBTN_HELP = 'btnHelp.png';
+const kBTN_RESET_GAME = 'btnRestart.png';
+const kBTN_SPONSOR = 'btnSponsor.png';
 
 
 // UI SPRITES
 const kIMG_BG = 'purpBG';
-const kIMG_GAMEOVER = "gameoverSprite";
-const kIMG_LOGO = "taara-logo"
+const kIMG_COVER = 'coverart.jpg'
+const kIMG_GAMEOVER = "gameover.png";
+const kIMG_LOGO = "taara-logo.png"
 const kIMG_HELP = 'help.png';
 
 var debug_log;
