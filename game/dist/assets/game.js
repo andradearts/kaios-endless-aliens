@@ -86,6 +86,9 @@ var GameScene = /** @class */ (function (_super) {
             AAKaiAds.showFullscreenAd();
             AAKaiAds.preloadFullscreenAd();
         }
+        else {
+            showBanner();
+        }
     };
     GameScene.prototype.setUpSprites = function () {
     };
@@ -185,6 +188,9 @@ var MenuOverlay = /** @class */ (function (_super) {
         if (this.tweeners != 0) {
             return;
         }
+        if (gGameState == states.kSTATE_GAMEOVER_DELAY) {
+            gGameState = states.kSTATE_GAMEOVER;
+        }
         if (gGameState != states.kSTATE_MENU) {
             if (theKeyEvent.key == "Backspace") {
                 theKeyEvent.preventDefault();
@@ -211,6 +217,7 @@ var MenuOverlay = /** @class */ (function (_super) {
         switch (gGameState) {
             case states.kSTATE_MENU:
             case states.kSTATE_GAMEOVER:
+            case states.kSTATE_GAMEOVER_DELAY:
                 this.checkMenuControls(theKey);
                 break;
             case states.kSTATE_PLAYING:
@@ -245,6 +252,7 @@ var MenuOverlay = /** @class */ (function (_super) {
                     // }
                     break;
                 case states.kSTATE_GAMEOVER:
+                case states.kSTATE_GAMEOVER_DELAY:
                 case states.kSTATE_PLAYING:
                     this.showResetButton(false);
                     this.playBackSnd();
@@ -376,6 +384,10 @@ var MenuOverlay = /** @class */ (function (_super) {
                 break;
             case "Enter":
             case "5":
+                if (gGameState == states.kSTATE_GAMEOVER_DELAY) {
+                    gGameState = states.kSTATE_GAMEOVER;
+                    return;
+                }
                 this.btnPlay.pointerUp(null);
                 break;
         }
@@ -410,7 +422,16 @@ var MenuOverlay = /** @class */ (function (_super) {
         //.setVisible(true);
         // DISPLAY BUTTONS #######################################################
         // #######################################################################
-        AAFunctions.displayButtons([this.btnHelp, this.btnPlay, this.btnSound], this.cameras.main, this.game.canvas.height + 100, -25);
+        // AAFunctions.displayButtons([this.btnHelp, this.btnPlay, this.btnSound], this.cameras.main, this.game.canvas.height + 100, -25);
+        Phaser.Actions.GridAlign([this.btnHelp, this.btnPlay, this.btnSound], {
+            width: this.cameras.main.width,
+            height: 1,
+            cellWidth: 240 / 3,
+            // cellHeight: 50,
+            x: 0,
+            y: this.game.canvas.height + 100,
+            position: Phaser.Display.Align.CENTER
+        });
         this.audioOffImage = this.add.image(this.btnSound.x, this.btnSound.y, kSPRITE_ATLAS, kBTN_SOUND_OFF).setVisible(!AAPrefs.playAudio);
         this.buttons = [this.btnHelp, this.btnPlay, this.btnSound];
         // GameOver Sprite #######################################################################
@@ -771,12 +792,15 @@ var PreloadScene = /** @class */ (function (_super) {
         // Spritesheets
         this.load.setPath("assets/images/");
         this.load.image(kIMG_BG, "bg.png");
+        this.load.image(kIMG_COVER, "coverart.jpg");
         this.load.image(kIMG_LOGO, "taara-logo.png");
         this.load.atlas(kSPRITE_ATLAS, kSPRITE_ATLAS + ".png", kSPRITE_ATLAS + ".json", null, null);
         // this.load.image('coverart', 'coverart.png');
         //Sound Effects
         this.load.setPath("assets/audio/");
-        var ext = '.mp3';
+        var ext = '.wav';
+        //SOund effects are to be wavs.  Some mp3 and oggs can crash phaser!
+        ext = '.mp3';
         // These two sounds are the standard button sounds
         this.load.audio("button", "sfxButton_select" + ext);
         this.load.audio("play", "sfxButton_play" + ext);
@@ -803,7 +827,13 @@ var HelpScene = /** @class */ (function (_super) {
         mo.showScores(false);
         mo.showBackButton(function () { });
         AAKaiAnalytics.sendEvent("help");
-        this.add.image(0, 0, kSPRITE_ATLAS, kIMG_HELP).setOrigin(0, 0);
+        var help = this.add.image(0, 0, kSPRITE_ATLAS, kIMG_HELP).setOrigin(0, 0);
+        this.tweens.add({
+            targets: help,
+            alpha: 1.0,
+            duration: 250,
+            ease: 'Power.easeIn'
+        });
     };
     return HelpScene;
 }(Phaser.Scene));
@@ -813,8 +843,7 @@ var gGameName = "_TEMPLATE_";
 var gGameVersion = "1.0.0";
 // GOOGLE  -- ALSO ADD TO INDEX.HTML !!!!!!!
 // UNIQUE TO EVERY GAME TEMPLATE ID IS taaragames.com for testing
-var measurement_id = "G-NG6FFXYDP5";
-var api_secret = "x8Mm4cF4Rjy4mIqI1KqRpg";
+var measurement_id = "G-T3EDZ1P5D0";
 //used for arcade debug and console.logs()
 var kDEBUG = false;
 var gSHOW_FPS = false; // this can be dynamically set
@@ -851,6 +880,7 @@ var kBTN_RESET_GAME = 'btnRestart.png';
 var kBTN_SPONSOR = 'btnSponsor.png';
 // UI SPRITES
 var kIMG_BG = 'purpBG';
+var kIMG_COVER = 'coverart.jpg';
 var kIMG_GAMEOVER = "gameover.png";
 var kIMG_LOGO = "taara-logo.png";
 var kIMG_HELP = 'help.png';
@@ -859,6 +889,9 @@ if (kDEBUG)
     debug_log = console.log.bind(window.console);
 else
     debug_log = function () { };
+// ⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️
+// ⬇️ GAME CONSTS HERE ⬇️  
+// ⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️
 var AAFunctions;
 (function (AAFunctions) {
     // High Score Variables ===========================================================
@@ -912,7 +945,8 @@ var AAFunctions;
         var spacer = _spacer;
         var totalButtonLength = _buttons.length; // + spacer;
         var stp = (_camera.width / _buttons.length); // + spacer;
-        var startx = (stp / 2) - (spacer / 3);
+        var startx = (stp / 2) - (spacer / 3); //21
+        // buggy hence the fucking number juggling above
         Phaser.Actions.GridAlign(_buttons, {
             width: totalButtonLength,
             height: 1,
@@ -1116,8 +1150,10 @@ var AAKaiAds;
         //}
         gFullscreenAdCount = 0;
         this.fullscreenAdShowing = true;
-        this.theFullScreenAd.call('display');
-        setTimeout(function () { AAKaiAds.preloadFullscreenAd(); }, 1000 * 30);
+        if (this.theFullScreenAd != undefined) {
+            this.theFullScreenAd.call('display');
+            setTimeout(function () { AAKaiAds.preloadFullscreenAd(); }, 1000 * 30);
+        }
     }
     AAKaiAds.showFullscreenAd = showFullscreenAd;
 })(AAKaiAds || (AAKaiAds = {}));
@@ -1274,6 +1310,10 @@ var AAKaiControls;
                 this.Enter = 1;
                 // e.preventDefault();
                 break;
+            case ' ':
+                this.spacebar = 1;
+                // e.preventDefault();
+                break;
         }
         // e.preventDefault();
     }
@@ -1339,6 +1379,10 @@ var AAKaiControls;
             case 'Enter':
             case '=':
                 this.Enter = 0;
+                //  e.preventDefault();
+                break;
+            case ' ':
+                this.spacebar = 0;
                 //  e.preventDefault();
                 break;
         }

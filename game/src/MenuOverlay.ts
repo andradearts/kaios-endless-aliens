@@ -400,8 +400,17 @@ class MenuOverlay extends Phaser.Scene {
         // DISPLAY BUTTONS #######################################################
         // #######################################################################
 
-        AAFunctions.displayButtons([this.btnHelp, this.btnPlay, this.btnSound], this.cameras.main, this.game.canvas.height + 100, -25);
-      
+        // AAFunctions.displayButtons([this.btnHelp, this.btnPlay, this.btnSound], this.cameras.main, this.game.canvas.height + 100, -25);
+        Phaser.Actions.GridAlign([this.btnHelp, this.btnPlay, this.btnSound], {
+            width: this.cameras.main.width,
+            height: 1,
+            cellWidth: 240/3,
+            // cellHeight: 50,
+            x: 0,
+            y: this.game.canvas.height + 100,
+            position: Phaser.Display.Align.CENTER
+        });
+
         this.audioOffImage = this.add.image(this.btnSound.x, this.btnSound.y, kSPRITE_ATLAS,kBTN_SOUND_OFF).setVisible(!AAPrefs.playAudio);
 
         this.buttons = [this.btnHelp, this.btnPlay, this.btnSound];
