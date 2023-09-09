@@ -73,8 +73,11 @@
     
       <!-- UNCOMMENT FOR PRODUCTION! -->
       <script src="https://static.kaiads.com/ads-sdk/ads-sdk.v5.min.js"></script>
-      <script src="./assets/phaser-arcade-physics.min.js"></script>
-  
+     
+      <!-- <script src="./assets/phaser-arcade-physics.min.js"></script> -->
+     
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.60.0/phaser-arcade-physics.js" integrity="sha512-whDWySnjyxPahvOpPanLSBNqV3PxhvrJezL3scq8JsCci81L+bsKJ9yQLrNQrJ4rIfqKOzQB1jbswtaMCaBLwg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
    
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-T3EDZ1P5D0"></script>
     <script>
@@ -100,7 +103,6 @@
       </div>
 
       <div class="sponsorbanner" id="sponsorad"></div>
-     
       
       <div class="sponsorButton" id="sponsorButton">
         <img src="./assets/svg/btnSponsor.svg" alt="" />
@@ -113,9 +115,7 @@
       </div>
     </div>
 
-
-  
-    <script src="./assets/game.min.js"></script>
+    <script src="./assets/game.min.js" defer></script>
   
   </body>
 </html>
