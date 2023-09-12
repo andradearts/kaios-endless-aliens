@@ -53,7 +53,7 @@ class MenuOverlay extends Phaser.Scene {
 
     create() {
 
-        this.setUpAudio();
+       
         this.setUpUI();
 
         gGameState = states.kSTATE_MENU;
@@ -79,7 +79,7 @@ class MenuOverlay extends Phaser.Scene {
             _this.keyup(event)
         });
 
-
+        //this.setUpAudio();
     }
 
     removeAllListeners() {
@@ -213,7 +213,7 @@ class MenuOverlay extends Phaser.Scene {
     }
 
     setUpAudio() {
-        this.sfxButton = this.sound.add('button');
+        this.sfxButton = this.sound.add("button");
         this.sfxButtonPlay = this.sound.add('play');
         this.sfxButtonBack = this.sound.add('back');
     }
@@ -440,7 +440,7 @@ class MenuOverlay extends Phaser.Scene {
     playBtnSnd() {
         if (AAPrefs.playAudio == true)
             this.sfxButton.play();
-    }
+     }
     playBackSnd() {
         if (AAPrefs.playAudio == true)
             this.sfxButtonBack.play();

@@ -1,15 +1,15 @@
 {
   "version":"1.7.0",
   "build":"23090701",
-  "name": "Bubble Bee",
-  "description": "Collect the honey and avoid the flies.  Grab power ups to make you stronger in this re-imagining of the classic game snake.",
+  "name": "Endless Aliens",
+  "description": " ",
   "scope": "/",
   "launch_path": "/index.html",
    "locales": {
     "en-US": {
-      "name": "Bubble Bee",
-      "subtitle": "Collect the honey and avoid the flies.",
-      "description":  "Collect the honey and avoid the flies.  Grab power ups to make you stronger in this re-imagining of the classic game snake. "
+      "name": "Endless Aliens",
+      "subtitle": " ",
+      "description":  " "
     }
   },
    "icons": {

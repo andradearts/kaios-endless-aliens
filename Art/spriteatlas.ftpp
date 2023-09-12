@@ -1,0 +1,211 @@
+{
+  "meta": {
+    "version": "0.6.7"
+  },
+  "savePath": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/game/dist/assets/images",
+  "images": [
+    {
+      "name": "amp1.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/amp1.png",
+      "folder": ""
+    },
+    {
+      "name": "amp2.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/amp2.png",
+      "folder": ""
+    },
+    {
+      "name": "ampBullet.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/ampBullet.png",
+      "folder": ""
+    },
+    {
+      "name": "bonus_life.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/bonus_life.png",
+      "folder": ""
+    },
+    {
+      "name": "bonus_points.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/bonus_points.png",
+      "folder": ""
+    },
+    {
+      "name": "bonus_shield.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/bonus_shield.png",
+      "folder": ""
+    },
+    {
+      "name": "bonus_upgrade.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/bonus_upgrade.png",
+      "folder": ""
+    },
+    {
+      "name": "border.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/border.png",
+      "folder": ""
+    },
+    {
+      "name": "btnBackBottom.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/shared-assets/UI/export/btnBackBottom.png",
+      "folder": ""
+    },
+    {
+      "name": "btnHelp.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/shared-assets/UI/export/btnHelp.png",
+      "folder": ""
+    },
+    {
+      "name": "btnPlay.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/shared-assets/UI/export/btnPlay.png",
+      "folder": ""
+    },
+    {
+      "name": "btnRestart.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/shared-assets/UI/export/btnRestart.png",
+      "folder": ""
+    },
+    {
+      "name": "btnSound.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/shared-assets/UI/export/btnSound.png",
+      "folder": ""
+    },
+    {
+      "name": "btnSoundOff.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/shared-assets/UI/export/btnSoundOff.png",
+      "folder": ""
+    },
+    {
+      "name": "btnSoundOn.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/shared-assets/UI/export/btnSoundOn.png",
+      "folder": ""
+    },
+    {
+      "name": "btnSponsor.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/shared-assets/UI/export/btnSponsor.png",
+      "folder": ""
+    },
+    {
+      "name": "bullet.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/bullet.png",
+      "folder": ""
+    },
+    {
+      "name": "exp1.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/exp1.png",
+      "folder": ""
+    },
+    {
+      "name": "exp2.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/exp2.png",
+      "folder": ""
+    },
+    {
+      "name": "exp3.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/exp3.png",
+      "folder": ""
+    },
+    {
+      "name": "exp4.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/exp4.png",
+      "folder": ""
+    },
+    {
+      "name": "explosionParticle.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/explosionParticle.png",
+      "folder": ""
+    },
+    {
+      "name": "gameover.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/shared-assets/UI/export/gameover.png",
+      "folder": ""
+    },
+    {
+      "name": "help_en.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/help_en.png",
+      "folder": ""
+    },
+    {
+      "name": "points.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/points.png",
+      "folder": ""
+    },
+    {
+      "name": "shield.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/shield.png",
+      "folder": ""
+    },
+    {
+      "name": "shield_bonus.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/shield_bonus.png",
+      "folder": ""
+    },
+    {
+      "name": "ship.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/ship.png",
+      "folder": ""
+    },
+    {
+      "name": "slice1.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/slice1.png",
+      "folder": ""
+    },
+    {
+      "name": "starParticle.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/starParticle.png",
+      "folder": ""
+    },
+    {
+      "name": "starParticle_2.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/starParticle_2.png",
+      "folder": ""
+    },
+    {
+      "name": "streak.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/streak.png",
+      "folder": ""
+    },
+    {
+      "name": "taara-logo.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/shared-assets/UI/export/taara-logo.png",
+      "folder": ""
+    },
+    {
+      "name": "title.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/title.png",
+      "folder": ""
+    },
+    {
+      "name": "upgrade_bonus.png",
+      "path": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/Art/export/upgrade_bonus.png",
+      "folder": ""
+    }
+  ],
+  "folders": [],
+  "packOptions": {
+    "textureName": "spriteatlas",
+    "textureFormat": "png",
+    "removeFileExtension": false,
+    "prependFolderName": true,
+    "base64Export": false,
+    "tinify": false,
+    "tinifyKey": "",
+    "scale": 1,
+    "filter": "none",
+    "exporter": "JSON (hash)",
+    "fileName": "pack-result",
+    "savePath": "/Users/mark/Library/CloudStorage/OneDrive-Personal/Taara Games/KaiOS/games/Endless Aliens/game/dist/assets/images",
+    "width": 2048,
+    "height": 2048,
+    "fixedSize": false,
+    "powerOfTwo": false,
+    "padding": 1,
+    "extrude": 1,
+    "allowRotation": false,
+    "allowTrim": true,
+    "trimMode": "trim",
+    "alphaThreshold": "0",
+    "detectIdentical": true,
+    "packer": "OptimalPacker",
+    "packerMethod": "Automatic"
+  }
+}

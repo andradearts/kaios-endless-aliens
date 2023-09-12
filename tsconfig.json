@@ -25,6 +25,13 @@
     "./game/src/MenuOverlay.ts",
     "./game/src/MenuScene.ts",
     "./game/src/HelpScene.ts",
+    "./game/src/Bullets.ts",
+    "./game/src/AmpBullets.ts",
+    "./game/src/Bullet.ts",
+    "./game/src/Amp.ts",
+    "./game/src/AmpBullet.ts",
+    "./game/src/SingleAmp.ts",
+    "./game/src/DropAmps.ts",
     "./game/src/GameScene.ts"
 ]
   

@@ -60,9 +60,21 @@ class PreloadScene extends Phaser.Scene {
         //Sound Effects
         this.load.setPath("assets/audio/");
 
-        let ext = '.wav';
-        //SOund effects are to be wavs.  Some mp3 and oggs can crash phaser!
+        let ext = '.ogg';
 
+        // These two sounds are the standard button sounds
+        this.load.audio("button", "click" + ext);
+        this.load.audio("explode_amp", "explode_amp" + ext);
+        this.load.audio("explode_hero", "explode_hero" + ext);
+        this.load.audio("loseLife", "loseLife" + ext);
+        this.load.audio("reward_catch", "reward_catch" + ext);
+        this.load.audio("reward_launch", "reward_launch" + ext);
+        this.load.audio("shoot_amp", "shoot_amp" + ext);
+        this.load.audio("shoot_hero", "shoot_hero" + ext);
+        this.load.audio("ampDrop_single", "ampdrop" + ext);
+        this.load.audio("ampDrop_all", "ampDropAll" + ext);
+
+        
         ext = '.mp3';
         // These two sounds are the standard button sounds
         this.load.audio("button", "sfxButton_select" + ext);

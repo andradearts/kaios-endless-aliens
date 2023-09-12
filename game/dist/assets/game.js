@@ -28,23 +28,39 @@ var GameScene = /** @class */ (function (_super) {
     __extends(GameScene, _super);
     function GameScene() {
         var _this = _super.call(this, { key: 'GameScene' }) || this;
-        _this.jumps = 0; //track ad launch
-        _this.poop = 0;
+        _this.shootKeyUp = true;
+        _this.lives = [];
+        _this.livingBugs = [];
+        // Game play variables *****************************************************************************************
+        // This is the delay bewteen the ship bullets.  decrease this to make the ship shoot faster
+        _this.kBULLET_DELAY = 400;
+        // This keeps track of the last time a ship bullet was shot and is chekced against the game time.  It's set in shoot() function
+        _this.bulletTime = 0;
+        // Amphibian Variable *****************************************************************************************
+        // This tracks the drop time of the amphibians
+        _this.dropTime = 0;
+        //
+        // This traks the delay between drop times of the amphibians
+        _this.dropDelay = 4500;
+        // track the time between amphibians shots.  this will decrease over time
+        _this.ampShotDelay = 1500;
+        _this.ampDropDelay = 3000;
+        // This will track the score of the game
+        _this.score = 0;
         return _this;
     }
     GameScene.prototype.preload = function () {
+        hideBanner();
     };
     GameScene.prototype.create = function () {
-        // Launch the menu scene
-        //this.scene.launch("MenuOverlay");
-        // this.setUpSprites();
-        // this.setUpPhysics(); //if needed
-        // The game starts in menu mode
-        // gGameState = gGameState = states.kSTATE_MENU;
-        // this.removeAllListeners();
-        // this.events.on('startgame', this.startGame, this);
-        this.scene.bringToTop("MenuOverlay");
+        this.setUpSprites();
+        this.setUpAudio();
         this.setUpUI();
+        //  Here we initilize the time bewteen amphibian shots
+        this.ampShootTime = this.time.now + this.ampShotDelay;
+        this.ampDropTime = this.time.now + this.ampDropDelay;
+        this.dropTime = this.time.now + this.dropDelay;
+        this.scene.bringToTop("MenuOverlay");
         this.startGame();
     };
     // removeAllListeners() {
@@ -54,22 +70,157 @@ var GameScene = /** @class */ (function (_super) {
     // Init all my game data here.
     GameScene.prototype.startGame = function () {
         //I have to kill the KaiAd object because it causes stutter.
+        this.gun = 1;
+        this.score = 0;
+        this.scene.get("MenuOverlay").displayScore(this.score);
+        // this.lives.forEach(
+        //     (who)=>{
+        //         who.destroy()
+        //     }
+        // )
+        // this.lives = []
+        this.dropTime = this.time.now + this.dropDelay;
         gGameState = states.kSTATE_PLAYING;
-        this.poop = 0;
+        this.dropAmpTimer = this.time.addEvent({
+            delay: this.dropDelay,
+            callback: function () {
+                this.dropAmps();
+            },
+            callbackScope: this,
+            repeat: -1
+        });
+        this.ampShootTimer = this.time.addEvent({
+            delay: this.ampShotDelay,
+            callback: function () {
+                this.ampShoot();
+            },
+            callbackScope: this
+        });
+        this.dropSingleAmpTimer = this.time.addEvent({
+            delay: this.ampDropDelay,
+            callback: function () {
+                this.ampDrop();
+            },
+            callbackScope: this,
+            repeat: -1
+        });
+        this.bonusTimer = this.time.addEvent({
+            delay: 3000,
+            callback: function () {
+                this.launchBonus();
+            },
+            callbackScope: this
+        });
     };
     GameScene.prototype.update = function (time, delta) {
+        // switch (gGameState) {
+        //     case states.kSTATE_PLAYING:
+        //         this.poop = this.poop + 10;
+        //         this.scene.get('MenuOverlay').events.emit('setscore', [this.poop]);
+        //         if (this.poop >= 1545) {
+        //             gGameState = states.kSTATE_GAMEOVER;
+        //             this.gameover();
+        //         }
+        //         break;
+        // }
         switch (gGameState) {
             case states.kSTATE_PLAYING:
-                this.poop = this.poop + 10;
-                this.scene.get('MenuOverlay').events.emit('setscore', [this.poop]);
-                if (this.poop >= 1545) {
-                    gGameState = states.kSTATE_GAMEOVER;
-                    this.gameover();
+                this.checkKeys();
+                // this.dropAmps();
+                //this.ampShoot();
+                //this.ampDrop();
+                if (this.shield.visible == true) {
+                    this.shield.x = this.hero.x;
+                    this.shield.y = this.hero.y - 3;
                 }
+                // used for one button version
+                // this.physics.world.wrap(this.hero, 5);
                 break;
         }
     };
+    GameScene.prototype.checkKeys = function () {
+        var left = AAKaiControls.ArrowLeft | AAKaiControls.NumKey1 | AAKaiControls.NumKey4;
+        var right = AAKaiControls.ArrowRight | AAKaiControls.NumKey2 | AAKaiControls.NumKey5;
+        var shot = AAKaiControls.Enter | AAKaiControls.NumKey3 | AAKaiControls.NumKey6;
+        if (left) {
+            this.moveShip(-4);
+        }
+        else if (right) {
+            this.moveShip(4);
+        }
+        if (shot) {
+            // if (this.shootKeyUp) {
+            this.shoot();
+            //         this.shootKeyUp = false
+            //     }
+            // } else {
+            //     this.shootKeyUp = true
+        }
+    };
+    // This function moves then amphibians down toward the ship
+    GameScene.prototype.dropAmps = function () {
+        // Since we call this function every frame we only start the drop if it's time
+        //if (this.time.now > this.dropTime) {
+        var _this = this;
+        var within = this.ampGroup.getMatching('visible', true);
+        if (AAPrefs.playAudio) {
+            this.sfx_ampDropAll.play();
+        }
+        this.tweens.add({
+            targets: within,
+            props: {
+                y: { value: '+=25', duration: 500, ease: 'Bounce.easeOut' }
+            },
+            onComplete: function () {
+                _this.addNewRowOfAmps(10);
+                //setTimeout(() => { this.dropAmps(); }, this.dropDelay)
+            },
+            onCompleteScope: this
+        });
+        // Update the drop time to the new time to drop.
+        // this.dropTime = this.time.now + this.dropDelay;
+        //}
+    };
+    // This function adds a new row to the group of amphibians when called.
+    // the parameter is the position.y to set the new amphibians
+    GameScene.prototype.addNewRowOfAmps = function (ay) {
+        // Loop 5 times
+        for (var x = 0; x < 5; x++) {
+            // get the first dead amphibian we can find
+            //var amphibian: Phaser.Physics.Arcade.Sprite = this.ampGroup.getFirstDead(true, (x * 35) + 50, ay)
+            var amphibian = this.ampGroup.get((x * 35) + 30, ay);
+            //getFirstDead(false, (x * 35) + 50, ay)
+            // get((x * 35)+30, ay);
+            amphibian.launch((x * 35) + 50, ay);
+            if ((amphibian == null) || (amphibian == undefined))
+                break;
+            //let w = amphibian.frame.width;
+            amphibian.active = true;
+            amphibian.visible = true;
+            amphibian.setSize(17, 14);
+            amphibian.body.velocity.x = 45; //35
+            amphibian.setBounceX(.99);
+            amphibian.play("amps");
+            amphibian.setTint(Phaser.Display.Color.GetColor(0, 255, 0));
+            amphibian.setDataEnabled();
+            amphibian.setData('hits', 2);
+            //this.livingBugs.push(amphibian)
+        }
+    };
+    GameScene.prototype.moveShip = function (dir) {
+        var x = this.hero.x;
+        x += dir;
+        //condition ? exprIfTrue : exprIfFalse
+        x = (x < 10) ? 10 : x;
+        x = (x > 230) ? 230 : x;
+        this.hero.x = x;
+    };
     GameScene.prototype.gameover = function () {
+        var _this = this;
+        if (gGameState == states.kSTATE_GAMEOVER_DELAY) {
+            return;
+        }
+        gGameState = states.kSTATE_GAMEOVER_DELAY;
         AAKaiAnalytics.sendEvent("gameover");
         gGameState = states.kSTATE_GAMEOVER;
         // show the game over button layout.
@@ -89,14 +240,592 @@ var GameScene = /** @class */ (function (_super) {
         else {
             showBanner();
         }
+        var startColor = Phaser.Display.Color.ObjectToColor({ r: 255, g: 0, b: 0, a: 255 });
+        var endColor = Phaser.Display.Color.ObjectToColor({ r: 255, g: 255, b: 255, a: 255 });
+        this.tweens.add({
+            targets: this.hero,
+            props: {
+                scale: 3.0,
+                angle: 1080
+            },
+            duration: 2000
+        });
+        this.tweens.addCounter({
+            from: 0,
+            to: 100,
+            duration: 100,
+            repeat: 5,
+            yoyo: true,
+            onUpdate: function (tween) {
+                var value = tween.getValue();
+                var colorObj = Phaser.Display.Color.Interpolate.ColorWithColor(startColor, endColor, 100, value);
+                var color = Phaser.Display.Color.GetColor(colorObj.r, colorObj.g, colorObj.b);
+                _this.hero.setTint(color);
+                // this.hero.setScale(1+(value*.01))
+            },
+            onComplete: function () {
+                _this.expoldeParticle();
+                if (AAPrefs.playAudio) {
+                    _this.sfx_explode_hero.play();
+                }
+                _this.hero.destroy();
+                window.navigator.vibrate(300);
+                _this.cameras.main.shake(250);
+                _this.stopAmpDropAndShot();
+                _this.time.addEvent({
+                    delay: 3000,
+                    callback: function () {
+                        gGameState = states.kSTATE_GAMEOVER;
+                        this.scene.get('MenuOverlay').events.emit('gameover');
+                    },
+                    callbackScope: _this,
+                });
+            },
+            onCompleteScope: this
+        });
+        if (this.bonusTimer != null) {
+            this.bonusTimer.destroy();
+        }
+    };
+    GameScene.prototype.stopAmpDropAndShot = function () {
+        if (this.dropAmpTimer != null) {
+            this.dropAmpTimer.destroy();
+        }
+        if (this.ampShootTimer != null) {
+            this.ampShootTimer.destroy();
+        }
+        if (this.dropSingleAmpTimer != null) {
+            this.dropSingleAmpTimer.destroy();
+        }
+    };
+    GameScene.prototype.shoot = function () {
+        if (this.time.now > this.bulletTime) {
+            // this.gun = 3
+            if (AAPrefs.playAudio) {
+                this.sfx_shoot_hero.play();
+            }
+            //const bullet: Bullet = this.bullets.getFirstDead(false)// 
+            // getFirstDead(false);
+            // var bullet2: Bullet;
+            // var bullet3: Bullet;
+            if (this.gun == 1) {
+                //if (bullet) {
+                //   bullet.fire(this.hero.x, this.hero.y)
+                //}
+                this.bullets.fire(this.hero.x, this.hero.y);
+            }
+            else if (this.gun == 2) {
+                // const bullet2 = this.bullets.getFirstDead(false)// get();//FirstDead(false);
+                // // if (bullet && bullet2) {
+                // bullet.fire(this.hero.x - 9, this.hero.y, -1)
+                // bullet2.fire(this.hero.x + 9, this.hero.y, 1)
+                this.bullets.fire(this.hero.x, this.hero.y, -2);
+                this.bullets.fire(this.hero.x, this.hero.y, 2);
+                //}
+            }
+            else if (this.gun == 3) {
+                this.bullets.fire(this.hero.x, this.hero.y);
+                this.bullets.fire(this.hero.x - 10, this.hero.y, -3);
+                this.bullets.fire(this.hero.x + 10, this.hero.y, 3);
+                // const bullet2 = this.bullets.getFirstDead(false)// get()//FirstDead(false);
+                // const bullet3 = this.bullets.getFirstDead(false)// get()//FirstDead(false);
+                // if (bullet && bullet2) {
+                // bullet.fire(this.hero.x, this.hero.y)
+                // bullet2.fire(this.hero.x - 10, this.hero.y, -3)
+                // bullet3.fire(this.hero.x + 10, this.hero.y, 3)
+                // }
+            }
+            this.bulletTime = this.time.now + this.kBULLET_DELAY;
+        }
+        // this is for one button mode
+        // this.hero.body.velocity.x *= -1; 
+    };
+    GameScene.prototype.getRandomAmpInView = function () {
+        var within = this.ampGroup.getMatching('visible', true);
+        var it = Phaser.Utils.Array.GetRandom(within);
+        if (it.y < 280) {
+            return it;
+        }
+        else {
+            return this.getRandomAmpInView();
+        }
+        // if (it != null) {
+        //     if (it.y > 10) {
+        //         return it
+        //     } else {
+        //         return this.getRandomAmpInView()
+        //     }
+        // }
+    };
+    GameScene.prototype.ampDrop = function () {
+        // flash the bug a few times
+        // maybe place a sfx
+        // then drop to deck
+        // wait 1-2 seconds
+        // kill it
+        var _this = this;
+        if (this.ampGroup.getLength() < 3) {
+            return;
+        }
+        // if (this.time.now > this.ampDropTime) {
+        var it = this.getRandomAmpInView();
+        // it.body.velocity.setTo(0, 0);
+        // get it's position
+        // destroy it
+        // put a dummy in it's place.
+        //ampDropDelay = 1200;
+        this.ampDropTime = this.time.now + Phaser.Math.RND.integerInRange(1200, 2400);
+        var startColor = Phaser.Display.Color.ObjectToColor({ r: 0, g: 255, b: 83, a: 255 });
+        var endColor = Phaser.Display.Color.ObjectToColor({ r: 255, g: 83, b: 80, a: 255 });
+        if (it) {
+            this.tweens.addCounter({
+                from: 0,
+                to: 100,
+                duration: 200,
+                repeat: 5,
+                yoyo: true,
+                onUpdate: function (tween) {
+                    var value = tween.getValue();
+                    var colorObj = Phaser.Display.Color.Interpolate.ColorWithColor(startColor, endColor, 100, value);
+                    var color = Phaser.Display.Color.GetColor(colorObj.r, colorObj.g, colorObj.b);
+                    it.setTint(color);
+                },
+                onComplete: function () {
+                    var ax = it.x;
+                    var ay = it.y;
+                    it.kill(); //destroy()
+                    _this.singleAmps.drop(ax, ay, _this.hero.y);
+                    if (AAPrefs.playAudio) {
+                        _this.sfx_ampDropSingle.play();
+                    }
+                } //end onComplete
+            });
+        }
+    };
+    GameScene.prototype.ampShoot = function () {
+        if (AAPrefs.playAudio) {
+            this.sfx_shoot_amp.play();
+        }
+        var it = this.getRandomAmpInView();
+        if (it) {
+            this.amphBullets.fire(it.x, it.y, this.hero.x, this.hero.y);
+        }
+        this.ampShootTimer = this.time.addEvent({
+            delay: Phaser.Math.RND.integerInRange(500, 2250),
+            callback: function () {
+                this.ampShoot();
+            },
+            callbackScope: this
+        });
+    };
+    GameScene.prototype.anotherAmpShot = function (perct) {
+        var _this = this;
+        // 50% of another bullet
+        if (AAFunctions.chanceRoll(perct)) {
+            setTimeout(function () { _this.ampShoot(); }, Phaser.Math.RND.integerInRange(500, 750));
+            // this.time.addEvent({
+            //     delay: Phaser.Math.RND.integerInRange(500, 750),
+            //     callback: function () {
+            //         this.ampShoot();
+            //         //this.anotherAmpShot(50)
+            //     },
+            //     callbackScope: this,
+            // });
+        }
     };
     GameScene.prototype.setUpSprites = function () {
+        this.physics.world.fixedStep = false;
+        this.physics.world.useTree = false;
+        // create the borders that will be used to bounce the amphibians.  These will be hidden.
+        // Create the left border sprite where x = 1 and y is just above the button of the game height, from the sprite atlas ' spriteAtlas' with sprite border.png
+        this.leftBorder = this.physics.add.staticImage(0, 0, kSPRITE_ATLAS, 'border.png').setOrigin(0);
+        // this.leftBorder.setImmovable(true)
+        this.rightBorder = this.physics.add.staticImage(this.game.canvas.width, 0, kSPRITE_ATLAS, 'border.png').setOrigin(1, 0);
+        // this.rightBorder.setImmovable(true)
+        // debug enabled
+        this.leftBorder.visible = kDEBUG;
+        this.rightBorder.visible = kDEBUG;
+        // this.spaceEmitter = this.add.particles(kSPRITE_ATLAS, 'starParticle.png').createEmitter({
+        //     x: { min: 5, max: 235 },
+        //     y: { min: 0, max: 310 },
+        //     lifespan: 1000,
+        //     speedY: { min: 5, max: 15 },
+        //     alpha: { start: .5, end: 0,ease:Phaser.Math.Easing.Sine.InOut },
+        //     scale: { start: .5, end: 0 },
+        //     maxParticles:100,
+        // });
+        this.anims.remove('amps');
+        this.anims.create({ key: 'amps', frames: this.anims.generateFrameNames(kSPRITE_ATLAS, { prefix: 'amp', start: 1, end: 2, suffix: '.png' }), repeat: -1, frameRate: 2 });
+        //  Our amphibian group holds all the amphibian sprites
+        this.ampGroup = this.physics.add.group({
+            defaultKey: kSPRITE_ATLAS,
+            classType: Amp,
+            maxSize: 60,
+            active: false
+            // runChildUpdate: true
+        });
+        //this.ampGroup = this.add.group()
+        // this.physics.add.group({ //
+        //     key: kSPRITE_ATLAS,
+        //     frame: 'amp1.png',
+        //     frameQuantity: 50, //45,
+        //     immovable: false,
+        //     maxSize: -1,
+        // });
+        this.ampGroup.getChildren().forEach(function (child) {
+            child.y = -500;
+            child.visible = false;
+            child.active = false;
+        });
+        // add four rows
+        var ay = 85;
+        this.addNewRowOfAmps(ay);
+        this.addNewRowOfAmps(ay -= 25);
+        this.addNewRowOfAmps(ay -= 25);
+        this.addNewRowOfAmps(ay -= 25);
+        this.physics.add.collider([this.rightBorder, this.leftBorder, this.ampGroup], this.ampGroup);
+        // this.physics.add.collider(this.ampGroup, this.ampGroup);
+        this.singleAmps = new DropAmps(this);
+        this.bullets = new Bullets(this);
+        this.physics.add.overlap(this.ampGroup, this.bullets, this.hitAmphibian, null, this);
+        // Our amphibian bullet pool holds all the bullets shot by the amphibians
+        this.amphBullets = new AmpBullets(this);
+        // this.amphBullets = this.physics.add.group({
+        //     defaultKey: kSPRITE_ATLAS,
+        //     classType: AmpBullet, // this could be the problem!
+        //     maxSize: 12,
+        //     runChildUpdate: true
+        // });
+        // this.amphBullets.create(12);
+        // this.streaks = this.add.group({
+        //     defaultKey: kSPRITE_ATLAS,
+        //     defaultFrame: 'streak.png',
+        //     maxSize: 16,
+        //     active: false
+        // });
+        // Set up where the ship will be. 
+        this.heroFloor = 30;
+        // Add the ship to the scene with arcade physics
+        this.hero = this.physics.add.sprite(this.game.canvas.width / 2, this.game.canvas.height - this.heroFloor, kSPRITE_ATLAS, 'ship.png');
+        this.hero.setBodySize(this.hero.frame.width - 8, this.hero.frame.height, true);
+        this.shield = this.physics.add.image(this.hero.x, this.hero.y, kSPRITE_ATLAS, 'shield.png');
+        this.shield.setVisible(false);
+        // this is for one button mode which I don't like but keeping here just in case
+        // this.hero.setVelocityX(-100);
+        this.physics.add.overlap(this.hero, this.amphBullets, this.hitHero, null, this);
+        //  The explosion pool is used for eveything exploding in the game.
+        // This line creates the group and adds it to the game
+        //this.explosionGroup = this.add.group();
+        //
+        // This function will create and add 10 sprites to the group.  Notice how we don't pass in the sprite name this time.
+        // This is because we will wil up the explosion with an animation in the next line...
+        //this.explosionGroup.createMultiple(10, kSPRITE_ATLAS);
+        //
+        // ...setupExplosions get called for each sprite in the group. Look at function setupExplosions() for more info
+        //this.explosionGroup.forEach(this.setupExplosions, this);
+        this.explosionPool = this.add.group({
+            defaultKey: kSPRITE_ATLAS,
+            defaultFrame: 'starParticle.png',
+            maxSize: 15,
+            active: false
+        });
+        this.explosionPool.create(2);
+        this.explosionPool.getChildren().forEach(function (child) {
+            child.y = -500;
+            child.visible = false;
+        });
+        this.anims.remove('explodeAmp');
+        this.anims.create({ key: 'explodeAmp', frames: this.anims.generateFrameNames(kSPRITE_ATLAS, { prefix: 'exp', start: 1, end: 4, suffix: '.png' }), frameRate: 12 });
+        // Set up the initial game variables
+        // here wil initialize the time between each amphibian drop.  
+        this.dropTime = this.time.now + this.dropDelay;
+        //
+        //  Here we initilize the time bewteen amphibian shots
+        this.ampShootTime = this.time.now + this.ampShotDelay;
+        this.bonus = this.physics.add.image(-50, -50, kSPRITE_ATLAS, 'bonus_upgrade.png');
+        // this.physics.add.image(-50, -50, kSPRITE_ATLAS, 'bonus_upgrade.png');
+        this.bonus.setDataEnabled();
+        this.physics.add.overlap(this.bonus, this.hero, this.bonusCollide, null, this);
+        this.displayLives();
+        this.explodeEmitter = this.add.particles(kSPRITE_ATLAS, 'explosionParticle.png').createEmitter({
+            x: 400,
+            y: 300,
+            speed: { min: 80, max: 300 },
+            angle: { min: 180, max: 359 },
+            scale: { start: 1.3, end: 0 },
+            blendMode: 'SCREEN',
+            //active: false,
+            lifespan: 1500,
+            gravityY: 200,
+        });
+        this.explodeEmitter.stop();
+    };
+    GameScene.prototype.explode = function (_x, _y) {
+        var expl = this.explosionPool.get(); //FirstDead(false, _x, _y);//get(_x, _y);
+        if (expl != null) {
+            //if (!expl) return; // None free
+            expl.setPosition(_x, _y);
+            expl.setActive(true)
+                .setVisible(true)
+                .play('explodeAmp');
+            expl.on('animationcomplete', function () { expl.setActive(false).setVisible(false); }, this);
+            // this.explodeparticle.active = true;
+            // this.explodeparticle.explode();
+        }
+    };
+    GameScene.prototype.expoldeParticle = function () {
+        this.explodeEmitter.setPosition(this.hero.x, this.hero.y);
+        this.explodeEmitter.explode(25);
+    };
+    GameScene.prototype.displayLives = function () {
+        this.lives.push(this.add.image(10, this.game.canvas.height - 8, kSPRITE_ATLAS, 'bonus_life.png'));
+        this.lives.push(this.add.image(10 + 25, this.game.canvas.height - 8, kSPRITE_ATLAS, 'bonus_life.png'));
+    };
+    GameScene.prototype.addLife = function () {
+        if (this.lives.length == 5) {
+            return;
+        }
+        var it = this.add.image(-25, this.game.canvas.height - 8, kSPRITE_ATLAS, 'bonus_life.png');
+        if (this.lives.length > 0) {
+            it.x = this.lives[this.lives.length - 1].x + 25;
+            this.lives.push(it);
+        }
+        else {
+            it.x = 10;
+        }
+        this.tweens.add({
+            targets: it,
+            alpha: 0,
+            duration: 50,
+            repeat: 5,
+            yoyo: true
+        });
+    };
+    GameScene.prototype.removeLife = function () {
+        //every time we get hit the gun resets
+        this.updateGun(0);
+        if (this.lives.length > 0) {
+            var l = this.lives.pop();
+            l.destroy();
+            return this.lives.length;
+        }
+        else {
+            return 0;
+        }
+    };
+    GameScene.prototype.heroAmpCollide = function (amp, shp) {
+        this.explode(amp.x, amp.y);
+        amp.body.x = -150;
+        // amp.destroy()
+        if (amp) {
+            amp.kill();
+        }
+        if (AAPrefs.playAudio) {
+            this.sfx_explode_amp.play();
+        }
+        if (this.shield.visible == false) {
+            if (this.removeLife() == 0) {
+                this.gameover();
+            }
+            // shp.destroy()
+        }
+        // this.gameover()
+    };
+    GameScene.prototype.bonusCollide = function (bonus, hero) {
+        var _this = this;
+        var item = this.bonus.getData('bonus');
+        // reuse recycle
+        this.bonus.body.x = -100; //destroy()
+        this.bonus.body.y = -100; //
+        if (AAPrefs.playAudio) {
+            this.sfx_reward_catch.play();
+        }
+        switch (item) {
+            case "points":
+                this.score += 100;
+                this.scene.get("MenuOverlay").displayScore(this.score);
+                break;
+            case "upgrade": //upgrade gun
+                this.updateGun(1);
+                break;
+            case "life": // add tra life up to 4
+                this.addLife();
+                break;
+            case "shield": //active shield
+                this.shield.setVisible(true);
+                this.shield.alpha = 1;
+                this.tweens.add({
+                    targets: this.shield,
+                    alpha: .25,
+                    duration: 500,
+                    repeat: 5,
+                    yoyo: true,
+                    onUpdate: function () {
+                        _this.shield.x = _this.hero.x;
+                        _this.shield.y = _this.hero.y - 5;
+                    },
+                    onComplete: function (who) {
+                        _this.shield.setVisible(false);
+                    }
+                });
+                break;
+            default:
+                break;
+        }
+    };
+    GameScene.prototype.hitHero = function (ship, bul) {
+        if (this.shield.visible == false) {
+            if (AAPrefs.playAudio) {
+                this.sfx_loseLife.play();
+            }
+            if (this.removeLife() == 0) {
+                this.gameover();
+            }
+        }
+        bul.kill();
+    };
+    GameScene.prototype.hitAmphibian = function (amp, bul) {
+        var hit = amp.getData('hits');
+        if (--hit > 0) {
+            amp.setTint(Phaser.Display.Color.GetColor(255, 255, 40));
+            amp.setData('hits', hit);
+            this.score += 1;
+            this.scene.get("MenuOverlay").displayScore(this.score);
+            if (AAPrefs.playAudio) {
+                this.sfx_explode_amp.play();
+            }
+        }
+        else {
+            this.score += 10;
+            this.scene.get("MenuOverlay").displayScore(this.score);
+            if (AAPrefs.playAudio) {
+                this.sfx_explode_amp.play();
+            }
+            this.explode(amp.x, amp.y);
+            amp.kill();
+            // amp.destroy()
+        }
+        bul.kill();
+        // check for end of level
+        // if (this.ampGroup.getLength() == 0) {
+        //     this.gameover() //testing only
+        // }
+    };
+    GameScene.prototype.updateGun = function (howMuch) {
+        if (howMuch == 0) {
+            this.gun = 1;
+        }
+        else {
+            this.gun += howMuch;
+            if (this.gun > 3) {
+                this.gun = 3;
+            }
+        }
+        this.updateAmpDropAndShots();
+    };
+    GameScene.prototype.updateAmpDropAndShots = function () {
+        this.stopAmpDropAndShot();
+        this.dropAmpTimer = this.time.addEvent({
+            delay: this.dropDelay / this.gun,
+            callback: function () {
+                this.dropAmps();
+            },
+            callbackScope: this,
+            repeat: -1
+        });
+        this.ampShootTimer = this.time.addEvent({
+            delay: this.ampShotDelay / this.gun,
+            callback: function () {
+                this.ampShoot();
+            },
+            callbackScope: this
+        });
+        this.dropSingleAmpTimer = this.time.addEvent({
+            delay: this.ampDropDelay / this.gun,
+            callback: function () {
+                this.ampDrop();
+            },
+            callbackScope: this,
+            repeat: -1
+        });
+    };
+    GameScene.prototype.launchBonus = function () {
+        var _this = this;
+        var x = Phaser.Math.RND.integerInRange(10, this.game.canvas.width - 10);
+        var y = 20;
+        this.bonus.x = x;
+        this.bonus.y = y;
+        var bonuses = ["upgrade", "life", "shield", "points"];
+        var it = Phaser.Utils.Array.GetRandom(bonuses);
+        var ang = 360 * 2;
+        if (it == "life") {
+            if (this.lives.length == 5) {
+                it = "points";
+                ang = 0;
+            }
+        }
+        this.bonus.setData("bonus", it);
+        this.bonus.setFrame("bonus_" + it + ".png");
+        if (AAPrefs.playAudio) {
+            this.sfx_reward_launch.play();
+        }
+        this.tweens.add({
+            targets: this.bonus,
+            props: {
+                tint: Math.random() * 0xffffff,
+                angle: ang,
+                y: this.hero.y
+            },
+            duration: 4000,
+            onUpdate: function () {
+                _this.bonus.tint = Math.random() * 0xffffff;
+            },
+            onComplete: function (who) {
+                _this.bonus.y = -100; //destroy();
+                _this.bonus.x = -100; //
+                if (gGameState == states.kSTATE_PLAYING) {
+                    _this.bonusTimer = _this.time.addEvent({
+                        delay: 3000,
+                        callback: function () {
+                            this.launchBonus();
+                        },
+                        callbackScope: _this
+                    });
+                }
+            },
+            onCompleteScope: this
+        });
     };
     GameScene.prototype.setUpAudio = function () {
+        this.sfx_explode_amp = this.sound.add("explode_amp");
+        this.sfx_explode_hero = this.sound.add("explode_hero");
+        this.sfx_loseLife = this.sound.add("loseLife");
+        this.sfx_reward_catch = this.sound.add("reward_catch");
+        this.sfx_reward_launch = this.sound.add("reward_launch");
+        this.sfx_shoot_amp = this.sound.add("shoot_amp");
+        this.sfx_shoot_hero = this.sound.add("shoot_hero");
+        this.sfx_ampDropAll = this.sound.add("ampDrop_all");
+        this.sfx_ampDropSingle = this.sound.add("ampDrop_single");
     };
     GameScene.prototype.setUpUI = function () {
         this.scene.get('MenuOverlay').showScores(true);
         //(<MenuOverlay>this.scene.get('MenuOverlay')).showResetButton(true);
+    };
+    GameScene.prototype.onWorldBounds = function (it) {
+        it.setActive(false);
+        it.setVisible(false);
+    };
+    // This function set up the explosions used by the amphibians and the ship
+    GameScene.prototype.setupExplosions = function (exp) {
+        // 'exp' parameter stores the sprite we need to add the animation too.
+        // set the anchor to the middle of the expolsion
+        exp.origin.x = 0.5;
+        exp.origin.y = 0.5;
+        // generate the frames for the animation
+        // var frameNames = Phaser.Animation.generateFrameNames('exp', 1, 4, '.png', 0);
+        //
+        // pass that list just created to the animation.add() function of the explosion and set the speed to 15 frames per second
+        // exp.animations.add('boom', frameNames, 15, true);
     };
     return GameScene;
 }(Phaser.Scene));
@@ -153,7 +882,6 @@ var MenuOverlay = /** @class */ (function (_super) {
         AAKaiControls.setUpInputs(this);
     };
     MenuOverlay.prototype.create = function () {
-        this.setUpAudio();
         this.setUpUI();
         gGameState = states.kSTATE_MENU;
         this.removeAllListeners();
@@ -172,6 +900,7 @@ var MenuOverlay = /** @class */ (function (_super) {
         document.addEventListener('keyup', function (event) {
             _this.keyup(event);
         });
+        //this.setUpAudio();
     };
     MenuOverlay.prototype.removeAllListeners = function () {
         this.events.removeListener('gameover');
@@ -277,7 +1006,7 @@ var MenuOverlay = /** @class */ (function (_super) {
         // }
     };
     MenuOverlay.prototype.setUpAudio = function () {
-        this.sfxButton = this.sound.add('button');
+        this.sfxButton = this.sound.add("button");
         this.sfxButtonPlay = this.sound.add('play');
         this.sfxButtonBack = this.sound.add('back');
     };
@@ -448,16 +1177,16 @@ var MenuOverlay = /** @class */ (function (_super) {
         this.fpsMeter = document.getElementById('fpsMeter');
     };
     MenuOverlay.prototype.playBtnSnd = function () {
-        if (AAPrefs.playAudio == true)
-            this.sfxButton.play();
+        //     if (AAPrefs.playAudio == true)
+        //         this.sfxButton.play();
     };
     MenuOverlay.prototype.playBackSnd = function () {
-        if (AAPrefs.playAudio == true)
-            this.sfxButtonBack.play();
+        // if (AAPrefs.playAudio == true)
+        //     this.sfxButtonBack.play();
     };
     MenuOverlay.prototype.playPlaySnd = function () {
-        if (AAPrefs.playAudio == true)
-            this.sfxButtonPlay.play();
+        // if (AAPrefs.playAudio == true)
+        //     this.sfxButtonPlay.play();
     };
     MenuOverlay.prototype.update = function (time, delta) {
         if (gSHOW_FPS) {
@@ -798,8 +1527,18 @@ var PreloadScene = /** @class */ (function (_super) {
         // this.load.image('coverart', 'coverart.png');
         //Sound Effects
         this.load.setPath("assets/audio/");
-        var ext = '.wav';
-        //SOund effects are to be wavs.  Some mp3 and oggs can crash phaser!
+        var ext = '.ogg';
+        // These two sounds are the standard button sounds
+        this.load.audio("button", "click" + ext);
+        this.load.audio("explode_amp", "explode_amp" + ext);
+        this.load.audio("explode_hero", "explode_hero" + ext);
+        this.load.audio("loseLife", "loseLife" + ext);
+        this.load.audio("reward_catch", "reward_catch" + ext);
+        this.load.audio("reward_launch", "reward_launch" + ext);
+        this.load.audio("shoot_amp", "shoot_amp" + ext);
+        this.load.audio("shoot_hero", "shoot_hero" + ext);
+        this.load.audio("ampDrop_single", "ampdrop" + ext);
+        this.load.audio("ampDrop_all", "ampDropAll" + ext);
         ext = '.mp3';
         // These two sounds are the standard button sounds
         this.load.audio("button", "sfxButton_select" + ext);
@@ -2142,4 +2881,223 @@ var Button = /** @class */ (function (_super) {
     };
     return Button;
 }(Phaser.GameObjects.Sprite)); //end class
+var Bullets = /** @class */ (function (_super) {
+    __extends(Bullets, _super);
+    function Bullets(scene) {
+        var _this = _super.call(this, scene.physics.world, scene) || this;
+        _this.createMultiple({
+            frameQuantity: 5,
+            key: 'sptireAtals',
+            frame: 'bullet.png',
+            active: false,
+            visible: false,
+            classType: Bullet
+        });
+        return _this;
+    }
+    Bullets.prototype.fire = function (x, y, dir) {
+        if (dir === void 0) { dir = 0; }
+        var bullet = this.getFirstDead(false);
+        if (bullet) {
+            bullet.fire(x, y, dir);
+        }
+    };
+    return Bullets;
+}(Phaser.Physics.Arcade.Group));
+var AmpBullets = /** @class */ (function (_super) {
+    __extends(AmpBullets, _super);
+    function AmpBullets(scene) {
+        var _this = _super.call(this, scene.physics.world, scene) || this;
+        _this.createMultiple({
+            frameQuantity: 5,
+            key: kSPRITE_ATLAS,
+            frame: 'bullet.png',
+            active: false,
+            visible: false,
+            classType: AmpBullet
+        });
+        return _this;
+    }
+    AmpBullets.prototype.fire = function (x, y, hx, hy) {
+        var bullet = this.getFirstDead(false);
+        if (bullet) {
+            bullet.fire(x, y, hx, hy);
+        }
+    };
+    return AmpBullets;
+}(Phaser.Physics.Arcade.Group));
+var Bullet = /** @class */ (function (_super) {
+    __extends(Bullet, _super);
+    function Bullet(scene, x, y) {
+        var _this = _super.call(this, scene, x, y, kSPRITE_ATLAS, 'bullet.png') || this;
+        _this.active = false;
+        return _this;
+    }
+    Bullet.prototype.fire = function (x, y, dir) {
+        if (dir === void 0) { dir = 0; }
+        this.active = true;
+        this.visible = true;
+        this.x = x;
+        this.y = y;
+        this.body.reset(x, y);
+        // this.setActive(true);
+        // this.setVisible(true);
+        this.setVelocityY(-300);
+        this.setVelocityX(dir * 10);
+    };
+    Bullet.prototype.preUpdate = function (time, delta) {
+        _super.prototype.preUpdate.call(this, time, delta);
+        if (this.active) {
+            if (this.y <= 0) {
+                this.kill();
+            }
+        }
+    };
+    Bullet.prototype.kill = function () {
+        this.body.y = -1000;
+        this.body.x = -100;
+        this.active = false;
+        this.visible = false;
+        // this.destroy();
+        //this.setActive(false);
+        // this.setVisible(false);
+    };
+    return Bullet;
+}(Phaser.Physics.Arcade.Sprite));
+var Amp = /** @class */ (function (_super) {
+    __extends(Amp, _super);
+    function Amp(scene) {
+        var _this = _super.call(this, scene, -100, -100, kSPRITE_ATLAS, 'amp1.png') || this;
+        _this.speed = .75;
+        // scene.add.sprite(100, 100, kSPRITE_ATLAS, 'amp1.png')
+        // this.active = false
+        // this.visible = false;
+        return _this;
+    }
+    // preUpdate(time, delta) {
+    //     super.preUpdate(time, delta);
+    //     // this.x = this.x + this.speed
+    //     // if (this.x >= 220){
+    //     //     this.body.x = 219
+    //     //     this.body.velocity.x *= -1
+    //     // }else if (this.x <= 10) {
+    //     //     this.body.x = 11
+    //     //     this.body.velocity.x *= -1
+    //     // }
+    // }
+    Amp.prototype.launch = function (x, y) {
+        // this.body.reset(x, y);
+        this.active = true;
+        this.visible = true;
+        this.x = x;
+        this.y = y;
+    };
+    Amp.prototype.kill = function () {
+        this.y = -100;
+        this.active = false;
+        this.visible = false;
+    };
+    return Amp;
+}(Phaser.Physics.Arcade.Sprite));
+var AmpBullet = /** @class */ (function (_super) {
+    __extends(AmpBullet, _super);
+    function AmpBullet(scene, x, y) {
+        return _super.call(this, scene, -100, -100, kSPRITE_ATLAS, 'ampBullet.png') || this;
+    }
+    AmpBullet.prototype.fire = function (x, y, hx, hy) {
+        this.body.reset(x, y);
+        this.setActive(true);
+        this.setVisible(true);
+        // this.setVelocityY(400);
+        this.scene.physics.accelerateTo(this, hx, hy, 300, 50, 300);
+    };
+    AmpBullet.prototype.preUpdate = function (time, delta) {
+        _super.prototype.preUpdate.call(this, time, delta);
+        if (this.y >= this.scene.game.canvas.height) {
+            this.kill();
+        }
+    };
+    AmpBullet.prototype.kill = function () {
+        this.body.y = -100;
+        this.active = false;
+        this.visible = false;
+        // this.body.y = -100
+        // this.destroy();
+        // this.setActive(false);
+        // this.setVisible(false);
+    };
+    return AmpBullet;
+}(Phaser.Physics.Arcade.Sprite));
+var SingleAmp = /** @class */ (function (_super) {
+    __extends(SingleAmp, _super);
+    function SingleAmp(scene, x, y) {
+        var _this = _super.call(this, scene, x, y, kSPRITE_ATLAS, 'amp1.png') || this;
+        _this.active = false;
+        _this.dropping = false;
+        return _this;
+    }
+    SingleAmp.prototype.preUpdate = function (time, delta) {
+        _super.prototype.preUpdate.call(this, time, delta);
+        if (this.dropping) {
+            if (this.y >= this.targetY) {
+                this.setVelocityY(0);
+                this.dropping = false;
+                this.y = this.targetY;
+                this.wait();
+            }
+        }
+    };
+    SingleAmp.prototype.wait = function () {
+        this.scene.time.addEvent({
+            delay: Phaser.Math.RND.integerInRange(1000, 2000),
+            callback: function () {
+                this.kill();
+            },
+            callbackScope: this,
+        });
+    };
+    SingleAmp.prototype.kill = function () {
+        this.dropping = false;
+        this.body.y = -100;
+        this.active = false;
+        this.visible = false;
+    };
+    SingleAmp.prototype.drop = function (lx, ly, heroY) {
+        this.active = true;
+        this.visible = true;
+        this.x = lx;
+        this.y = ly;
+        this.targetY = heroY;
+        this.dropping = true;
+        this.setTint(Phaser.Display.Color.GetColor(255, 83, 80));
+        this.setBodySize(this.frame.width - 9, this.frame.height - 4, true);
+        this.scene.physics.add.overlap(this, this.scene.hero, this.scene.heroAmpCollide, null, this.scene);
+        this.scene.physics.add.overlap(this, this.scene.bullets, this.scene.hitAmphibian, null, this.scene);
+        this.body.reset(lx, ly);
+        this.setVelocityY(200);
+    };
+    return SingleAmp;
+}(Phaser.Physics.Arcade.Sprite));
+var DropAmps = /** @class */ (function (_super) {
+    __extends(DropAmps, _super);
+    function DropAmps(scene) {
+        var _this = _super.call(this, scene.physics.world, scene) || this;
+        _this.createMultiple({
+            frameQuantity: 5,
+            key: kSPRITE_ATLAS,
+            frame: 'amp1.png',
+            active: false,
+            visible: false,
+            classType: SingleAmp
+        });
+        return _this;
+    }
+    DropAmps.prototype.drop = function (x, y, hx) {
+        var amp = this.getFirstDead(false);
+        if (amp) {
+            amp.drop(x, y, hx);
+        }
+    };
+    return DropAmps;
+}(Phaser.Physics.Arcade.Group));
 //# sourceMappingURL=game.js.map

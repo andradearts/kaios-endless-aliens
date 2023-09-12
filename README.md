@@ -1,4 +1,7 @@
-# KaiOS Game Template v3
+# KaiOS Endless Aliens
+## 09/12/23 
+
+This project is has been updated and simplified a long time ago. I don't want to update it so I'm putting it onto github.  I most likely never release the update and will delete before I make it public
 
 ## 09/07/23 Changes
 

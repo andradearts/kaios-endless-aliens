@@ -1,9 +1,9 @@
 {
   "lang": "en-US",
-  "id": "Bubble Bee 3",
-  "name": "Bubble Bee 3",
-  "short_name": "Bubble Bee",
-  "description": "Collect the honey and avoid the flies.  Grab power ups to make you stronger in this re-imagining of the classic game snake.",
+  "id": "Endless Aliens 3",
+  "name": "Endless Aliens 3",
+  "short_name": "Endless Aliens",
+  "description": "",
   "orientation": "portrait",
   "categories": ["games"],
   "start_url": "/index-v3.html",
@@ -29,7 +29,7 @@
     "dependencies": {
       "ads-sdk": "1.5.8"
     },
-    "subtitle": "Collect the honey and avoid the flies.",
+    "subtitle": "",
     "version": "3.0.0",
     "developer": {
       "name": "Taara Games",
